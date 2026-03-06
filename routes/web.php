@@ -1,0 +1,158 @@
+<?php
+
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\AiHelpController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\LearnController;
+use App\Http\Controllers\Mentor\DashboardController as MentorDashboardController;
+use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\PortfolioController;
+use App\Http\Controllers\PublicProfileController;
+use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\ResourceCompletionController;
+use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\TestAttemptController;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\TestQuestionController;
+use App\Http\Controllers\TestQuestionOptionController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use Laravel\Fortify\Features;
+
+// Redirect bare root to default locale
+Route::redirect('/', '/en');
+
+// All content routes live under /{locale}/ for SEO (EN/BN URL routing)
+Route::prefix('{locale}')
+    ->where(['locale' => 'en|bn'])
+    ->middleware('setlocale')
+    ->group(function () {
+        Route::get('/', function () {
+            return Inertia::render('welcome', [
+                'canRegister' => Features::enabled(Features::registration()),
+            ]);
+        })->name('home');
+
+        Route::get('about-us', function () {
+            return Inertia::render('about-us');
+        })->name('about-us');
+
+        Route::get('dashboard', [DashboardController::class, 'index'])
+            ->middleware(['auth', 'verified'])
+            ->name('dashboard');
+
+        // Mentor dashboard
+        Route::get('mentor/dashboard', [MentorDashboardController::class, 'index'])
+            ->middleware(['auth', 'verified', 'role:mentor,admin'])
+            ->name('mentor.dashboard');
+
+        // Admin dashboard
+        Route::get('admin/dashboard', [AdminDashboardController::class, 'index'])
+            ->middleware(['auth', 'verified', 'role:admin'])
+            ->name('admin.dashboard');
+
+        // Course learn page — public for free resources, auth handled in controller
+        Route::get('courses/{course}/learn/{resource}', [LearnController::class, 'show'])
+            ->name('learn.show');
+
+        // Learning experience — auth-required interactions
+        Route::middleware(['auth', 'verified'])->group(function () {
+            Route::post('courses/{course}/learn/{resource}/attempts', [TestAttemptController::class, 'store'])
+                ->name('learn.attempts.store');
+            Route::put('test-attempts/{attempt}/answers', [TestAttemptController::class, 'saveAnswers'])
+                ->name('learn.attempts.answers');
+            Route::post('test-attempts/{attempt}/submit', [TestAttemptController::class, 'submit'])
+                ->name('learn.attempts.submit');
+            Route::get('test-attempts/{attempt}/result', [TestAttemptController::class, 'result'])
+                ->name('learn.attempts.result');
+            Route::post('courses/{course}/learn/{resource}/complete', [ResourceCompletionController::class, 'complete'])
+                ->name('learn.complete');
+            Route::post('test-questions/{question}/ai-help', [AiHelpController::class, 'ask'])
+                ->name('ai.help');
+        });
+
+        // Course management — mentor & admin only (must come before wildcard {course} routes)
+        Route::middleware(['auth', 'verified', 'role:mentor,admin'])->group(function () {
+            Route::get('courses/create', [CourseController::class, 'create'])
+                ->name('courses.create');
+            Route::post('courses', [CourseController::class, 'store'])
+                ->name('courses.store');
+            Route::get('courses/{course}/edit', [CourseController::class, 'edit'])
+                ->name('courses.edit');
+            Route::put('courses/{course}', [CourseController::class, 'update'])
+                ->name('courses.update');
+            Route::delete('courses/{course}', [CourseController::class, 'destroy'])
+                ->name('courses.destroy');
+
+            Route::post('courses/{course}/modules', [ModuleController::class, 'store'])
+                ->name('modules.store');
+            Route::put('courses/{course}/modules/{module}', [ModuleController::class, 'update'])
+                ->name('modules.update');
+            Route::delete('courses/{course}/modules/{module}', [ModuleController::class, 'destroy'])
+                ->name('modules.destroy');
+
+            Route::post('courses/{course}/modules/{module}/resources', [ResourceController::class, 'store'])
+                ->name('resources.store');
+            Route::put('courses/{course}/modules/{module}/resources/{resource}', [ResourceController::class, 'update'])
+                ->name('resources.update');
+            Route::delete('courses/{course}/modules/{module}/resources/{resource}', [ResourceController::class, 'destroy'])
+                ->name('resources.destroy');
+
+            // Test CRUD
+            Route::get('courses/{course}/modules/{module}/resources/{resource}/test', [TestController::class, 'edit'])
+                ->name('tests.edit');
+            Route::post('courses/{course}/modules/{module}/resources/{resource}/test', [TestController::class, 'store'])
+                ->name('tests.store');
+            Route::put('courses/{course}/modules/{module}/resources/{resource}/test/{test}', [TestController::class, 'update'])
+                ->name('tests.update');
+            Route::delete('courses/{course}/modules/{module}/resources/{resource}/test/{test}', [TestController::class, 'destroy'])
+                ->name('tests.destroy');
+
+            // Question CRUD + reorder
+            Route::post('tests/{test}/questions', [TestQuestionController::class, 'store'])
+                ->name('test-questions.store');
+            Route::put('tests/{test}/questions/{question}', [TestQuestionController::class, 'update'])
+                ->name('test-questions.update');
+            Route::delete('tests/{test}/questions/{question}', [TestQuestionController::class, 'destroy'])
+                ->name('test-questions.destroy');
+            Route::post('tests/{test}/questions/reorder', [TestQuestionController::class, 'reorder'])
+                ->name('test-questions.reorder');
+
+            // Question option CRUD
+            Route::post('tests/{test}/questions/{question}/options', [TestQuestionOptionController::class, 'store'])
+                ->name('test-question-options.store');
+            Route::put('tests/{test}/questions/{question}/options/{option}', [TestQuestionOptionController::class, 'update'])
+                ->name('test-question-options.update');
+            Route::delete('tests/{test}/questions/{question}/options/{option}', [TestQuestionOptionController::class, 'destroy'])
+                ->name('test-question-options.destroy');
+
+            // Submissions & endorsement
+            Route::get('courses/{course}/submissions', [SubmissionController::class, 'index'])
+                ->name('submissions.index');
+            Route::get('test-attempts/{attempt}', [TestAttemptController::class, 'show'])
+                ->name('test-attempts.show');
+            Route::post('test-attempts/{attempt}/endorse', [TestAttemptController::class, 'endorse'])
+                ->name('test-attempts.endorse');
+        });
+
+        // Public course catalog & detail (no auth required, after specific routes)
+        Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
+        Route::get('courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+
+        // Enrollment (auth required)
+        Route::post('courses/{course}/enroll', [EnrollmentController::class, 'store'])
+            ->middleware(['auth', 'verified'])
+            ->name('courses.enroll');
+
+        // Public evidence portfolio
+        Route::get('u/{username}', [PublicProfileController::class, 'show'])->name('portfolio.show');
+
+        // Portfolio showcase toggle (auth required)
+        Route::post('portfolio/attempts/{attempt}/showcase', [PortfolioController::class, 'toggleShowcase'])
+            ->middleware(['auth', 'verified'])
+            ->name('portfolio.showcase');
+    });
+
+require __DIR__.'/settings.php';
