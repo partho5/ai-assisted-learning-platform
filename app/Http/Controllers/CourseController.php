@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\CourseDifficulty;
-use App\Enums\CourseStatus;
 use App\Enums\ResourceType;
 use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
@@ -87,7 +86,8 @@ class CourseController extends Controller
         $course->load([
             'mentor:id,name,username,avatar,headline,bio',
             'category',
-            'modules.resources',
+            'modules' => fn ($q) => $q->orderBy('order'),
+            'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at'),
         ]);
 
         $course->loadCount(['modules', 'resources', 'enrollments']);
@@ -130,7 +130,11 @@ class CourseController extends Controller
     {
         $this->authorizeOwner($course);
 
-        $course->load(['category', 'modules.resources']);
+        $course->load([
+            'category',
+            'modules' => fn ($q) => $q->orderBy('order'),
+            'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at'),
+        ]);
 
         return Inertia::render('mentor/courses/edit', [
             'course' => $course,

@@ -47,6 +47,10 @@ class HandleInertiaRequests extends Middleware
             'supportedLocales' => config('app.supported_locales', ['en', 'bn']),
             // Lazy closure so translations are resolved after SetLocale sets app locale
             'ui' => fn () => trans('ui'),
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error'   => fn () => $request->session()->get('error'),
+            ],
         ];
     }
 }

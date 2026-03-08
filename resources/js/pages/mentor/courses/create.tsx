@@ -44,7 +44,7 @@ export default function CourseCreate({ categories, difficulties }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="New Course" />
 
-            <div className="mx-auto max-w-3xl p-4 md:p-6">
+            <div className="mx-auto md:mx-20 p-4 md:p-6">
                 <h1 className="mb-6 text-2xl font-semibold tracking-tight">Create Course</h1>
 
                 <form onSubmit={submit} className="flex flex-col gap-5">
@@ -59,7 +59,7 @@ export default function CourseCreate({ categories, difficulties }: Props) {
 
                     <Field label="Description" error={form.errors.description} required>
                         <RichTextEditor
-                            content={form.data.description}
+                            value={form.data.description}
                             onChange={(val) => form.setData('description', val)}
                             placeholder="What is this course about?"
                             disabled={form.processing}
@@ -68,7 +68,7 @@ export default function CourseCreate({ categories, difficulties }: Props) {
 
                     <Field label="What learners will achieve" error={form.errors.what_you_will_learn} required>
                         <RichTextEditor
-                            content={form.data.what_you_will_learn}
+                            value={form.data.what_you_will_learn}
                             onChange={(val) => form.setData('what_you_will_learn', val)}
                             placeholder="List the outcomes learners can expect..."
                             disabled={form.processing}
@@ -76,9 +76,9 @@ export default function CourseCreate({ categories, difficulties }: Props) {
                     </Field>
 
                     <Field label="Prerequisites" error={form.errors.prerequisites}>
-                        <Input
+                        <RichTextEditor
                             value={form.data.prerequisites}
-                            onChange={(e) => form.setData('prerequisites', e.target.value)}
+                            onChange={(val) => form.setData('prerequisites', val)}
                             placeholder="Basic HTML knowledge, etc. (optional)"
                             disabled={form.processing}
                         />

@@ -2,6 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { store as enrollStore } from '@/actions/App/Http/Controllers/EnrollmentController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import RichHtml from '@/components/rich-html';
 import PublicLayout from '@/layouts/public-layout';
 import type { Course, Enrollment } from '@/types';
@@ -45,17 +46,19 @@ export default function CourseShow({ course, enrollment }: Props) {
             <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12">
                 <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
                     {/* Main content */}
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                         {/* Breadcrumb */}
                         <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                             <span
-                                className="cursor-pointer hover:text-foreground transition-colors"
+                                className="cursor-pointer transition-colors hover:text-foreground"
                                 onClick={() => window.history.back()}
                             >
                                 Courses
                             </span>
                             <span>/</span>
-                            <span className="text-foreground truncate">{course.title}</span>
+                            <span className="truncate text-foreground">
+                                {course.title}
+                            </span>
                         </div>
 
                         {/* Hero */}
@@ -76,7 +79,9 @@ export default function CourseShow({ course, enrollment }: Props) {
 
                         <div
                             className="prose prose-sm dark:prose-invert rich-html mb-5 max-w-none leading-relaxed text-muted-foreground"
-                            dangerouslySetInnerHTML={{ __html: course.description }}
+                            dangerouslySetInnerHTML={{
+                                __html: course.description,
+                            }}
                         />
 
                         {/* Stats row */}
@@ -112,36 +117,56 @@ export default function CourseShow({ course, enrollment }: Props) {
                         {course.what_you_will_learn && (
                             <section className="mb-8 overflow-hidden rounded-xl border border-indigo-200 dark:border-indigo-800/60">
                                 <div className="border-b border-indigo-200 bg-indigo-50/80 px-5 py-3 dark:border-indigo-800/60 dark:bg-indigo-950/40">
-                                    <h2 className="font-semibold text-indigo-900 dark:text-indigo-100">What you will learn</h2>
+                                    <h2 className="font-semibold text-indigo-900 dark:text-indigo-100">
+                                        What you will learn
+                                    </h2>
                                 </div>
                                 <div className="bg-indigo-50/30 p-5 dark:bg-indigo-950/10">
-                                    <RichHtml content={course.what_you_will_learn} className="leading-relaxed text-muted-foreground" />
+                                    <RichHtml
+                                        content={course.what_you_will_learn}
+                                        className="leading-relaxed text-muted-foreground"
+                                    />
                                 </div>
                             </section>
                         )}
 
                         {/* Prerequisites */}
                         {course.prerequisites && (
-                            <section className="mb-8 overflow-hidden rounded-xl border border-amber-200 dark:border-amber-800/60">
-                                <div className="border-b border-amber-200 bg-amber-50/80 px-5 py-3 dark:border-amber-800/60 dark:bg-amber-950/40">
-                                    <h2 className="font-semibold text-amber-900 dark:text-amber-100">Prerequisites</h2>
+                            <section className="mb-8 overflow-hidden rounded-xl border border-indigo-200 dark:border-indigo-800/60">
+                                <div className="border-b border-indigo-200 bg-indigo-50/80 px-5 py-3 dark:border-indigo-800/60 dark:bg-indigo-950/40">
+                                    <h2 className="font-semibold text-indigo-900 dark:text-indigo-100">
+                                        Prerequisites
+                                    </h2>
                                 </div>
-                                <div className="bg-amber-50/30 p-5 dark:bg-amber-950/10">
-                                    <p className="leading-relaxed text-muted-foreground">{course.prerequisites}</p>
+                                <div className="bg-indigo-50/30 p-5 dark:bg-indigo-950/10">
+                                    <RichHtml
+                                        content={course.prerequisites}
+                                        className="leading-relaxed text-muted-foreground"
+                                    />
                                 </div>
                             </section>
                         )}
 
                         {/* Curriculum */}
                         <section className="mb-8">
-                            <h2 className="mb-4 text-lg font-semibold">Curriculum</h2>
+                            <h2 className="mb-4 text-lg font-semibold">
+                                Curriculum
+                            </h2>
                             <div className="flex flex-col gap-3">
                                 {course.modules.map((module) => (
-                                    <div key={module.id} className="overflow-hidden rounded-xl border border-border bg-card">
+                                    <div
+                                        key={module.id}
+                                        className="overflow-hidden rounded-xl border border-border bg-card"
+                                    >
                                         <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-3">
-                                            <h3 className="font-semibold">{module.title}</h3>
+                                            <h3 className="font-semibold">
+                                                {module.title}
+                                            </h3>
                                             <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-600 dark:bg-violet-900/40 dark:text-violet-300">
-                                                {module.resources.length} lesson{module.resources.length !== 1 ? 's' : ''}
+                                                {module.resources.length} lesson
+                                                {module.resources.length !== 1
+                                                    ? 's'
+                                                    : ''}
                                             </span>
                                         </div>
                                         {module.description && (
@@ -151,43 +176,68 @@ export default function CourseShow({ course, enrollment }: Props) {
                                         )}
                                         {module.resources.length > 0 && (
                                             <ul>
-                                                {module.resources.map((resource, i) => (
-                                                    <li
-                                                        key={resource.id}
-                                                        className={`flex items-start justify-between gap-3 px-4 py-2.5 text-sm ${i !== 0 ? 'border-t border-border' : ''}`}
-                                                    >
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <div className="flex items-center gap-2">
-                                                                <Badge className="py-0 text-xs font-normal bg-sky-100 text-sky-700 hover:bg-sky-100 dark:bg-sky-900/40 dark:text-sky-300">
-                                                                    {RESOURCE_TYPE_LABELS[resource.type] ?? resource.type}
-                                                                </Badge>
-                                                                {resource.is_free ? (
-                                                                    <Link
-                                                                        href={`/${l}/courses/${course.slug}/learn/${resource.id}`}
-                                                                        className="font-medium leading-snug hover:text-primary hover:underline"
-                                                                    >
-                                                                        {resource.title}
-                                                                    </Link>
-                                                                ) : (
-                                                                    <span className="font-medium leading-snug">
-                                                                        {resource.title}
-                                                                    </span>
-                                                                )}
-                                                                {resource.is_free && (
-                                                                    <Badge className="py-0 text-xs bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-300">Free</Badge>
+                                                {module.resources.map(
+                                                    (resource, i) => (
+                                                        <li
+                                                            key={resource.id}
+                                                            className={`flex items-start justify-between gap-3 px-4 py-2.5 text-sm ${i !== 0 ? 'border-t border-border' : ''}`}
+                                                        >
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Badge className="bg-sky-100 py-0 text-xs font-normal text-sky-700 hover:bg-sky-100 dark:bg-sky-900/40 dark:text-sky-300">
+                                                                        {RESOURCE_TYPE_LABELS[
+                                                                            resource
+                                                                                .type
+                                                                        ] ??
+                                                                            resource.type}
+                                                                    </Badge>
+                                                                    {resource.is_free ? (
+                                                                        <Link
+                                                                            href={`/${l}/courses/${course.slug}/learn/${resource.id}`}
+                                                                            className="leading-snug font-medium text-blue-600 hover:text-primary hover:underline"
+                                                                        >
+                                                                            {
+                                                                                resource.title
+                                                                            }
+                                                                        </Link>
+                                                                    ) : (
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger asChild>
+                                                                                <span className="flex cursor-default items-center gap-1 font-medium leading-snug">
+                                                                                    {resource.title} 🔒
+                                                                                </span>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                Available for enrolled (full access) users
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    )}
+                                                                    {resource.is_free && (
+                                                                        <Badge className="bg-emerald-100 py-0 text-xs text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                                                            Free
+                                                                        </Badge>
+                                                                    )}
+                                                                </div>
+                                                                {resource.why_this_resource && (
+                                                                    <RichHtml
+                                                                        content={
+                                                                            resource.why_this_resource
+                                                                        }
+                                                                        className="text-xs text-muted-foreground"
+                                                                    />
                                                                 )}
                                                             </div>
-                                                            {resource.why_this_resource && (
-                                                                <RichHtml content={resource.why_this_resource} className="text-xs text-muted-foreground" />
+                                                            {resource.estimated_time && (
+                                                                <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                                                                    {
+                                                                        resource.estimated_time
+                                                                    }
+                                                                    m
+                                                                </span>
                                                             )}
-                                                        </div>
-                                                        {resource.estimated_time && (
-                                                            <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                                                                {resource.estimated_time}m
-                                                            </span>
-                                                        )}
-                                                    </li>
-                                                ))}
+                                                        </li>
+                                                    ),
+                                                )}
                                             </ul>
                                         )}
                                     </div>
@@ -199,7 +249,9 @@ export default function CourseShow({ course, enrollment }: Props) {
                         {course.mentor && (
                             <section className="overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800/60">
                                 <div className="border-b border-emerald-200 bg-emerald-50/80 px-5 py-3 dark:border-emerald-800/60 dark:bg-emerald-950/40">
-                                    <h2 className="font-semibold text-emerald-900 dark:text-emerald-100">About the mentor</h2>
+                                    <h2 className="font-semibold text-emerald-900 dark:text-emerald-100">
+                                        About the mentor
+                                    </h2>
                                 </div>
                                 <div className="bg-emerald-50/20 p-5 dark:bg-emerald-950/10">
                                     <div className="flex items-start gap-4">
@@ -211,13 +263,19 @@ export default function CourseShow({ course, enrollment }: Props) {
                                             />
                                         ) : (
                                             <div className="flex size-14 items-center justify-center rounded-full bg-emerald-100 text-xl font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
-                                                {course.mentor.name.charAt(0).toUpperCase()}
+                                                {course.mentor.name
+                                                    .charAt(0)
+                                                    .toUpperCase()}
                                             </div>
                                         )}
                                         <div>
-                                            <p className="font-semibold">{course.mentor.name}</p>
+                                            <p className="font-semibold">
+                                                {course.mentor.name}
+                                            </p>
                                             {course.mentor.headline && (
-                                                <p className="text-sm text-muted-foreground">{course.mentor.headline}</p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {course.mentor.headline}
+                                                </p>
                                             )}
                                             {course.mentor.bio && (
                                                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -234,34 +292,43 @@ export default function CourseShow({ course, enrollment }: Props) {
                     {/* Enrollment card — sticky sidebar on desktop */}
                     <aside className="lg:sticky lg:top-20 lg:w-80 lg:shrink-0">
                         <div className="overflow-hidden rounded-xl border border-primary/30 bg-card shadow-md">
-                            <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-5 py-3 border-b border-primary/20">
-                                <p className="text-xs font-semibold uppercase tracking-widest text-primary/70">Enroll in this course</p>
+                            <div className="border-b border-primary/20 bg-gradient-to-r from-primary/10 to-primary/5 px-5 py-3">
+                                <p className="text-xs font-semibold tracking-widest text-primary/70 uppercase">
+                                    Enroll in this course
+                                </p>
                             </div>
                             <div className="p-6">
-                            {/* Thumbnail preview on sidebar (desktop only, hidden if shown in main) */}
-                            {course.thumbnail && (
-                                <img
-                                    src={course.thumbnail}
-                                    alt={course.title}
-                                    className="mb-4 hidden aspect-video w-full rounded-lg object-cover lg:block"
-                                />
-                            )}
-
-                            <div className="mb-4 flex flex-col gap-1.5 text-sm text-muted-foreground">
-                                {course.modules.length > 0 && (
-                                    <span>{course.modules.length} modules · {totalResources} lessons</span>
+                                {/* Thumbnail preview on sidebar (desktop only, hidden if shown in main) */}
+                                {course.thumbnail && (
+                                    <img
+                                        src={course.thumbnail}
+                                        alt={course.title}
+                                        className="mb-4 hidden aspect-video w-full rounded-lg object-cover lg:block"
+                                    />
                                 )}
-                                {durationText && <span>{durationText} total</span>}
-                                <span className="capitalize">{course.difficulty} level</span>
-                            </div>
 
-                            <EnrollmentCTA
-                                course={course}
-                                enrollment={enrollment}
-                                user={auth?.user ?? null}
-                                locale={l}
-                                onEnroll={handleEnroll}
-                            />
+                                <div className="mb-4 flex flex-col gap-1.5 text-sm text-muted-foreground">
+                                    {course.modules.length > 0 && (
+                                        <span>
+                                            {course.modules.length} modules ·{' '}
+                                            {totalResources} lessons
+                                        </span>
+                                    )}
+                                    {durationText && (
+                                        <span>{durationText} total</span>
+                                    )}
+                                    <span className="capitalize">
+                                        {course.difficulty} level
+                                    </span>
+                                </div>
+
+                                <EnrollmentCTA
+                                    course={course}
+                                    enrollment={enrollment}
+                                    user={auth?.user ?? null}
+                                    locale={l}
+                                    onEnroll={handleEnroll}
+                                />
                             </div>
                         </div>
                     </aside>

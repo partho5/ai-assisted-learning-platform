@@ -1,17 +1,16 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { complete as markComplete } from '@/actions/App/Http/Controllers/ResourceCompletionController';
 import {
     store as startAttempt,
     saveAnswers,
     submit as submitAttempt,
 } from '@/actions/App/Http/Controllers/TestAttemptController';
-import { complete as markComplete } from '@/actions/App/Http/Controllers/ResourceCompletionController';
+import RichHtml from '@/components/rich-html';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
-import RichHtml from '@/components/rich-html';
 import AppLayout from '@/layouts/app-layout';
 import PublicLayout from '@/layouts/public-layout';
 import type {
@@ -131,7 +130,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
                 {resource.why_this_resource && <RichHtml content={resource.why_this_resource} className="mb-4 text-sm text-muted-foreground" />}
                 {resource.url && (
                     <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="secondary" size="sm">Open Article ↗</Button>
+                        <Button variant="secondary" size="default">Open Article ↗</Button>
                     </a>
                 )}
             </div>
@@ -163,7 +162,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
                 />
                 <div className="mt-2">
                     <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="secondary" size="sm">Download ↗</Button>
+                        <Button variant="secondary" size="default">Download ↗</Button>
                     </a>
                 </div>
             </div>
@@ -552,26 +551,30 @@ export default function Learn({ course, initialResourceId, resources, enrollment
     }, []);
 
     // Scroll listener for active resource tracking
-    useEffect(() => {
-        const mainEl = mainRef.current;
-        if (!mainEl) return;
+    // Guard flag: suppress sidebar sync when user triggers a click-based scroll
+    const suppressSidebarSync = useRef(false);
 
+    useEffect(() => {
         let ticking = false;
 
         function onScroll() {
             if (ticking) return;
             ticking = true;
             requestAnimationFrame(() => {
-                const mainRect = mainEl.getBoundingClientRect();
-                // Threshold: 15% from the top of the container.
-                // Active = last resource whose top has scrolled at or above this line.
-                const threshold = mainRect.top + mainRect.height * 0.15;
+                // Viewport-relative threshold: 30% from top
+                const threshold = window.innerHeight * 0.30;
                 let bestId = resources[0]?.id ?? initialResourceId;
+                let closestDistance = Infinity;
 
                 resourceRefs.current.forEach((el, id) => {
                     const rect = el.getBoundingClientRect();
-                    if (rect.top <= threshold) {
-                        bestId = id; // keep updating; last one past threshold wins
+                    // Pick the resource whose top is closest to the threshold (from above)
+                    if (rect.top < threshold) {
+                        const distance = threshold - rect.top;
+                        if (distance < closestDistance) {
+                            closestDistance = distance;
+                            bestId = id;
+                        }
                     }
                 });
 
@@ -580,8 +583,15 @@ export default function Learn({ course, initialResourceId, resources, enrollment
             });
         }
 
-        mainEl.addEventListener('scroll', onScroll, { passive: true });
-        return () => mainEl.removeEventListener('scroll', onScroll);
+        // Listen on both window (guest/public layout) AND main element (logged-in
+        // sidebar layout where main is the constrained scroll container)
+        const mainEl = mainRef.current;
+        window.addEventListener('scroll', onScroll, { passive: true });
+        mainEl?.addEventListener('scroll', onScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            mainEl?.removeEventListener('scroll', onScroll);
+        };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -590,14 +600,28 @@ export default function Learn({ course, initialResourceId, resources, enrollment
         history.replaceState(null, '', `#r-${activeResourceId}`);
     }, [activeResourceId]);
 
-    // Sync sidebar: scroll active item into view
+    // Sync sidebar: scroll active item into view (skip when user clicked a sidebar item)
     useEffect(() => {
-        sidebarRef.current
-            ?.querySelector<HTMLElement>(`[data-resource-id="${activeResourceId}"]`)
-            ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (suppressSidebarSync.current) {
+            suppressSidebarSync.current = false;
+            return;
+        }
+        const sidebar = sidebarRef.current;
+        const button = sidebar?.querySelector<HTMLElement>(`[data-resource-id="${activeResourceId}"]`);
+        if (sidebar && button) {
+            const btnTop = button.offsetTop;
+            const btnBottom = btnTop + button.offsetHeight;
+            if (btnTop < sidebar.scrollTop) {
+                sidebar.scrollTop = btnTop - 8;
+            } else if (btnBottom > sidebar.scrollTop + sidebar.clientHeight) {
+                sidebar.scrollTop = btnBottom - sidebar.clientHeight + 8;
+            }
+        }
     }, [activeResourceId]);
 
     function scrollToResource(id: number) {
+        suppressSidebarSync.current = true;
+        setActiveResourceId(id);
         document.getElementById(`r-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -608,11 +632,11 @@ export default function Learn({ course, initialResourceId, resources, enrollment
     ];
 
     const inner = (
-        <div className="flex h-full min-h-0 flex-col md:flex-row">
+        <div className="flex min-h-svh flex-col md:flex-row">
             {/* ── Sidebar ── */}
             <aside
                 ref={sidebarRef}
-                className="w-full shrink-0 overflow-y-auto border-b border-border md:w-64 md:border-b-0 md:border-r"
+                className="w-full shrink-0 overflow-y-auto border-b border-border md:w-64 md:border-b-0 md:border-r md:sticky md:top-0 md:h-screen"
             >
                 <div className="p-4">
                     {/* Progress bar — enrolled only */}
@@ -638,7 +662,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                     {/* Module + resource list */}
                     {course.modules.map((mod) => (
                         <div key={mod.id} className="mb-3">
-                            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            <p className="mb-1 text-xs font-semibold  tracking-wide text-muted-foreground">
                                 {mod.title}
                             </p>
                             <ul className="space-y-0.5">
@@ -650,26 +674,51 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                                         <li key={r.id}>
                                             <button
                                                 data-resource-id={r.id}
-                                                onClick={() => scrollToResource(r.id)}
-                                                className={`flex w-full items-center gap-2 rounded px-2 py-1.5 text-left text-sm transition-colors hover:bg-muted ${
-                                                    isActive ? 'bg-muted font-medium' : ''
+                                                onClick={() =>
+                                                    scrollToResource(r.id)
+                                                }
+                                                className={`flex w-full items-center gap-2 rounded bg-blue-50/50 px-2 py-1.5 text-left text-sm transition-colors ${
+                                                    isActive
+                                                        ? 'border-blue-600 bg-sky-100 font-medium'
+                                                        : ''
                                                 }`}
                                             >
                                                 {enrollment ? (
                                                     isLocked ? (
-                                                        <span className="text-muted-foreground/40">🔒</span>
+                                                        <span className="text-muted-foreground/40">
+                                                            🔒
+                                                        </span>
                                                     ) : (
-                                                        <StatusIcon status={completionMap[r.id]} />
+                                                        <StatusIcon
+                                                            status={
+                                                                completionMap[
+                                                                    r.id
+                                                                ]
+                                                            }
+                                                        />
                                                     )
                                                 ) : (
                                                     <span className="text-muted-foreground/40">
-                                                        {r.is_free ? '○' : '🔒'}
+                                                        {r.is_free ? '○' : '○'}
                                                     </span>
                                                 )}
-                                                <span className="flex-1 truncate">{r.title}</span>
+                                                <span className="flex-1 truncate">
+                                                    {r.title}
+                                                </span>
                                                 {r.is_free && !enrollment && (
-                                                    <Badge variant="outline" className="py-0 text-xs font-normal">
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="py-0 text-xs font-normal"
+                                                    >
                                                         Free
+                                                    </Badge>
+                                                )}
+                                                {!r.is_free && !enrollment && (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className="py-0 text-xs font-normal"
+                                                    >
+                                                        🔒
                                                     </Badge>
                                                 )}
                                             </button>
@@ -689,10 +738,10 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                                         Sign up to track your progress
                                     </p>
                                     <div className="flex flex-col gap-1.5">
-                                        <Button asChild variant="enroll" size="sm" className="w-full">
+                                        <Button asChild variant="enroll" size="default" className="w-full">
                                             <Link href="/register">Sign up free</Link>
                                         </Button>
-                                        <Button asChild variant="ghost" size="sm" className="w-full">
+                                        <Button asChild variant="ghost" size="default" className="w-full">
                                             <Link href="/login">Log in</Link>
                                         </Button>
                                     </div>
@@ -702,7 +751,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                                     <p className="mb-2 text-xs text-muted-foreground">
                                         Enroll to track progress &amp; submit assignments
                                     </p>
-                                    <Button asChild variant="enroll" size="sm" className="w-full">
+                                    <Button asChild variant="enroll" size="default" className="w-full">
                                         <Link href={`/${l}/courses/${course.slug}`}>View course</Link>
                                     </Button>
                                 </>

@@ -138,9 +138,9 @@ function CourseDetailsForm({
                         />
                     </Field>
                     <Field label="Prerequisites" error={form.errors.prerequisites}>
-                        <Input
+                        <RichTextEditor
                             value={form.data.prerequisites}
-                            onChange={(e) => form.setData('prerequisites', e.target.value)}
+                            onChange={(val) => form.setData('prerequisites', val)}
                             disabled={form.processing}
                         />
                     </Field>

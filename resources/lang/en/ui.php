@@ -4,16 +4,17 @@ return [
     'nav' => [
         // Shared
         'dashboard' => 'Dashboard',
-        'settings'  => 'Settings',
+        'settings' => 'Settings',
 
         // Admin panel
-        'users'     => 'Users',
-        'courses'   => 'Courses',
+        'users' => 'Users',
+        'courses' => 'Courses',
+        'categories' => 'Categories',
         'analytics' => 'Analytics',
 
         // Learner / Mentor panel
         'my_courses' => 'My Courses',
-        'profile'    => 'Profile',
+        'profile' => 'Profile',
     ],
 
     'locale' => [

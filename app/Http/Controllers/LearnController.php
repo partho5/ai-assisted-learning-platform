@@ -42,7 +42,7 @@ class LearnController extends Controller
         // Load all modules + resources + tests (question sensitive fields excluded via select)
         $course->load([
             'modules' => fn ($q) => $q->orderBy('order'),
-            'modules.resources' => fn ($q) => $q->orderBy('order')->with([
+            'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at')->with([
                 'test.questions' => fn ($q) => $q->select([
                     'id', 'test_id', 'order', 'question_type', 'body',
                     'hint', 'points', 'evaluation_method', 'numeric_operator',

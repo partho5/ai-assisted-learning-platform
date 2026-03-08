@@ -82,7 +82,7 @@ export default function PublicPortfolio({ profile, stats, enrolledCourses, showc
     return (
         <PublicLayout>
             <Head title={`${profile.name} — Portfolio`}>
-                <meta name="description" content={profile.headline ?? `${profile.name}'s learning portfolio on SkillEvidence.`} />
+                <meta name="description" content={profile.headline ?? `${profile.name}'s learning portfolio on ${import.meta.env.VITE_APP_NAME}.`} />
             </Head>
 
             {/* Profile header */}

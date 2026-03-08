@@ -7,6 +7,7 @@ export type UiTranslations = {
         settings: string;
         users: string;
         courses: string;
+        categories: string;
         analytics: string;
         my_courses: string;
         profile: string;
@@ -23,6 +24,7 @@ declare module '@inertiajs/core' {
             locale: string;
             supportedLocales: string[];
             ui: UiTranslations;
+            flash: { success: string | null; error: string | null };
             [key: string]: unknown;
         };
     }

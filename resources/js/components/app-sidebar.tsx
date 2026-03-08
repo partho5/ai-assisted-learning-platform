@@ -1,6 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
-import { NavFooter } from '@/components/nav-footer';
+import { BookOpen, LayoutGrid, Tag } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -15,26 +14,22 @@ import {
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
-    const { locale, ui } = usePage().props;
+    const { locale, ui, auth } = usePage().props;
     const dashboardHref = `/${locale}/dashboard`;
+    const isAdmin = auth.user.role === 'admin';
+    const isMentorOrAdmin = isAdmin || auth.user.role === 'mentor';
 
     const mainNavItems: NavItem[] = [
         { title: ui.nav.dashboard, href: dashboardHref, icon: LayoutGrid },
+        ...(isAdmin
+            ? [{ title: ui.nav.categories, href: `/${locale}/admin/categories`, icon: Tag }]
+            : []),
     ];
+
+    const mentorNavItems: NavItem[] = isMentorOrAdmin
+        ? [{ title: ui.nav.my_courses, href: `/${locale}/courses`, icon: BookOpen }]
+        : [];
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -52,10 +47,12 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                {mentorNavItems.length > 0 && (
+                    <NavMain items={mentorNavItems} label="Mentor" />
+                )}
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AiHelpController;
 use App\Http\Controllers\CourseController;
@@ -10,8 +11,8 @@ use App\Http\Controllers\Mentor\DashboardController as MentorDashboardController
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\PublicProfileController;
-use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\ResourceCompletionController;
+use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\TestAttemptController;
 use App\Http\Controllers\TestController;
@@ -52,6 +53,16 @@ Route::prefix('{locale}')
         Route::get('admin/dashboard', [AdminDashboardController::class, 'index'])
             ->middleware(['auth', 'verified', 'role:admin'])
             ->name('admin.dashboard');
+
+        // Admin category management
+        Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+            Route::get('admin/categories', [AdminCategoryController::class, 'index'])->name('admin.categories.index');
+            Route::get('admin/categories/create', [AdminCategoryController::class, 'create'])->name('admin.categories.create');
+            Route::post('admin/categories', [AdminCategoryController::class, 'store'])->name('admin.categories.store');
+            Route::get('admin/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('admin.categories.edit');
+            Route::put('admin/categories/{category}', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
+            Route::delete('admin/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
+        });
 
         // Course learn page — public for free resources, auth handled in controller
         Route::get('courses/{course}/learn/{resource}', [LearnController::class, 'show'])

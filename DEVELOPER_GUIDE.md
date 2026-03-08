@@ -178,6 +178,28 @@ enum UserRole: string {
 }
 ```
 
+### Creating an Admin User
+
+Admin is a privileged role — it is **not selectable during public registration** (only `mentor` and `learner` are). Use one of the methods below.
+
+**Option 1: Artisan command (recommended)**
+
+```bash
+php artisan app:make-admin --email=you@example.com
+```
+
+Creates a new admin user interactively, or promotes an existing user by email.
+
+**Option 3: Promote via Tinker (quick one-liner)**
+
+```bash
+php artisan tinker --execute="App\Models\User::where('email', 'you@example.com')->update(['role' => 'admin']);"
+```
+
+Replace `you@example.com` with the target account's email. The change is immediate — no restart needed.
+
+---
+
 ### User Tiers (Subscription Levels)
 
 **File:** `app/Enums/UserTier.php`
