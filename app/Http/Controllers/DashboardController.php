@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ResourceCompletionStatus;
 use App\Models\Enrollment;
+use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -64,8 +65,30 @@ class DashboardController extends Controller
             ];
         });
 
+        $payments = Payment::query()
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['captured', 'active', 'refunded', 'cancelled'])
+            ->with('course:id,title,slug,billing_type,subscription_duration_months')
+            ->latest()
+            ->get()
+            ->map(fn (Payment $p) => [
+                'id' => $p->id,
+                'course_title' => $p->course?->title,
+                'course_slug' => $p->course?->slug,
+                'billing_type' => $p->billing_type,
+                'status' => $p->status,
+                'final_amount' => (float) $p->final_amount,
+                'original_amount' => (float) $p->original_amount,
+                'discount_amount' => (float) $p->discount_amount,
+                'currency' => $p->currency,
+                'created_at' => $p->created_at->toDateString(),
+                'expires_at' => $enrollments
+                    ->firstWhere('course_id', $p->course_id)?->expires_at?->toDateString(),
+            ]);
+
         return Inertia::render('dashboard', [
             'enrolledCourses' => $enrolledCourses,
+            'payments' => $payments,
             'stats' => [
                 'total_enrolled' => $enrollments->count(),
                 'pending_endorsements' => $enrolledCourses->sum('pending_endorsement_count'),

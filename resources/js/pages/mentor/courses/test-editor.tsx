@@ -9,7 +9,6 @@ import {
     store as questionStore,
     update as questionUpdate,
     destroy as questionDestroy,
-    reorder as questionReorder,
 } from '@/actions/App/Http/Controllers/TestQuestionController';
 import {
     store as optionStore,
@@ -42,6 +41,22 @@ const QUESTION_TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPES_WITH_OPTIONS = ['multiple_choice', 'checkboxes', 'dropdown'];
+
+// ─── Shared select style ──────────────────────────────────────────────────────
+const SELECT_CLS =
+    'mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring';
+const TEXTAREA_CLS =
+    'mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring';
+
+// ─── Section label inside a form ──────────────────────────────────────────────
+function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
+    return (
+        <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+            {children}
+        </div>
+    );
+}
 
 // ─── Test Settings Form ───────────────────────────────────────────────────────
 
@@ -83,8 +98,9 @@ function TestSettingsForm({
     }
 
     return (
-        <form onSubmit={submit} className="rounded-xl border border-border bg-card p-5">
-            <div className="mb-4 flex items-center justify-between">
+        <form onSubmit={submit} className="rounded-xl border border-border bg-card">
+            {/* Card header */}
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
                 <h2 className="font-semibold">Test Settings</h2>
                 {test && (
                     <Button type="button" variant="danger" size="compact" onClick={handleDestroy}>
@@ -93,64 +109,83 @@ function TestSettingsForm({
                 )}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                    <Label>Title</Label>
-                    <Input
-                        className="mt-1"
-                        value={form.data.title}
-                        onChange={(e) => form.setData('title', e.target.value)}
-                    />
-                </div>
-                <div className="sm:col-span-2">
-                    <Label>Description</Label>
-                    <textarea
-                        rows={2}
-                        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                        value={form.data.description}
-                        onChange={(e) => form.setData('description', e.target.value)}
-                    />
-                </div>
-                <div>
-                    <Label>Passing Score (%)</Label>
-                    <Input
-                        type="number" min={0} max={100} className="mt-1"
-                        value={form.data.passing_score}
-                        onChange={(e) => form.setData('passing_score', e.target.value)}
-                        placeholder="e.g. 70"
-                    />
-                </div>
-                <div>
-                    <Label>Time Limit (minutes)</Label>
-                    <Input
-                        type="number" min={1} className="mt-1"
-                        value={form.data.time_limit_minutes}
-                        onChange={(e) => form.setData('time_limit_minutes', e.target.value)}
-                        placeholder="No limit"
-                    />
-                </div>
-                <div>
-                    <Label>Max Attempts</Label>
-                    <Input
-                        type="number" min={1} className="mt-1"
-                        value={form.data.max_attempts}
-                        onChange={(e) => form.setData('max_attempts', e.target.value)}
-                        placeholder="Unlimited"
-                    />
-                </div>
-                <div className="flex items-center gap-2 pt-5">
-                    <input
-                        id="ai-help"
-                        type="checkbox"
-                        checked={form.data.ai_help_enabled}
-                        onChange={(e) => form.setData('ai_help_enabled', e.target.checked)}
-                        className="accent-primary"
-                    />
-                    <Label htmlFor="ai-help" className="cursor-pointer text-sm">Enable AI Help globally</Label>
-                </div>
+            <div className="space-y-4 p-5">
+                {/* Basic info */}
+                <FormSection title="Basic Info">
+                    <div className="space-y-3">
+                        <div>
+                            <Label>Title</Label>
+                            <Input
+                                className="mt-1"
+                                value={form.data.title}
+                                onChange={(e) => form.setData('title', e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <Label>Description</Label>
+                            <textarea
+                                rows={2}
+                                className={TEXTAREA_CLS}
+                                value={form.data.description}
+                                onChange={(e) => form.setData('description', e.target.value)}
+                                placeholder="Optional overview shown to learners before they start"
+                            />
+                        </div>
+                    </div>
+                </FormSection>
+
+                {/* Scoring & limits */}
+                <FormSection title="Scoring &amp; Limits">
+                    <div className="grid gap-3 sm:grid-cols-3">
+                        <div>
+                            <Label>Passing Score (%)</Label>
+                            <Input
+                                type="number" min={0} max={100} className="mt-1"
+                                value={form.data.passing_score}
+                                onChange={(e) => form.setData('passing_score', e.target.value)}
+                                placeholder="e.g. 70"
+                            />
+                        </div>
+                        <div>
+                            <Label>Time Limit (min)</Label>
+                            <Input
+                                type="number" min={1} className="mt-1"
+                                value={form.data.time_limit_minutes}
+                                onChange={(e) => form.setData('time_limit_minutes', e.target.value)}
+                                placeholder="No limit"
+                            />
+                        </div>
+                        <div>
+                            <Label>Max Attempts</Label>
+                            <Input
+                                type="number" min={1} className="mt-1"
+                                value={form.data.max_attempts}
+                                onChange={(e) => form.setData('max_attempts', e.target.value)}
+                                placeholder="Unlimited"
+                            />
+                        </div>
+                    </div>
+                </FormSection>
+
+                {/* Features */}
+                <FormSection title="Features">
+                    <label className="flex cursor-pointer items-center gap-3">
+                        <input
+                            id="ai-help"
+                            type="checkbox"
+                            checked={form.data.ai_help_enabled}
+                            onChange={(e) => form.setData('ai_help_enabled', e.target.checked)}
+                            className="accent-primary h-4 w-4"
+                        />
+                        <div>
+                            <p className="text-sm font-medium leading-none">Enable AI Help globally</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground">Learners can request AI hints on any question in this test</p>
+                        </div>
+                    </label>
+                </FormSection>
             </div>
 
-            <div className="mt-4 flex justify-end">
+            <div className="flex justify-end border-t border-border px-5 py-3">
                 <Button type="submit" disabled={form.processing}>
                     {test ? 'Save Settings' : 'Create Test'}
                 </Button>
@@ -185,7 +220,7 @@ function OptionRow({
     }
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2">
             {editing ? (
                 <>
                     <Input
@@ -202,7 +237,8 @@ function OptionRow({
                 <>
                     <span className="flex-1 text-sm">{option.label}</span>
                     <button onClick={() => setEditing(true)} className="text-xs text-muted-foreground hover:text-foreground">Edit</button>
-                    <button onClick={remove} className="text-xs text-destructive hover:underline">×</button>
+                    <span className="text-muted-foreground/40">·</span>
+                    <button onClick={remove} className="text-xs text-destructive hover:underline">Remove</button>
                 </>
             )}
         </div>
@@ -215,7 +251,6 @@ function QuestionCard({
     question,
     test,
     index,
-    total,
     locale,
 }: {
     question: TestQuestion;
@@ -255,13 +290,6 @@ function QuestionCard({
         router.delete(questionDestroy.url({ locale, test: test.id, question: question.id }));
     }
 
-    function moveUp() {
-        if (index === 0) return;
-        router.post(questionReorder.url({ locale, test: test.id }), {
-            order: [] // Will be handled by full reorder below
-        });
-    }
-
     function addOption() {
         if (!newOption.trim()) return;
         router.post(optionStore.url({ locale, test: test.id, question: question.id }), { label: newOption.trim() });
@@ -269,161 +297,193 @@ function QuestionCard({
     }
 
     return (
-        <div className="rounded-lg border border-border bg-card">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+            {/* Collapsed header — clickable */}
             <div
-                className="flex cursor-pointer items-center gap-3 px-4 py-3"
+                className="flex cursor-pointer items-center gap-3 bg-muted/40 px-4 py-3 hover:bg-muted/60 transition-colors"
                 onClick={() => setOpen((o) => !o)}
             >
-                <span className="text-xs text-muted-foreground">{index + 1}.</span>
-                <span className="flex-1 text-sm font-medium truncate">{question.body || 'Untitled question'}</span>
-                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-border text-[11px] font-semibold text-muted-foreground">
+                    {index + 1}
+                </span>
+                <span className="flex-1 truncate text-sm font-medium">{question.body || 'Untitled question'}</span>
+                <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <Badge variant="secondary" className="text-xs capitalize">{QUESTION_TYPE_LABELS[question.question_type]}</Badge>
-                    <span className="text-xs text-muted-foreground">{question.points}pt</span>
-                    <button onClick={remove} className="text-xs text-destructive hover:underline">Delete</button>
+                    <span className="text-xs font-medium text-muted-foreground">{question.points}pt</span>
+                    <button
+                        onClick={remove}
+                        className="rounded px-1.5 py-0.5 text-xs text-destructive hover:bg-destructive/10"
+                    >
+                        Delete
+                    </button>
                     <span className="text-xs text-muted-foreground">{open ? '▲' : '▼'}</span>
                 </div>
             </div>
 
+            {/* Expanded body */}
             {open && (
-                <div className="border-t border-border px-4 py-4">
-                    <form onSubmit={save} className="space-y-3">
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <div className="sm:col-span-2">
-                                <Label className="text-xs">Question Body</Label>
-                                <textarea
-                                    rows={2}
-                                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                    value={form.data.body}
-                                    onChange={(e) => form.setData('body', e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label className="text-xs">Type</Label>
-                                <select
-                                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                    value={form.data.question_type}
-                                    onChange={(e) => form.setData('question_type', e.target.value as TestQuestion['question_type'])}
-                                >
-                                    {Object.entries(QUESTION_TYPE_LABELS).map(([v, l]) => (
-                                        <option key={v} value={v}>{l}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <Label className="text-xs">Points</Label>
-                                <Input
-                                    type="number" min={0} className="mt-1 text-sm"
-                                    value={form.data.points}
-                                    onChange={(e) => form.setData('points', e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <Label className="text-xs">Evaluation Method</Label>
-                                <select
-                                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                    value={form.data.evaluation_method}
-                                    onChange={(e) => form.setData('evaluation_method', e.target.value as TestQuestion['evaluation_method'])}
-                                >
-                                    <option value="exact_match">Exact Match</option>
-                                    <option value="numeric_comparison">Numeric Comparison</option>
-                                    <option value="ai_graded">AI Graded</option>
-                                </select>
-                            </div>
-                            {isNumeric && (
+                <div className="border-t border-border bg-card px-5 py-5 space-y-4">
+                    <form onSubmit={save} className="space-y-4">
+
+                        {/* Question setup */}
+                        <FormSection title="Question">
+                            <div className="space-y-3">
                                 <div>
-                                    <Label className="text-xs">Numeric Operator</Label>
+                                    <Label className="text-xs">Body</Label>
+                                    <textarea
+                                        rows={2}
+                                        className={TEXTAREA_CLS}
+                                        value={form.data.body}
+                                        onChange={(e) => form.setData('body', e.target.value)}
+                                    />
+                                </div>
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <Label className="text-xs">Type</Label>
+                                        <select
+                                            className={SELECT_CLS}
+                                            value={form.data.question_type}
+                                            onChange={(e) => form.setData('question_type', e.target.value as TestQuestion['question_type'])}
+                                        >
+                                            {Object.entries(QUESTION_TYPE_LABELS).map(([v, l]) => (
+                                                <option key={v} value={v}>{l}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs">Points</Label>
+                                        <Input
+                                            type="number" min={0} className="mt-1 text-sm"
+                                            value={form.data.points}
+                                            onChange={(e) => form.setData('points', e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </FormSection>
+
+                        {/* Evaluation */}
+                        <FormSection title="Evaluation">
+                            <div className="space-y-3">
+                                <div>
+                                    <Label className="text-xs">Method</Label>
                                     <select
-                                        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                        value={form.data.numeric_operator}
-                                        onChange={(e) => form.setData('numeric_operator', e.target.value)}
+                                        className={SELECT_CLS}
+                                        value={form.data.evaluation_method}
+                                        onChange={(e) => form.setData('evaluation_method', e.target.value as TestQuestion['evaluation_method'])}
                                     >
-                                        <option value="eq">= (Equal)</option>
-                                        <option value="gt">&gt; (Greater than)</option>
-                                        <option value="gte">≥ (Greater or equal)</option>
-                                        <option value="lt">&lt; (Less than)</option>
-                                        <option value="lte">≤ (Less or equal)</option>
+                                        <option value="exact_match">Exact Match</option>
+                                        <option value="numeric_comparison">Numeric Comparison</option>
+                                        <option value="ai_graded">AI Graded</option>
                                     </select>
                                 </div>
-                            )}
-                            {!isAiGraded && !hasOptions && (
+                                {isNumeric && (
+                                    <div>
+                                        <Label className="text-xs">Numeric Operator</Label>
+                                        <select
+                                            className={SELECT_CLS}
+                                            value={form.data.numeric_operator}
+                                            onChange={(e) => form.setData('numeric_operator', e.target.value)}
+                                        >
+                                            <option value="eq">= (Equal)</option>
+                                            <option value="gt">&gt; (Greater than)</option>
+                                            <option value="gte">≥ (Greater or equal)</option>
+                                            <option value="lt">&lt; (Less than)</option>
+                                            <option value="lte">≤ (Less or equal)</option>
+                                        </select>
+                                    </div>
+                                )}
+                                {!isAiGraded && !hasOptions && (
+                                    <div>
+                                        <Label className="text-xs">Correct Answer</Label>
+                                        <Input
+                                            className="mt-1 text-sm"
+                                            value={form.data.correct_answer}
+                                            onChange={(e) => form.setData('correct_answer', e.target.value)}
+                                            placeholder="Expected answer"
+                                        />
+                                    </div>
+                                )}
+                                {isAiGraded && (
+                                    <div>
+                                        <Label className="text-xs">AI Grading Rubric</Label>
+                                        <textarea
+                                            rows={3}
+                                            className={TEXTAREA_CLS}
+                                            value={form.data.ai_rubric}
+                                            onChange={(e) => form.setData('ai_rubric', e.target.value)}
+                                            placeholder="Describe what a good answer looks like…"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </FormSection>
+
+                        {/* Behaviour */}
+                        <FormSection title="Behaviour">
+                            <div className="space-y-3">
                                 <div>
-                                    <Label className="text-xs">Correct Answer</Label>
+                                    <Label className="text-xs">Hint (shown to learner on request)</Label>
                                     <Input
                                         className="mt-1 text-sm"
-                                        value={form.data.correct_answer}
-                                        onChange={(e) => form.setData('correct_answer', e.target.value)}
-                                        placeholder="Expected answer"
+                                        value={form.data.hint}
+                                        onChange={(e) => form.setData('hint', e.target.value)}
+                                        placeholder="Optional hint text…"
                                     />
                                 </div>
-                            )}
-                            {isAiGraded && (
-                                <div className="sm:col-span-2">
-                                    <Label className="text-xs">AI Grading Rubric</Label>
-                                    <textarea
-                                        rows={3}
-                                        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                        value={form.data.ai_rubric}
-                                        onChange={(e) => form.setData('ai_rubric', e.target.value)}
-                                        placeholder="Describe what a good answer looks like…"
-                                    />
+                                <div className="flex gap-6">
+                                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                                        <input
+                                            type="checkbox"
+                                            checked={form.data.is_required}
+                                            onChange={(e) => form.setData('is_required', e.target.checked)}
+                                            className="accent-primary h-4 w-4"
+                                        />
+                                        Required
+                                    </label>
+                                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                                        <input
+                                            type="checkbox"
+                                            checked={form.data.ai_help_enabled}
+                                            onChange={(e) => form.setData('ai_help_enabled', e.target.checked)}
+                                            className="accent-primary h-4 w-4"
+                                        />
+                                        AI Help
+                                    </label>
                                 </div>
-                            )}
-                            <div className="sm:col-span-2">
-                                <Label className="text-xs">Hint (shown to learner)</Label>
-                                <Input
-                                    className="mt-1 text-sm"
-                                    value={form.data.hint}
-                                    onChange={(e) => form.setData('hint', e.target.value)}
-                                />
                             </div>
-                            <div className="flex items-center gap-4">
-                                <label className="flex items-center gap-2 text-xs cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={form.data.is_required}
-                                        onChange={(e) => form.setData('is_required', e.target.checked)}
-                                        className="accent-primary"
-                                    />
-                                    Required
-                                </label>
-                                <label className="flex items-center gap-2 text-xs cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={form.data.ai_help_enabled}
-                                        onChange={(e) => form.setData('ai_help_enabled', e.target.checked)}
-                                        className="accent-primary"
-                                    />
-                                    AI Help
-                                </label>
-                            </div>
-                        </div>
+                        </FormSection>
 
-                        <Button type="submit" size="compact" disabled={form.processing}>Save Question</Button>
+                        <div className="flex justify-end">
+                            <Button type="submit" size="compact" disabled={form.processing}>Save Question</Button>
+                        </div>
                     </form>
 
-                    {/* Options management */}
+                    {/* Answer options */}
                     {hasOptions && (
-                        <div className="mt-4 space-y-2 border-t border-border pt-4">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Options</p>
-                            {question.options.map((opt) => (
-                                <OptionRow key={opt.id} option={opt} test={test} question={question} locale={locale} />
-                            ))}
-                            <div className="flex gap-2">
-                                <Input
-                                    className="flex-1 h-7 text-xs"
-                                    placeholder="New option…"
-                                    value={newOption}
-                                    onChange={(e) => setNewOption(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addOption())}
-                                />
-                                <Button size="compact" onClick={addOption}>Add</Button>
-                            </div>
-                            {hasOptions && (
-                                <p className="text-xs text-muted-foreground">
-                                    Correct answer: set option IDs as JSON array in question settings above (e.g. after saving options, copy their IDs).
+                        <FormSection title="Answer Options">
+                            <div className="space-y-2">
+                                {question.options.length === 0 && (
+                                    <p className="text-xs text-muted-foreground">No options yet — add the first one below.</p>
+                                )}
+                                {question.options.map((opt) => (
+                                    <OptionRow key={opt.id} option={opt} test={test} question={question} locale={locale} />
+                                ))}
+                                <div className="flex gap-2 pt-1">
+                                    <Input
+                                        className="flex-1 h-8 text-xs"
+                                        placeholder="New option…"
+                                        value={newOption}
+                                        onChange={(e) => setNewOption(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addOption())}
+                                    />
+                                    <Button size="compact" onClick={addOption}>Add</Button>
+                                </div>
+                                <p className="text-[11px] text-muted-foreground">
+                                    Mark correct answers via the <span className="font-medium text-foreground">Correct Answer</span> field in Evaluation — paste option IDs as a JSON array, e.g. <code>[1, 3]</code>.
                                 </p>
-                            )}
-                        </div>
+                            </div>
+                        </FormSection>
                     )}
                 </div>
             )}
@@ -448,7 +508,7 @@ export default function TestEditor({ course, module, resource, test, questions }
         if (!test) return;
         router.post(questionStore.url({ locale: l, test: test.id }), {
             question_type: 'short_text',
-            body: '',
+            body: 'New question',
             points: 1,
             evaluation_method: 'exact_match',
             is_required: true,
@@ -461,8 +521,15 @@ export default function TestEditor({ course, module, resource, test, questions }
 
             <div className="mx-auto max-w-2xl space-y-6 px-4 py-8">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-bold">Test Editor</h1>
-                    <Badge variant="secondary">{resource.title}</Badge>
+                    <div>
+                        <h1 className="text-xl font-bold">Test Editor</h1>
+                        <p className="mt-0.5 text-sm text-muted-foreground">{resource.title}</p>
+                    </div>
+                    {test && (
+                        <Badge variant="secondary" className="text-xs">
+                            {questions.length} question{questions.length !== 1 ? 's' : ''}
+                        </Badge>
+                    )}
                 </div>
 
                 {/* Test settings */}
@@ -478,14 +545,15 @@ export default function TestEditor({ course, module, resource, test, questions }
                 {test && (
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <h2 className="font-semibold">Questions ({questions.length})</h2>
+                            <h2 className="font-semibold text-foreground">Questions</h2>
                             <Button size="compact" onClick={addQuestion}>+ Add Question</Button>
                         </div>
 
                         {questions.length === 0 && (
-                            <p className="rounded-lg border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-                                No questions yet. Add your first question above.
-                            </p>
+                            <div className="rounded-xl border border-dashed border-border bg-card p-8 text-center">
+                                <p className="text-sm font-medium text-foreground">No questions yet</p>
+                                <p className="mt-1 text-xs text-muted-foreground">Click "Add Question" to create your first question.</p>
+                            </div>
                         )}
 
                         {questions.map((question, index) => (
@@ -503,7 +571,7 @@ export default function TestEditor({ course, module, resource, test, questions }
 
                 {!test && (
                     <p className="text-sm text-muted-foreground">
-                        Create a test first to start adding questions.
+                        Create the test first to start adding questions.
                     </p>
                 )}
             </div>

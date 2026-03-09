@@ -15,12 +15,17 @@ class EnrollmentController extends Controller
             abort(404);
         }
 
-        Enrollment::firstOrCreate([
-            'user_id' => $request->user()->id,
-            'course_id' => $course->id,
-        ], [
-            'access_level' => 'observer',
-        ]);
+        $accessLevel = $course->isPaid() ? 'observer' : 'full';
+
+        $enrollment = Enrollment::firstOrCreate(
+            ['user_id' => $request->user()->id, 'course_id' => $course->id],
+            ['access_level' => $accessLevel],
+        );
+
+        // Upgrade observer → full if course is free and they're already enrolled
+        if (! $enrollment->wasRecentlyCreated && ! $course->isPaid() && $enrollment->access_level->value === 'observer') {
+            $enrollment->update(['access_level' => 'full']);
+        }
 
         return redirect()
             ->route('courses.show', ['locale' => app()->getLocale(), 'course' => $course->slug])

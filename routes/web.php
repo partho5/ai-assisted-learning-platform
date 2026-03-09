@@ -4,12 +4,15 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AiHelpController;
+use App\Http\Controllers\ChatHistoryController;
+use App\Http\Controllers\CouponCodeController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LearnController;
 use App\Http\Controllers\Mentor\DashboardController as MentorDashboardController;
 use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\ResourceCompletionController;
@@ -81,6 +84,12 @@ Route::prefix('{locale}')
         Route::post('courses/{course}/learn/{resource}/chat', [AiChatController::class, 'resource'])
             ->middleware('throttle:20,1')
             ->name('chat.resource');
+
+        // Chat history — public (guest_user_id identifies guests)
+        Route::get('chat/history', [ChatHistoryController::class, 'index'])
+            ->name('chat.history.index');
+        Route::delete('chat/history', [ChatHistoryController::class, 'destroy'])
+            ->name('chat.history.destroy');
 
         // Learning experience — auth-required interactions
         Route::middleware(['auth', 'verified'])->group(function () {
@@ -171,6 +180,39 @@ Route::prefix('{locale}')
             ->middleware(['auth', 'verified'])
             ->name('courses.enroll');
 
+        // Payment — coupon validation is public; order/subscription require auth
+        Route::post('courses/{course}/payment/coupon', [PaymentController::class, 'validateCoupon'])
+            ->name('payment.coupon.validate');
+
+        Route::middleware(['auth', 'verified'])->group(function () {
+            // One-time purchase
+            Route::post('courses/{course}/payment/order', [PaymentController::class, 'createOrder'])
+                ->name('payment.order.create');
+            Route::post('courses/{course}/payment/order/capture', [PaymentController::class, 'captureOrder'])
+                ->name('payment.order.capture');
+
+            // Subscription
+            Route::post('courses/{course}/payment/subscribe', [PaymentController::class, 'createSubscription'])
+                ->name('payment.subscription.create');
+            Route::post('courses/{course}/payment/subscribe/activate', [PaymentController::class, 'activateSubscription'])
+                ->name('payment.subscription.activate');
+        });
+
+        // Subscription return/cancel redirects (GET, auth required)
+        Route::get('courses/{course}/payment/subscribe/return', [PaymentController::class, 'subscriptionReturn'])
+            ->middleware(['auth', 'verified'])
+            ->name('payment.subscription.return');
+        Route::get('courses/{course}/payment/subscribe/cancel', [PaymentController::class, 'subscriptionCancel'])
+            ->name('payment.subscription.cancel');
+
+        // Coupon management (mentor/admin)
+        Route::middleware(['auth', 'verified', 'role:mentor,admin'])->group(function () {
+            Route::post('courses/{course}/coupons', [CouponCodeController::class, 'store'])
+                ->name('coupons.store');
+            Route::delete('courses/{course}/coupons/{couponCode}', [CouponCodeController::class, 'destroy'])
+                ->name('coupons.destroy');
+        });
+
         // Public evidence portfolio
         Route::get('u/{username}', [PublicProfileController::class, 'show'])->name('portfolio.show');
 
@@ -179,5 +221,9 @@ Route::prefix('{locale}')
             ->middleware(['auth', 'verified'])
             ->name('portfolio.showcase');
     });
+
+// PayPal webhook — outside locale prefix, CSRF excluded in bootstrap/app.php
+Route::post('webhooks/paypal', [PaymentController::class, 'webhook'])
+    ->name('webhooks.paypal');
 
 require __DIR__.'/settings.php';

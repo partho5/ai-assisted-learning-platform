@@ -40,4 +40,11 @@ return [
         'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
     ],
 
+    'paypal' => [
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'client_secret' => env('PAYPAL_CLIENT_SECRET'),
+        'mode' => env('PAYPAL_MODE', 'sandbox'),   // sandbox | live
+        'webhook_id' => env('PAYPAL_WEBHOOK_ID'),        // optional, for signature verification
+    ],
+
 ];

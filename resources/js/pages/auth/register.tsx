@@ -9,6 +9,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import { cn } from '@/lib/utils';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
+import { getGuestUserId } from '@/lib/guest-id';
 import { useState } from 'react';
 
 type Role = 'learner' | 'mentor';
@@ -43,6 +44,7 @@ export default function Register() {
             >
                 {({ processing, errors }) => (
                     <>
+                        <input type="hidden" name="guest_user_id" value={getGuestUserId()} />
                         <div className="grid gap-6">
                             <div className="grid gap-2">
                                 <Label>I am joining as a</Label>

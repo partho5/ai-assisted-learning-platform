@@ -25,6 +25,10 @@ class StoreCourseRequest extends FormRequest
             'estimated_duration' => ['nullable', 'integer', 'min:1'],
             'category_id' => ['nullable', 'exists:categories,id'],
             'thumbnail' => ['nullable', 'url', 'max:2048'],
+            'price' => ['nullable', 'numeric', 'min:0', 'max:9999.99'],
+            'currency' => ['nullable', 'string', 'size:3'],
+            'billing_type' => ['nullable', Rule::in(['one_time', 'subscription'])],
+            'subscription_duration_months' => ['nullable', 'integer', 'min:1', 'max:120'],
         ];
     }
 }

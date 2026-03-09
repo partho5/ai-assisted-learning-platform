@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BookOpen, CheckCircle, Clock } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, CreditCard } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
@@ -26,8 +26,23 @@ interface Stats {
     completed_courses: number;
 }
 
+interface PaymentRecord {
+    id: number;
+    course_title: string | null;
+    course_slug: string | null;
+    billing_type: 'one_time' | 'subscription';
+    status: 'captured' | 'active' | 'refunded' | 'cancelled';
+    final_amount: number;
+    original_amount: number;
+    discount_amount: number;
+    currency: string;
+    created_at: string;
+    expires_at: string | null;
+}
+
 interface Props {
     enrolledCourses: EnrolledCourse[];
+    payments: PaymentRecord[];
     stats: Stats;
 }
 
@@ -54,7 +69,18 @@ function StatCard({ label, value, icon: Icon, color }: { label: string; value: n
     );
 }
 
-export default function Dashboard({ enrolledCourses, stats }: Props) {
+const STATUS_CONFIG: Record<PaymentRecord['status'], { label: string; cls: string }> = {
+    captured:  { label: 'Paid',        cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
+    active:    { label: 'Active',      cls: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' },
+    refunded:  { label: 'Refunded',    cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
+    cancelled: { label: 'Cancelled',   cls: 'bg-muted text-muted-foreground' },
+};
+
+function fmt(amount: number, currency: string): string {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+}
+
+export default function Dashboard({ enrolledCourses, payments, stats }: Props) {
     const { locale, ui } = usePage().props;
     const l = String(locale);
 
@@ -157,6 +183,76 @@ export default function Dashboard({ enrolledCourses, stats }: Props) {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    )}
+                </div>
+                {/* Billing */}
+                <div>
+                    <div className="mb-4 flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        <h2 className="text-base font-semibold">Billing & Payments</h2>
+                    </div>
+
+                    {payments.length === 0 ? (
+                        <div className="rounded-xl border border-border bg-card px-6 py-8 text-center">
+                            <p className="text-sm text-muted-foreground">No payment history yet.</p>
+                        </div>
+                    ) : (
+                        <div className="overflow-hidden rounded-xl border border-border bg-card">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-border bg-muted/40">
+                                        <th className="px-4 py-3 text-left font-medium text-muted-foreground">Course</th>
+                                        <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
+                                        <th className="px-4 py-3 text-left font-medium text-muted-foreground">Amount</th>
+                                        <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
+                                        <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
+                                        <th className="px-4 py-3 text-left font-medium text-muted-foreground">Access until</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {payments.map((p, i) => {
+                                        const statusCfg = STATUS_CONFIG[p.status];
+                                        return (
+                                            <tr key={p.id} className={`border-b border-border last:border-0 ${i % 2 === 0 ? '' : 'bg-muted/20'}`}>
+                                                <td className="px-4 py-3 font-medium">
+                                                    {p.course_slug ? (
+                                                        <Link href={`/${l}/courses/${p.course_slug}`} className="hover:text-primary hover:underline">
+                                                            {p.course_title}
+                                                        </Link>
+                                                    ) : (
+                                                        <span className="text-muted-foreground">{p.course_title ?? '—'}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 text-muted-foreground capitalize">
+                                                    {p.billing_type === 'subscription' ? 'Subscription' : 'One-time'}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {p.final_amount === 0 ? (
+                                                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">Free</span>
+                                                    ) : (
+                                                        <span className="font-medium">{fmt(p.final_amount, p.currency)}</span>
+                                                    )}
+                                                    {p.discount_amount > 0 && (
+                                                        <span className="ml-1.5 text-xs text-muted-foreground line-through">
+                                                            {fmt(p.original_amount, p.currency)}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusCfg.cls}`}>
+                                                        {statusCfg.label}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-muted-foreground">{p.created_at}</td>
+                                                <td className="px-4 py-3 text-muted-foreground">
+                                                    {p.expires_at ?? (p.billing_type === 'one_time' && p.status === 'captured' ? 'Forever' : '—')}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>

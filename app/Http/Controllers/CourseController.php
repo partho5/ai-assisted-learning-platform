@@ -134,6 +134,7 @@ class CourseController extends Controller
             'category',
             'modules' => fn ($q) => $q->orderBy('order'),
             'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at'),
+            'couponCodes' => fn ($q) => $q->orderByDesc('created_at'),
         ]);
 
         return Inertia::render('mentor/courses/edit', [

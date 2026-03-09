@@ -7,6 +7,16 @@ interface Props {
 
 export function ChatMessage({ message }: Props) {
     if (message.role === 'system') {
+        if (message.content === 'session-break') {
+            return (
+                <div className="flex items-center gap-2 py-1">
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="text-[11px] text-muted-foreground">↑ Previous session</span>
+                    <div className="h-px flex-1 bg-border" />
+                </div>
+            );
+        }
+
         return (
             <div className="flex items-center gap-2 py-1">
                 <div className="h-px flex-1 bg-border" />
@@ -60,6 +70,11 @@ function markdownToHtml(text: string): string {
             )
             // Inline code
             .replace(/`([^`]+)`/g, (_, code: string) => `<code>${escHtml(code)}</code>`)
+            // Headings (h1–h4, must be at start of line)
+            .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
             // Bold
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
             // Italic

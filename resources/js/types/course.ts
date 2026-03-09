@@ -7,6 +7,19 @@ export type Enrollment = {
     course_id: number;
     access_level: EnrollmentAccess;
     purchased_at: string | null;
+    expires_at: string | null;
+};
+
+export type BillingType = 'one_time' | 'subscription';
+
+export type CouponCode = {
+    id: number;
+    code: string;
+    discount_percent: number;
+    usage_limit: number | null;
+    used_count: number;
+    expires_at: string | null;
+    is_active: boolean;
 };
 export type CourseDifficulty = 'beginner' | 'intermediate' | 'advanced';
 export type ResourceType = 'video' | 'article' | 'text' | 'document' | 'audio' | 'image' | 'assignment';
@@ -67,12 +80,18 @@ export type Course = {
     thumbnail: string | null;
     status: CourseStatus;
     is_featured: boolean;
+    // Pricing
+    price: string | null;
+    currency: string;
+    billing_type: BillingType;
+    subscription_duration_months: number | null;
     category: Category | null;
     mentor?: CourseMentor;
     modules: CourseModule[];
     modules_count?: number;
     resources_count?: number;
     enrollments_count?: number;
+    coupon_codes?: CouponCode[];
 };
 
 export type SelectOption = {

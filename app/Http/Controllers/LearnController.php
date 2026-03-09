@@ -86,15 +86,20 @@ class LearnController extends Controller
             }
         }
 
+        $hasFullAccess = $enrollment?->isFull() ?? false;
+
         // Build enriched resources (flat array, one entry per resource)
-        $resources = $allResources->map(function ($r) use ($completions, $activeAttempts, $pastAttempts) {
+        $resources = $allResources->map(function ($r) use ($completions, $activeAttempts, $pastAttempts, $hasFullAccess) {
             $testId = $r->test?->id;
+            $canAccess = $r->is_free || $hasFullAccess;
 
             return array_merge(
-                $r->only(['id', 'module_id', 'title', 'type', 'url', 'content', 'source',
+                $r->only(['id', 'module_id', 'title', 'type', 'source',
                     'estimated_time', 'mentor_note', 'why_this_resource', 'is_free', 'order']),
                 [
-                    'test' => $r->test,
+                    'url' => $canAccess ? $r->url : null,
+                    'content' => $canAccess ? $r->content : null,
+                    'test' => $canAccess ? $r->test : null,
                     'completion' => $completions->get($r->id),
                     'activeAttempt' => $testId ? $activeAttempts->get($testId) : null,
                     'previousAttempts' => $testId

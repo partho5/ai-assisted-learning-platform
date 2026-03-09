@@ -82,6 +82,7 @@ export default function Login({
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
+                                    defaultChecked
                                 />
                                 <Label htmlFor="remember">Remember me</Label>
                             </div>

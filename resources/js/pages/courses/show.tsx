@@ -1,7 +1,10 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { store as enrollStore } from '@/actions/App/Http/Controllers/EnrollmentController';
+import { show as learnShow } from '@/actions/App/Http/Controllers/LearnController';
 import { course as courseChatAction } from '@/actions/App/Http/Controllers/AiChatController';
+import { index as chatHistory } from '@/routes/chat/history';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
+import { PurchaseButton } from '@/components/payment/purchase-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -27,7 +30,6 @@ const RESOURCE_TYPE_LABELS: Record<string, string> = {
 export default function CourseShow({ course, enrollment }: Props) {
     const { auth, locale } = usePage().props;
     const l = String(locale);
-
     const totalResources = course.resources_count ?? course.modules.reduce((sum, m) => sum + m.resources.length, 0);
     const durationText = course.estimated_duration
         ? course.estimated_duration >= 60
@@ -44,6 +46,7 @@ export default function CourseShow({ course, enrollment }: Props) {
         key: `course-${course.id}`,
         label: course.title,
         endpoint: courseChatAction.url({ locale: l, course: course.slug }),
+        historyEndpoint: chatHistory.url(l),
         locale: l,
     };
 
@@ -349,6 +352,10 @@ export default function CourseShow({ course, enrollment }: Props) {
     );
 }
 
+function fmt(amount: number, currency: string): string {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+}
+
 function EnrollmentCTA({
     course,
     enrollment,
@@ -362,20 +369,50 @@ function EnrollmentCTA({
     locale: string;
     onEnroll: () => void;
 }) {
+    const isPaid = course.price !== null && parseFloat(course.price) > 0;
+    const price = isPaid ? parseFloat(course.price!) : 0;
+    const isSubscription = course.billing_type === 'subscription';
+    const priceLabel = isPaid
+        ? isSubscription
+            ? `${fmt(price, course.currency)}/month`
+            : fmt(price, course.currency)
+        : 'Free';
+
     if (!user) {
         return (
             <div className="flex flex-col gap-3">
+                {isPaid && (
+                    <div className="flex items-baseline justify-between rounded-lg bg-muted/50 px-4 py-3">
+                        <span className="text-sm text-muted-foreground">{isSubscription ? 'Monthly' : 'One-time'}</span>
+                        <span className="text-2xl font-bold">{priceLabel}</span>
+                    </div>
+                )}
                 <Button variant="enroll" className="w-full" asChild>
                     <a href={`/register`}>Sign up free to start learning</a>
                 </Button>
                 <p className="text-center text-xs text-muted-foreground">
-                    Free account — access preview lessons instantly
+                    {isPaid ? 'Create a free account, then purchase to unlock full access.' : 'Free account — access preview lessons instantly'}
                 </p>
             </div>
         );
     }
 
     if (!enrollment) {
+        if (isPaid) {
+            return (
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-baseline justify-between rounded-lg bg-muted/50 px-4 py-3">
+                        <span className="text-sm text-muted-foreground">{isSubscription ? 'Monthly' : 'One-time'}</span>
+                        <span className="text-2xl font-bold">{priceLabel}</span>
+                    </div>
+                    <PurchaseButton course={course} locale={locale} label={`Buy Now — ${priceLabel}`} className="w-full" />
+                    <p className="text-center text-xs text-muted-foreground">
+                        Secure payment via PayPal · 30-day refund policy
+                    </p>
+                </div>
+            );
+        }
+
         return (
             <div className="flex flex-col gap-3">
                 <Button variant="enroll" className="w-full" onClick={onEnroll}>
@@ -389,25 +426,47 @@ function EnrollmentCTA({
     }
 
     if (enrollment.access_level === 'full') {
+        const firstResource = course.modules?.flatMap((m) => m.resources)[0];
         return (
             <div className="flex flex-col gap-3">
                 <div className="rounded-lg bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                     You have full access to this course
                 </div>
-                <Button variant="complete" className="w-full">
-                    Continue learning
-                </Button>
+                {firstResource ? (
+                    <Button variant="complete" className="w-full" asChild>
+                        <Link href={learnShow.url({ locale, course: course.slug, resource: firstResource.id })}>
+                            Continue learning
+                        </Link>
+                    </Button>
+                ) : (
+                    <Button variant="complete" className="w-full" disabled>
+                        Continue learning
+                    </Button>
+                )}
             </div>
         );
     }
 
+    // Observer on a paid course
+    if (isPaid) {
+        return (
+            <div className="flex flex-col gap-3">
+                <div className="rounded-lg bg-indigo-50 px-4 py-3 text-sm text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
+                    <span className="font-medium">Enrolled as observer.</span> Upgrade to unlock all lessons.
+                </div>
+                <PurchaseButton course={course} locale={locale} label={`Upgrade — ${priceLabel}`} className="w-full" />
+            </div>
+        );
+    }
+
+    // Observer on a free course — promote to full via enrollment endpoint
     return (
         <div className="flex flex-col gap-3">
             <div className="rounded-lg bg-indigo-50 px-4 py-3 text-sm text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300">
-                <span className="font-medium">Enrolled as observer.</span> Upgrade to access all lessons.
+                <span className="font-medium">Enrolled as observer.</span> Get full access for free.
             </div>
-            <Button variant="premium" className="w-full">
-                Unlock full access
+            <Button variant="premium" className="w-full" onClick={onEnroll}>
+                Unlock full access — Free
             </Button>
         </div>
     );

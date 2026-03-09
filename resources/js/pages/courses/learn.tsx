@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { resource as resourceChatAction } from '@/actions/App/Http/Controllers/AiChatController';
+import { index as chatHistory } from '@/routes/chat/history';
 import { complete as markComplete } from '@/actions/App/Http/Controllers/ResourceCompletionController';
 import {
     store as startAttempt,
@@ -397,7 +398,7 @@ function ResourceBlock({
     enrollment: Enrollment | null;
     locale: string;
 }) {
-    const isObserverLocked = enrollment?.access_level === 'observer' && !resource.is_free;
+    const isObserverLocked = !resource.is_free && (!enrollment || enrollment.access_level === 'observer');
     const isAssignment = resource.type === 'assignment';
     const hasTest = !!resource.test;
     const isCompleted = resource.completion?.status === 'endorsed';
@@ -582,6 +583,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
         label: activeResource?.title,
         resourceType: typeof activeResource?.type === 'string' ? activeResource.type : (activeResource?.type as { value?: string })?.value ?? 'text',
         endpoint: resourceChatAction.url({ locale: l, course: course.slug, resource: activeResourceId }),
+        historyEndpoint: chatHistory.url(l),
         locale: l,
     }), [activeResourceId, activeResource, l, course.slug]);
     const mainRef = useRef<HTMLDivElement>(null);
@@ -718,7 +720,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                                 {mod.resources.map((r) => {
                                     const isActive = r.id === activeResourceId;
                                     const isLocked =
-                                        enrollment?.access_level === 'observer' && !r.is_free;
+                                        !r.is_free && (!enrollment || enrollment.access_level === 'observer');
                                     return (
                                         <li key={r.id}>
                                             <button

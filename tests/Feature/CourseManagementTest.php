@@ -142,6 +142,69 @@ class CourseManagementTest extends TestCase
             ->assertSessionHasErrors('what_you_will_learn');
     }
 
+    public function test_mentor_can_create_a_paid_course(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('courses.store', ['locale' => 'en']), [
+                'title' => 'Paid Laravel Course',
+                'description' => 'Advanced course.',
+                'what_you_will_learn' => 'Advanced Laravel.',
+                'difficulty' => CourseDifficulty::Intermediate->value,
+                'billing_type' => 'one_time',
+                'price' => '49.99',
+                'currency' => 'USD',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('courses', [
+            'title' => 'Paid Laravel Course',
+            'billing_type' => 'one_time',
+            'price' => '49.99',
+            'currency' => 'USD',
+            'user_id' => $mentor->id,
+        ]);
+    }
+
+    public function test_mentor_can_create_a_subscription_course(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('courses.store', ['locale' => 'en']), [
+                'title' => 'Monthly Course',
+                'description' => 'Subscription course.',
+                'what_you_will_learn' => 'Something great.',
+                'difficulty' => CourseDifficulty::Beginner->value,
+                'billing_type' => 'subscription',
+                'price' => '9.99',
+                'currency' => 'USD',
+                'subscription_duration_months' => 3,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('courses', [
+            'title' => 'Monthly Course',
+            'billing_type' => 'subscription',
+            'price' => '9.99',
+            'subscription_duration_months' => 3,
+        ]);
+    }
+
+    public function test_course_creation_rejects_invalid_billing_type(): void
+    {
+        $this->actingAs(User::factory()->mentor()->create())
+            ->post(route('courses.store', ['locale' => 'en']), [
+                'title' => 'Test',
+                'description' => 'Desc',
+                'what_you_will_learn' => 'Things',
+                'difficulty' => CourseDifficulty::Beginner->value,
+                'billing_type' => 'invalid_type',
+            ])
+            ->assertSessionHasErrors('billing_type');
+    }
+
     // ──────────────────────────────────────────────
     // edit / update
     // ──────────────────────────────────────────────

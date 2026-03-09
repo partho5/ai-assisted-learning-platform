@@ -6,6 +6,10 @@ import {
     update as courseUpdate,
 } from '@/actions/App/Http/Controllers/CourseController';
 import {
+    store as couponStore,
+    destroy as couponDestroy,
+} from '@/actions/App/Http/Controllers/CouponCodeController';
+import {
     destroy as moduleDestroy,
     store as moduleStore,
     update as moduleUpdate,
@@ -22,7 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Category, Course, CourseDifficulty, CourseModule, CourseResource, ResourceType, SelectOption } from '@/types';
+import type { BillingType, BreadcrumbItem, Category, Course, CourseDifficulty, CouponCode, CourseModule, CourseResource, ResourceType, SelectOption } from '@/types';
 
 interface Props {
     course: Course;
@@ -54,6 +58,10 @@ function CourseDetailsForm({
         category_id: String(course.category_id ?? ''),
         thumbnail: course.thumbnail ?? '',
         status: course.status,
+        billing_type: course.billing_type ?? 'one_time',
+        price: course.price ?? '',
+        currency: course.currency ?? 'USD',
+        subscription_duration_months: String(course.subscription_duration_months ?? ''),
     });
 
     function submit(e: React.FormEvent) {
@@ -192,12 +200,206 @@ function CourseDetailsForm({
                     </Field>
                 </div>
 
+                {/* ── Pricing ────────────────────────────────────────── */}
+                <div className="flex flex-col gap-4 rounded-lg border border-emerald-300 bg-emerald-50/70 p-4 dark:border-emerald-700/60 dark:bg-emerald-950/30">
+                    <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Pricing</p>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Field label="Billing type" error={form.errors.billing_type} required>
+                            <Select
+                                value={form.data.billing_type}
+                                onChange={(e) => form.setData('billing_type', e.target.value as BillingType)}
+                                options={[
+                                    { value: 'one_time', label: 'One-time payment' },
+                                    { value: 'subscription', label: 'Monthly subscription' },
+                                ]}
+                                disabled={form.processing}
+                            />
+                        </Field>
+                        <Field label="Currency" error={form.errors.currency} required>
+                            <Select
+                                value={form.data.currency}
+                                onChange={(e) => form.setData('currency', e.target.value)}
+                                options={[
+                                    { value: 'USD', label: 'USD — US Dollar' },
+                                    { value: 'EUR', label: 'EUR — Euro' },
+                                    { value: 'GBP', label: 'GBP — British Pound' },
+                                    { value: 'INR', label: 'INR — Indian Rupee' },
+                                    { value: 'BRL', label: 'BRL — Brazilian Real' },
+                                    { value: 'MXN', label: 'MXN — Mexican Peso' },
+                                    { value: 'JPY', label: 'JPY — Japanese Yen' },
+                                    { value: 'AUD', label: 'AUD — Australian Dollar' },
+                                    { value: 'CAD', label: 'CAD — Canadian Dollar' },
+                                    { value: 'BDT', label: 'BDT — Bangladeshi Taka' },
+                                ]}
+                                disabled={form.processing}
+                            />
+                        </Field>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Field label="Price (leave blank = free)" error={form.errors.price}>
+                            <Input
+                                type="number"
+                                min={0}
+                                step={0.01}
+                                value={form.data.price}
+                                onChange={(e) => form.setData('price', e.target.value)}
+                                disabled={form.processing}
+                                placeholder="9.99"
+                            />
+                        </Field>
+                        {form.data.billing_type === 'subscription' && (
+                            <Field label="Duration (months)" error={form.errors.subscription_duration_months} required>
+                                <Input
+                                    type="number"
+                                    min={1}
+                                    max={36}
+                                    value={form.data.subscription_duration_months}
+                                    onChange={(e) => form.setData('subscription_duration_months', e.target.value)}
+                                    disabled={form.processing}
+                                    placeholder="6"
+                                />
+                            </Field>
+                        )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                        Price of 0 or blank = free enrollment. Coupon codes can be managed below after saving.
+                    </p>
+                </div>
+
                 <div className="flex justify-end border-t border-sidebar-border pt-4">
                     <Button type="submit" variant="progress" disabled={form.processing}>
                         {form.processing ? 'Saving...' : 'Save Changes'}
                     </Button>
                 </div>
             </form>
+        </section>
+    );
+}
+
+// ─── Coupon Code Manager ─────────────────────────────────────────────────────
+
+function CouponCodeManager({ course, locale }: { course: Course; locale: string }) {
+    const [open, setOpen] = useState(false);
+    const form = useForm({
+        code: '',
+        discount_percent: '',
+        usage_limit: '',
+        expires_at: '',
+    });
+
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+        form.submit(couponStore({ locale, course: course.slug }), {
+            preserveScroll: true,
+            onSuccess: () => { form.reset(); setOpen(false); },
+        });
+    }
+
+    function deleteCoupon(coupon: CouponCode) {
+        if (!confirm(`Delete coupon "${coupon.code}"?`)) { return; }
+        router.delete(couponDestroy.url({ locale, course: course.slug, couponCode: coupon.id }), { preserveScroll: true });
+    }
+
+    const coupons = course.coupon_codes ?? [];
+
+    return (
+        <section className="overflow-hidden rounded-xl border border-sidebar-border/70 bg-card dark:border-sidebar-border">
+            <div className="flex items-center justify-between border-b border-sidebar-border/70 bg-muted/40 px-5 py-3 dark:border-sidebar-border">
+                <div>
+                    <h2 className="font-semibold">Coupon Codes</h2>
+                    <p className="text-xs text-muted-foreground">Affiliate & discount codes for this course</p>
+                </div>
+                {!open && (
+                    <Button type="button" variant="secondary" size="compact" onClick={() => setOpen(true)}>
+                        + New Code
+                    </Button>
+                )}
+            </div>
+
+            <div className="p-5 flex flex-col gap-4">
+                {open && (
+                    <form onSubmit={submit} className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-800/50 dark:bg-emerald-950/25">
+                        <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">New Coupon</p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Field label="Code (auto-generated if blank)" error={form.errors.code}>
+                                <Input
+                                    value={form.data.code}
+                                    onChange={(e) => form.setData('code', e.target.value.toUpperCase())}
+                                    disabled={form.processing}
+                                    placeholder="FRIEND2024"
+                                    className="font-mono tracking-wider uppercase"
+                                />
+                            </Field>
+                            <Field label="Discount %" error={form.errors.discount_percent} required>
+                                <Input
+                                    type="number"
+                                    min={5}
+                                    max={100}
+                                    value={form.data.discount_percent}
+                                    onChange={(e) => form.setData('discount_percent', e.target.value)}
+                                    disabled={form.processing}
+                                    placeholder="100"
+                                />
+                            </Field>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Field label="Usage limit (blank = unlimited)" error={form.errors.usage_limit}>
+                                <Input
+                                    type="number"
+                                    min={1}
+                                    value={form.data.usage_limit}
+                                    onChange={(e) => form.setData('usage_limit', e.target.value)}
+                                    disabled={form.processing}
+                                    placeholder="1"
+                                />
+                            </Field>
+                            <Field label="Expires at (blank = never)" error={form.errors.expires_at}>
+                                <Input
+                                    type="date"
+                                    value={form.data.expires_at}
+                                    onChange={(e) => form.setData('expires_at', e.target.value)}
+                                    disabled={form.processing}
+                                />
+                            </Field>
+                        </div>
+                        <div className="flex justify-end gap-2 border-t border-emerald-200 pt-3 dark:border-emerald-800/50">
+                            <Button type="button" variant="ghost" size="compact" onClick={() => setOpen(false)} disabled={form.processing}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" variant="progress" size="compact" disabled={form.processing}>
+                                {form.processing ? 'Creating...' : 'Create Code'}
+                            </Button>
+                        </div>
+                    </form>
+                )}
+
+                {coupons.length === 0 && !open ? (
+                    <p className="text-sm text-muted-foreground">No coupon codes yet. Create one to give discounts or free access.</p>
+                ) : (
+                    <div className="flex flex-col gap-2">
+                        {coupons.map((coupon) => (
+                            <div key={coupon.id} className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5">
+                                <div className="flex items-center gap-3">
+                                    <span className="font-mono text-sm font-semibold tracking-wider">{coupon.code}</span>
+                                    <Badge className={`text-xs ${coupon.discount_percent >= 100 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'}`}>
+                                        {coupon.discount_percent === 100 ? 'Free (100%)' : `${coupon.discount_percent}% off`}
+                                    </Badge>
+                                    {!coupon.is_active && (
+                                        <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                    <span>{coupon.used_count}{coupon.usage_limit ? `/${coupon.usage_limit}` : ''} uses</span>
+                                    {coupon.expires_at && <span>Expires {new Date(coupon.expires_at).toLocaleDateString()}</span>}
+                                    <Button type="button" variant="ghost" size="compact" onClick={() => deleteCoupon(coupon)} className="text-destructive hover:text-destructive">
+                                        Delete
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </section>
     );
 }
@@ -591,13 +793,15 @@ export default function CourseEdit({ course, categories, difficulties, resourceT
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit: ${course.title}`} />
 
-            <div className="flex flex-col gap-6 p-4 md:p-6">
+            <div className="flex flex-col gap-6 p-4 md:p-6 mb-48">
                 <CourseDetailsForm
                     course={course}
                     categories={categories}
                     difficulties={difficulties}
                     locale={l}
                 />
+
+                <CouponCodeManager course={course} locale={l} />
 
                 <section className="flex flex-col gap-4">
                     <h2 className="font-semibold">Curriculum</h2>

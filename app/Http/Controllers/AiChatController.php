@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\AiChat\ChatContextMeta;
 use App\AiChat\CourseChatContext;
+use App\AiChat\CoursesListChatContext;
 use App\AiChat\PlatformChatContext;
 use App\AiChat\ResourceChatContext;
 use App\Contracts\AiProvider;
 use App\Enums\EnrollmentAccess;
 use App\Enums\UserTier;
 use App\Http\Requests\AiChatRequest;
+use App\Models\ChatSession;
 use App\Models\Course;
 use App\Models\Resource;
 use Illuminate\Http\Request;
@@ -25,10 +27,16 @@ class AiChatController extends Controller
     public function platform(AiChatRequest $request): StreamedResponse
     {
         $meta = $this->buildContextMeta($request);
-        $systemPrompt = PlatformChatContext::buildSystemPrompt($meta);
+        $courses = $request->validated('courses', []) ?? [];
+
+        $systemPrompt = ! empty($courses)
+            ? CoursesListChatContext::buildSystemPrompt($courses, $meta)
+            : PlatformChatContext::buildSystemPrompt($meta);
+
+        $session = $this->resolveSession($request, 'platform');
         $history = $this->buildHistory($request);
 
-        return $this->stream($this->ai, $systemPrompt, $history);
+        return $this->stream($this->ai, $systemPrompt, $history, $session, $request->validated('message'));
     }
 
     /**
@@ -39,9 +47,11 @@ class AiChatController extends Controller
         $course->load('modules.resources');
         $meta = $this->buildContextMeta($request, $course);
         $systemPrompt = CourseChatContext::buildSystemPrompt($course, $meta);
+
+        $session = $this->resolveSession($request, 'course');
         $history = $this->buildHistory($request);
 
-        return $this->stream($this->ai, $systemPrompt, $history);
+        return $this->stream($this->ai, $systemPrompt, $history, $session, $request->validated('message'));
     }
 
     /**
@@ -52,27 +62,45 @@ class AiChatController extends Controller
         $resource->load('module');
         $meta = $this->buildContextMeta($request, $course);
         $systemPrompt = ResourceChatContext::buildSystemPrompt($resource, $course, $meta);
+
+        $session = $this->resolveSession($request, 'resource');
         $history = $this->buildHistory($request);
 
-        return $this->stream($this->ai, $systemPrompt, $history);
+        return $this->stream($this->ai, $systemPrompt, $history, $session, $request->validated('message'));
     }
 
     /**
      * @param  array<int, array{role: 'user'|'assistant', content: string}>  $history
      */
-    private function stream(AiProvider $ai, string $systemPrompt, array $history): StreamedResponse
-    {
-        return response()->stream(function () use ($ai, $systemPrompt, $history): void {
+    private function stream(
+        AiProvider $ai,
+        string $systemPrompt,
+        array $history,
+        ?ChatSession $session,
+        string $userMessage,
+    ): StreamedResponse {
+        // Persist user message immediately
+        $session?->messages()->create(['role' => 'user', 'content' => $userMessage]);
+
+        return response()->stream(function () use ($ai, $systemPrompt, $history, $session): void {
+            $fullContent = '';
+
             $ai->streamChat(
                 systemPrompt: $systemPrompt,
                 history: $history,
-                onChunk: function (string $chunk): void {
+                onChunk: function (string $chunk) use (&$fullContent): void {
+                    $fullContent .= $chunk;
                     $encoded = json_encode(['chunk' => $chunk]);
                     echo "data: {$encoded}\n\n";
                     ob_flush();
                     flush();
                 },
             );
+
+            // Persist assistant reply after stream completes
+            if ($session && $fullContent !== '') {
+                $session->messages()->create(['role' => 'assistant', 'content' => $fullContent]);
+            }
 
             echo "data: [DONE]\n\n";
             ob_flush();
@@ -123,5 +151,32 @@ class AiChatController extends Controller
         }
 
         return new ChatContextMeta($authStatus, $userTier, $courseAccess);
+    }
+
+    /**
+     * Find or create the chat session for this request.
+     * Returns null when neither user_id nor guest_user_id is available.
+     */
+    private function resolveSession(AiChatRequest $request, string $contextType): ?ChatSession
+    {
+        $userId = $request->user()?->id;
+        $guestUserId = $request->validated('guest_user_id');
+
+        if (! $userId && ! $guestUserId) {
+            return null;
+        }
+
+        $contextKey = $request->validated('context_key') ?? $contextType;
+        $contextUrl = $request->validated('context_url') ?? $request->url();
+
+        return ChatSession::findOrCreateFor(
+            userId: $userId,
+            guestUserId: $guestUserId,
+            context: [
+                'context_type' => $contextType,
+                'context_key' => $contextKey,
+                'context_url' => $contextUrl,
+            ],
+        );
     }
 }

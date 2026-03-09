@@ -94,4 +94,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Enrollment::class);
     }
+
+    /** @return HasMany<ChatSession, $this> */
+    public function chatSessions(): HasMany
+    {
+        return $this->hasMany(ChatSession::class);
+    }
 }

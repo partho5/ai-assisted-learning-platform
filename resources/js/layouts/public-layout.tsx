@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { platform } from '@/actions/App/Http/Controllers/AiChatController';
+import { index as chatHistory } from '@/routes/chat/history';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { login, register } from '@/routes';
 
@@ -44,7 +45,7 @@ export default function PublicLayout({ children, hidePlatformChat = false }: { c
 
             {!hidePlatformChat && (
                 <FloatingChatButton
-                    context={{ type: 'platform', key: 'platform', endpoint: platform.url(l), locale: l }}
+                    context={{ type: 'platform', key: 'platform', endpoint: platform.url(l), historyEndpoint: chatHistory.url(l), locale: l }}
                 />
             )}
         </div>

@@ -28,6 +28,11 @@ class CreateNewUser implements CreatesNewUsers
             'role' => ['required', Rule::enum(UserRole::class), Rule::notIn([UserRole::Admin->value])],
         ])->validate();
 
+        // Store guest chat ID in session so the Registered listener can merge history
+        if (! empty($input['guest_user_id'])) {
+            session()->put('merge_guest_chat_id', $input['guest_user_id']);
+        }
+
         return User::create([
             'name' => $input['name'],
             'username' => $this->generateUsername($input['name']),

@@ -24,7 +24,8 @@ declare module '@inertiajs/core' {
             locale: string;
             supportedLocales: string[];
             ui: UiTranslations;
-            flash: { success: string | null; error: string | null };
+            flash: { success: string | null; error: string | null; chat_merged: boolean | null };
+            paypalClientId: string | null;
             [key: string]: unknown;
         };
     }

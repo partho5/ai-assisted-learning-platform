@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import { useChat, type ChatContext } from '@/hooks/use-chat';
 import { ChatMessage } from '@/components/chat/chat-message';
 import { ChatSuggestions } from '@/components/chat/chat-suggestions';
@@ -12,22 +12,40 @@ interface Props {
 }
 
 export function ChatPanel({ context, isOpen, onClose }: Props) {
-    const { messages, sendMessage, isLoading, clearMessages } = useChat(context);
+    const { flash } = usePage().props;
+    const { messages, sendMessage, isLoading, isLoadingHistory, hasMore, loadOlderMessages, clearMessages } =
+        useChat(context, isOpen);
     const [draft, setDraft] = useState('');
+    const [confirmingClear, setConfirmingClear] = useState(false);
+    const [showMergeBanner, setShowMergeBanner] = useState(!!flash.chat_merged);
     const bottomRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    // Preserve scroll position when prepending older messages
+    const scrollHeightBeforeRef = useRef<number>(0);
 
-    // Scroll to bottom on new messages
+    // Scroll to bottom on new messages (not when loading older ones)
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !isLoadingHistory && scrollHeightBeforeRef.current === 0) {
             bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
         }
-    }, [messages, isOpen]);
+    }, [messages.length, isOpen, isLoadingHistory]);
 
-    // Focus input when panel opens
+    // Restore scroll position after older messages are prepended
+    useEffect(() => {
+        if (!isLoadingHistory && scrollRef.current && scrollHeightBeforeRef.current > 0) {
+            const diff = scrollRef.current.scrollHeight - scrollHeightBeforeRef.current;
+            scrollRef.current.scrollTop = diff;
+            scrollHeightBeforeRef.current = 0;
+        }
+    }, [isLoadingHistory]);
+
+    // Focus input when panel opens; reset confirm state when panel closes
     useEffect(() => {
         if (isOpen) {
             setTimeout(() => inputRef.current?.focus(), 100);
+        } else {
+            setConfirmingClear(false);
         }
     }, [isOpen]);
 
@@ -46,7 +64,25 @@ export function ChatPanel({ context, isOpen, onClose }: Props) {
         }
     }
 
-    const showSuggestions = messages.filter((m) => m.role !== 'system').length === 0;
+    function handleLoadOlder() {
+        if (scrollRef.current) {
+            scrollHeightBeforeRef.current = scrollRef.current.scrollHeight;
+        }
+        loadOlderMessages();
+    }
+
+    async function handleClear() {
+        if (!confirmingClear) {
+            setConfirmingClear(true);
+            return;
+        }
+        setConfirmingClear(false);
+        await clearMessages();
+    }
+
+    const nonSystemMessages = messages.filter((m) => m.role !== 'system');
+    const showSuggestions = nonSystemMessages.length === 0 && !isLoadingHistory;
+    const showEmpty = nonSystemMessages.length === 0 && !isLoadingHistory;
 
     return (
         <>
@@ -82,19 +118,39 @@ export function ChatPanel({ context, isOpen, onClose }: Props) {
                     </div>
                     <div className="flex items-center gap-1">
                         {messages.length > 0 && (
-                            <button
-                                type="button"
-                                onClick={clearMessages}
-                                className="rounded-lg px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                            >
-                                Clear
-                            </button>
+                            confirmingClear ? (
+                                <div className="flex items-center gap-1">
+                                    <span className="text-[11px] text-muted-foreground">Delete history?</span>
+                                    <button
+                                        type="button"
+                                        onClick={handleClear}
+                                        className="rounded-lg px-2 py-1 text-[11px] text-red-500 transition-colors hover:bg-red-500/10"
+                                    >
+                                        Yes
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setConfirmingClear(false)}
+                                        className="rounded-lg px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted"
+                                    >
+                                        No
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={handleClear}
+                                    className="rounded-lg px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                >
+                                    Clear
+                                </button>
+                            )
                         )}
                         <button
                             type="button"
                             onClick={onClose}
                             aria-label="Close chat"
-                            className="flex h-7 w-7  items-center justify-center rounded-lg text-red-500 transition-colors hover:bg-red-600 hover:text-white"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg text-red-500 transition-colors hover:bg-red-600 hover:text-white"
                         >
                             ✕
                         </button>
@@ -102,8 +158,41 @@ export function ChatPanel({ context, isOpen, onClose }: Props) {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto px-4 py-3">
-                    {messages.length === 0 ? (
+                <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3">
+                    {/* Guest-merge notice */}
+                    {showMergeBanner && (
+                        <div className="mb-3 flex items-start gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-3 py-2 text-[11px] text-indigo-400">
+                            <span className="mt-0.5 shrink-0">✓</span>
+                            <span className="flex-1">Your previous chat history has been linked to your account.</span>
+                            <button
+                                type="button"
+                                onClick={() => setShowMergeBanner(false)}
+                                className="shrink-0 opacity-60 hover:opacity-100"
+                                aria-label="Dismiss"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Initial history skeleton */}
+                    {isLoadingHistory && messages.length === 0 && (
+                        <div className="flex flex-col gap-3">
+                            {[80, 60, 90, 50].map((w, i) => (
+                                <div
+                                    key={i}
+                                    className={cn(
+                                        'h-8 animate-pulse rounded-2xl bg-muted',
+                                        i % 2 === 0 ? 'self-end' : 'self-start',
+                                    )}
+                                    style={{ width: `${w}%` }}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Empty state */}
+                    {showEmpty && (
                         <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
                             <span className="text-3xl">💬</span>
                             <p className="text-sm font-medium text-foreground">
@@ -117,15 +206,41 @@ export function ChatPanel({ context, isOpen, onClose }: Props) {
                                 {context.type === 'platform'
                                     ? 'How it works, enrollment, tiers, and more.'
                                     : context.type === 'course'
-                                      ? 'I know what this course covers and who it\'s for.'
+                                      ? "I know what this course covers and who it's for."
                                       : 'I have context about what you\'re studying.'}
                             </p>
                         </div>
-                    ) : (
+                    )}
+
+                    {/* Message list */}
+                    {messages.length > 0 && (
                         <div className="flex flex-col gap-3">
+                            {/* Load older trigger */}
+                            {hasMore && (
+                                <div className="flex justify-center py-1">
+                                    <button
+                                        type="button"
+                                        onClick={handleLoadOlder}
+                                        disabled={isLoadingHistory}
+                                        className="text-[11px] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                                    >
+                                        {isLoadingHistory ? (
+                                            <span className="flex items-center gap-1">
+                                                <span className="h-1 w-1 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]" />
+                                                <span className="h-1 w-1 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
+                                                <span className="h-1 w-1 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
+                                            </span>
+                                        ) : (
+                                            '↑ Load earlier messages'
+                                        )}
+                                    </button>
+                                </div>
+                            )}
+
                             {messages.map((m) => (
                                 <ChatMessage key={m.id} message={m} />
                             ))}
+
                             {isLoading && messages[messages.length - 1]?.streaming !== true && (
                                 <div className="flex justify-start">
                                     <div className="rounded-2xl rounded-tl-sm border border-border bg-card px-3.5 py-2.5">
@@ -155,7 +270,7 @@ export function ChatPanel({ context, isOpen, onClose }: Props) {
 
                 {/* Input */}
                 <div className="px-3 pb-3 pt-2">
-                    <div className="group rounded-2xl border border-border bg-muted/30 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
+                    <div className="group rounded-2xl border border-border bg-muted/30 transition-all focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
                         <textarea
                             ref={inputRef}
                             value={draft}
@@ -164,11 +279,11 @@ export function ChatPanel({ context, isOpen, onClose }: Props) {
                             placeholder="Ask anything…"
                             rows={2}
                             disabled={isLoading}
-                            className="block w-full resize-none bg-transparent px-4 pt-3 pb-1 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50 max-h-36"
+                            className="block max-h-36 w-full resize-none bg-transparent px-4 pb-1 pt-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:opacity-50"
                             style={{ fieldSizing: 'content' } as React.CSSProperties}
                         />
                         <div className="flex items-center justify-between px-3 pb-2 pt-1">
-                            <p className="text-[12px] text-foreground group-focus-within:text-muted-foreground group-focus-within:text-[10px] transition-colors">
+                            <p className="text-[12px] text-foreground transition-colors group-focus-within:text-[10px] group-focus-within:text-muted-foreground">
                                 Shift+Enter for new line
                             </p>
                             <button
@@ -176,7 +291,7 @@ export function ChatPanel({ context, isOpen, onClose }: Props) {
                                 onClick={handleSubmit}
                                 disabled={!draft.trim() || isLoading}
                                 aria-label="Send message"
-                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white transition-colors hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
                             >
                                 <svg viewBox="0 0 20 20" fill="currentColor" className="size-4">
                                     <path d="M3.105 2.288a.75.75 0 0 0-.826.95l1.414 4.926A1.5 1.5 0 0 0 5.135 9.25h6.115a.75.75 0 0 1 0 1.5H5.135a1.5 1.5 0 0 0-1.442 1.086l-1.414 4.926a.75.75 0 0 0 .826.95 28.897 28.897 0 0 0 15.293-7.154.75.75 0 0 0 0-1.115A28.897 28.897 0 0 0 3.105 2.288Z" />

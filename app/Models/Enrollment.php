@@ -18,6 +18,7 @@ class Enrollment extends Model
         'course_id',
         'access_level',
         'purchased_at',
+        'expires_at',
     ];
 
     /** @return array<string, string> */
@@ -26,6 +27,7 @@ class Enrollment extends Model
         return [
             'access_level' => EnrollmentAccess::class,
             'purchased_at' => 'datetime',
+            'expires_at' => 'datetime',
         ];
     }
 
@@ -49,6 +51,18 @@ class Enrollment extends Model
     public function isObserver(): bool
     {
         return $this->access_level === EnrollmentAccess::Observer;
+    }
+
+    /** Subscription enrollments expire; one-time purchases never do. */
+    public function hasExpired(): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->isPast();
+    }
+
+    /** Full access that hasn't expired. */
+    public function isActiveFullAccess(): bool
+    {
+        return $this->isFull() && ! $this->hasExpired();
     }
 
     /** @return HasMany<ResourceCompletion, $this> */

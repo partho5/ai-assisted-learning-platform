@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Category, SelectOption } from '@/types';
+import type { BillingType, BreadcrumbItem, Category, SelectOption } from '@/types';
 
 interface Props {
     categories: Category[];
@@ -33,6 +33,10 @@ export default function CourseCreate({ categories, difficulties }: Props) {
         estimated_duration: '',
         category_id: '',
         thumbnail: '',
+        billing_type: 'one_time' as BillingType,
+        price: '',
+        currency: 'USD',
+        subscription_duration_months: '',
     });
 
     function submit(e: React.FormEvent) {
@@ -44,7 +48,7 @@ export default function CourseCreate({ categories, difficulties }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="New Course" />
 
-            <div className="mx-auto md:mx-20 p-4 md:p-6">
+            <div className="mx-auto md:mx-20 p-4 md:p-6 mb-48">
                 <h1 className="mb-6 text-2xl font-semibold tracking-tight">Create Course</h1>
 
                 <form onSubmit={submit} className="flex flex-col gap-5">
@@ -137,6 +141,72 @@ export default function CourseCreate({ categories, difficulties }: Props) {
                         />
                     </Field>
 
+                    {/* ── Pricing ────────────────────────────────────────── */}
+                    <div className="flex flex-col gap-4 rounded-lg border border-emerald-300 bg-emerald-50/70 p-4 dark:border-emerald-700/60 dark:bg-emerald-950/30">
+                        <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Pricing</p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Field label="Billing type" error={form.errors.billing_type} required>
+                                <Select
+                                    value={form.data.billing_type}
+                                    onChange={(e) => form.setData('billing_type', e.target.value as BillingType)}
+                                    options={[
+                                        { value: 'one_time', label: 'One-time payment' },
+                                        { value: 'subscription', label: 'Monthly subscription' },
+                                    ]}
+                                    disabled={form.processing}
+                                />
+                            </Field>
+                            <Field label="Currency" error={form.errors.currency} required>
+                                <Select
+                                    value={form.data.currency}
+                                    onChange={(e) => form.setData('currency', e.target.value)}
+                                    options={[
+                                        { value: 'USD', label: 'USD — US Dollar' },
+                                        { value: 'EUR', label: 'EUR — Euro' },
+                                        { value: 'GBP', label: 'GBP — British Pound' },
+                                        { value: 'INR', label: 'INR — Indian Rupee' },
+                                        { value: 'BRL', label: 'BRL — Brazilian Real' },
+                                        { value: 'MXN', label: 'MXN — Mexican Peso' },
+                                        { value: 'JPY', label: 'JPY — Japanese Yen' },
+                                        { value: 'AUD', label: 'AUD — Australian Dollar' },
+                                        { value: 'CAD', label: 'CAD — Canadian Dollar' },
+                                        { value: 'BDT', label: 'BDT — Bangladeshi Taka' },
+                                    ]}
+                                    disabled={form.processing}
+                                />
+                            </Field>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <Field label="Price (leave blank = free)" error={form.errors.price}>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    step={0.01}
+                                    value={form.data.price}
+                                    onChange={(e) => form.setData('price', e.target.value)}
+                                    disabled={form.processing}
+                                    placeholder="9.99"
+                                />
+                            </Field>
+                            {form.data.billing_type === 'subscription' && (
+                                <Field label="Duration (months)" error={form.errors.subscription_duration_months} required>
+                                    <Input
+                                        type="number"
+                                        min={1}
+                                        max={36}
+                                        value={form.data.subscription_duration_months}
+                                        onChange={(e) => form.setData('subscription_duration_months', e.target.value)}
+                                        disabled={form.processing}
+                                        placeholder="6"
+                                    />
+                                </Field>
+                            )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                            Price of 0 or blank = free enrollment. Coupon codes can be added after the course is created.
+                        </p>
+                    </div>
+
                     <div className="flex items-center justify-end gap-3 border-t border-sidebar-border pt-4">
                         <Button
                             type="button"
@@ -153,6 +223,24 @@ export default function CourseCreate({ categories, difficulties }: Props) {
                 </form>
             </div>
         </AppLayout>
+    );
+}
+
+function Select({
+    options,
+    ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement> & { options: SelectOption[] }) {
+    return (
+        <select
+            {...props}
+            className="border-input bg-background ring-offset-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        >
+            {options.map((o) => (
+                <option key={o.value} value={o.value}>
+                    {o.label}
+                </option>
+            ))}
+        </select>
     );
 }
 

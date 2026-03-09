@@ -29,6 +29,11 @@ class Course extends Model
         'thumbnail',
         'status',
         'is_featured',
+        'price',
+        'currency',
+        'billing_type',
+        'subscription_duration_months',
+        'paypal_plan_id',
     ];
 
     /** @return array<string, string> */
@@ -39,6 +44,8 @@ class Course extends Model
             'status' => CourseStatus::class,
             'is_featured' => 'boolean',
             'is_free' => 'boolean',
+            'price' => 'decimal:2',
+            'subscription_duration_months' => 'integer',
         ];
     }
 
@@ -60,7 +67,7 @@ class Course extends Model
         return $this->hasMany(Module::class)->orderBy('order');
     }
 
-    /** @return HasManyThrough<Resource, Module, $this> */
+    /** @return HasManyThrough<resource, Module, $this> */
     public function resources(): HasManyThrough
     {
         return $this->hasManyThrough(Resource::class, Module::class);
@@ -70,6 +77,43 @@ class Course extends Model
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);
+    }
+
+    /** @return HasMany<Payment, $this> */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /** @return HasMany<CouponCode, $this> */
+    public function couponCodes(): HasMany
+    {
+        return $this->hasMany(CouponCode::class);
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->price !== null && (float) $this->price > 0;
+    }
+
+    public function isSubscription(): bool
+    {
+        return $this->billing_type === 'subscription';
+    }
+
+    /** Human-readable price string, e.g. "$29.00" or "$9.99/mo". */
+    public function formattedPrice(): ?string
+    {
+        if (! $this->isPaid()) {
+            return null;
+        }
+
+        $amount = number_format((float) $this->price, 2);
+        $symbol = $this->currency === 'USD' ? '$' : $this->currency.' ';
+
+        return $this->isSubscription()
+            ? "{$symbol}{$amount}/month"
+            : "{$symbol}{$amount}";
     }
 
     public function getRouteKeyName(): string
@@ -86,6 +130,7 @@ class Course extends Model
         if (! $model && is_numeric($value)) {
             $model = $this->where('id', $value)->first();
         }
+
         return $model ? $model : abort(404);
     }
 

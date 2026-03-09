@@ -49,8 +49,10 @@ class HandleInertiaRequests extends Middleware
             'ui' => fn () => trans('ui'),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
-                'error'   => fn () => $request->session()->get('error'),
+                'error' => fn () => $request->session()->get('error'),
+                'chat_merged' => fn () => $request->session()->get('chat_merged'),
             ],
+            'paypalClientId' => config('services.paypal.client_id'),
         ];
     }
 }
