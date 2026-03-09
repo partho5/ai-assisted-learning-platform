@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AiHelpController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
@@ -67,6 +68,19 @@ Route::prefix('{locale}')
         // Course learn page — public for free resources, auth handled in controller
         Route::get('courses/{course}/learn/{resource}', [LearnController::class, 'show'])
             ->name('learn.show');
+
+        // AI Chat — platform, course, and resource assistants (all public, auth optional)
+        Route::post('chat/platform', [AiChatController::class, 'platform'])
+            ->middleware('throttle:15,1')
+            ->name('chat.platform');
+
+        Route::post('courses/{course}/chat', [AiChatController::class, 'course'])
+            ->middleware('throttle:15,1')
+            ->name('chat.course');
+
+        Route::post('courses/{course}/learn/{resource}/chat', [AiChatController::class, 'resource'])
+            ->middleware('throttle:20,1')
+            ->name('chat.resource');
 
         // Learning experience — auth-required interactions
         Route::middleware(['auth', 'verified'])->group(function () {

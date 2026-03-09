@@ -9,13 +9,15 @@ use RuntimeException;
 class OpenAiProvider implements AiProvider
 {
     private string $apiKey;
+
     private string $model;
+
     private string $endpoint = 'https://api.openai.com/v1/chat/completions';
 
     public function __construct()
     {
-        $this->apiKey = config('services.openai.key', '');
-        $this->model = config('services.openai.model', 'gpt-4o-mini');
+        $this->apiKey = (string) config('services.openai.key', '');
+        $this->model = (string) config('services.openai.model', 'gpt-4o-mini');
     }
 
     /**
@@ -92,5 +94,62 @@ PROMPT;
         }
 
         return $response->json('choices.0.message.content', 'I am not able to provide a hint right now. Please try again.');
+    }
+
+    /**
+     * @param  array<int, array{role: 'user'|'assistant', content: string}>  $history
+     */
+    public function streamChat(string $systemPrompt, array $history, callable $onChunk, string $model = 'gpt-4o-mini'): void
+    {
+        $messages = array_merge(
+            [['role' => 'system', 'content' => $systemPrompt]],
+            $history,
+        );
+
+        $response = Http::withToken($this->apiKey)
+            ->withOptions(['stream' => true])
+            ->timeout(120)
+            ->post($this->endpoint, [
+                'model' => $model,
+                'messages' => $messages,
+                'stream' => true,
+            ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('AI chat stream failed: '.$response->body());
+        }
+
+        $body = $response->getBody();
+
+        while (! $body->eof()) {
+            $line = '';
+
+            while (! $body->eof()) {
+                $char = $body->read(1);
+                if ($char === "\n") {
+                    break;
+                }
+                $line .= $char;
+            }
+
+            $line = trim($line);
+
+            if (! str_starts_with($line, 'data: ')) {
+                continue;
+            }
+
+            $data = substr($line, 6);
+
+            if ($data === '[DONE]') {
+                break;
+            }
+
+            $chunk = json_decode($data, true);
+            $content = $chunk['choices'][0]['delta']['content'] ?? null;
+
+            if ($content !== null) {
+                $onChunk($content);
+            }
+        }
     }
 }

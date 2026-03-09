@@ -1,5 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { store as enrollStore } from '@/actions/App/Http/Controllers/EnrollmentController';
+import { course as courseChatAction } from '@/actions/App/Http/Controllers/AiChatController';
+import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -37,8 +39,16 @@ export default function CourseShow({ course, enrollment }: Props) {
         router.post(enrollStore.url({ locale: l, course: course.slug }));
     }
 
+    const chatContext = {
+        type: 'course' as const,
+        key: `course-${course.id}`,
+        label: course.title,
+        endpoint: courseChatAction.url({ locale: l, course: course.slug }),
+        locale: l,
+    };
+
     return (
-        <PublicLayout>
+        <PublicLayout hidePlatformChat>
             <Head title={course.title}>
                 <meta name="description" content={course.description} />
             </Head>
@@ -334,6 +344,7 @@ export default function CourseShow({ course, enrollment }: Props) {
                     </aside>
                 </div>
             </div>
+            <FloatingChatButton context={chatContext} />
         </PublicLayout>
     );
 }

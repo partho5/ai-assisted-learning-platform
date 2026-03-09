@@ -15,4 +15,11 @@ interface AiProvider
      * Provide a Socratic hint for a learner without revealing the answer.
      */
     public function hint(string $questionBody, string $answerDraft): string;
+
+    /**
+     * Stream a chat response chunk by chunk via a callback.
+     *
+     * @param  array<int, array{role: 'user'|'assistant', content: string}>  $history
+     */
+    public function streamChat(string $systemPrompt, array $history, callable $onChunk, string $model = 'gpt-4o-mini'): void;
 }

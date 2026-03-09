@@ -1,11 +1,13 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { resource as resourceChatAction } from '@/actions/App/Http/Controllers/AiChatController';
 import { complete as markComplete } from '@/actions/App/Http/Controllers/ResourceCompletionController';
 import {
     store as startAttempt,
     saveAnswers,
     submit as submitAttempt,
 } from '@/actions/App/Http/Controllers/TestAttemptController';
+import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import RichHtml from '@/components/rich-html';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -417,16 +419,34 @@ function ResourceBlock({
             <div className="mb-4">
                 <h2 className="text-lg font-bold">{resource.title}</h2>
                 {resource.estimated_time && (
-                    <p className="mt-0.5 text-sm text-muted-foreground">~{resource.estimated_time} min</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
+                        ~{resource.estimated_time} min
+                    </p>
                 )}
             </div>
+
+            {resource.why_this_resource && !isAssignment && (
+                <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+                    <span className="mb-1 block font-medium">
+                        Why this resource:
+                    </span>
+                    <RichHtml
+                        content={resource.why_this_resource}
+                        className="text-sm text-muted-foreground"
+                    />
+                </div>
+            )}
 
             {/* Observer locked overlay */}
             {isObserverLocked ? (
                 <div className="rounded-xl border border-border bg-muted/30 p-8 text-center">
                     <div className="mb-2 text-3xl">🔒</div>
-                    <p className="text-sm font-medium">This lesson requires full access</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Upgrade your enrollment to unlock all lessons.</p>
+                    <p className="text-sm font-medium">
+                        This lesson requires full access
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        Upgrade your enrollment to unlock all lessons.
+                    </p>
                 </div>
             ) : (
                 <>
@@ -437,45 +457,49 @@ function ResourceBlock({
                         </div>
                     )}
 
-                    {resource.why_this_resource && !isAssignment && (
-                        <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
-                            <span className="mb-1 block font-medium">Why this resource:</span>
-                            <RichHtml content={resource.why_this_resource} className="text-sm text-muted-foreground" />
-                        </div>
-                    )}
-
-                    {resource.mentor_note && (
-                        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/30">
-                            <span className="font-medium">Mentor note: </span>
-                            {resource.mentor_note}
-                        </div>
-                    )}
-
                     {/* Test / assignment — enrolled only */}
                     {hasTest && enrollment && (
                         <div className="mt-4 space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="font-semibold">{isAssignment ? 'Assignment' : 'Self-Check'}</h3>
+                                <h3 className="font-semibold">
+                                    {isAssignment ? 'Assignment' : 'Self-Check'}
+                                </h3>
                                 {isCompleted && <Badge>Endorsed ✓</Badge>}
-                                {!isCompleted && isSubmitted && <Badge variant="secondary">Submitted</Badge>}
+                                {!isCompleted && isSubmitted && (
+                                    <Badge variant="secondary">Submitted</Badge>
+                                )}
                             </div>
 
                             {resource.previousAttempts.length > 0 && (
                                 <div className="rounded-lg border border-border bg-card p-3">
-                                    <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                    <p className="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
                                         Previous Attempts
                                     </p>
                                     <div className="space-y-1">
                                         {resource.previousAttempts.map((pa) => (
-                                            <div key={pa.id} className="flex items-center justify-between text-sm">
-                                                <span>Attempt #{pa.attempt_number}</span>
+                                            <div
+                                                key={pa.id}
+                                                className="flex items-center justify-between text-sm"
+                                            >
+                                                <span>
+                                                    Attempt #{pa.attempt_number}
+                                                </span>
                                                 <div className="flex items-center gap-2">
-                                                    {pa.score !== null && <span>{pa.score}%</span>}
-                                                    <Badge variant="secondary" className="text-xs capitalize">
+                                                    {pa.score !== null && (
+                                                        <span>{pa.score}%</span>
+                                                    )}
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="text-xs capitalize"
+                                                    >
                                                         {pa.status}
                                                     </Badge>
                                                     <button
-                                                        onClick={() => router.get(`/${locale}/test-attempts/${pa.id}/result`)}
+                                                        onClick={() =>
+                                                            router.get(
+                                                                `/${locale}/test-attempts/${pa.id}/result`,
+                                                            )
+                                                        }
                                                         className="text-xs text-primary hover:underline"
                                                     >
                                                         View
@@ -488,7 +512,11 @@ function ResourceBlock({
                             )}
 
                             {!isCompleted && (
-                                <TestForm resource={resource} courseSlug={courseSlug} locale={locale} />
+                                <TestForm
+                                    resource={resource}
+                                    courseSlug={courseSlug}
+                                    locale={locale}
+                                />
                             )}
                         </div>
                     )}
@@ -496,7 +524,9 @@ function ResourceBlock({
                     {/* Mark complete — non-test, enrolled */}
                     {!hasTest && enrollment && !isCompleted && (
                         <div className="mt-5 flex justify-end">
-                            <Button onClick={handleMarkComplete}>Mark as Complete</Button>
+                            <Button onClick={handleMarkComplete}>
+                                Mark as Complete
+                            </Button>
                         </div>
                     )}
                     {!hasTest && enrollment && isCompleted && (
@@ -505,6 +535,13 @@ function ResourceBlock({
                         </div>
                     )}
                 </>
+            )}
+
+            {resource.mentor_note && (
+                <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/30">
+                    <span className="font-medium">Mentor note: </span>
+                    {resource.mentor_note}
+                </div>
             )}
         </div>
     );
@@ -535,6 +572,18 @@ export default function Learn({ course, initialResourceId, resources, enrollment
 
     // Scroll tracking state
     const [activeResourceId, setActiveResourceId] = useState(initialResourceId);
+    const activeResource = useMemo(
+        () => resources.find((r) => r.id === activeResourceId) ?? resources[0],
+        [activeResourceId, resources],
+    );
+    const chatContext = useMemo(() => ({
+        type: 'resource' as const,
+        key: `resource-${activeResourceId}`,
+        label: activeResource?.title,
+        resourceType: typeof activeResource?.type === 'string' ? activeResource.type : (activeResource?.type as { value?: string })?.value ?? 'text',
+        endpoint: resourceChatAction.url({ locale: l, course: course.slug, resource: activeResourceId }),
+        locale: l,
+    }), [activeResourceId, activeResource, l, course.slug]);
     const mainRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const resourceRefs = useRef<Map<number, HTMLElement>>(new Map());
@@ -787,17 +836,19 @@ export default function Learn({ course, initialResourceId, resources, enrollment
 
     if (isGuest) {
         return (
-            <PublicLayout>
+            <PublicLayout hidePlatformChat>
                 <Head title={`${course.title} — Learn`} />
                 {inner}
+                <FloatingChatButton context={chatContext} />
             </PublicLayout>
         );
     }
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs} hidePlatformChat>
             <Head title={`${course.title} — Learn`} />
             {inner}
+            <FloatingChatButton context={chatContext} />
         </AppLayout>
     );
 }

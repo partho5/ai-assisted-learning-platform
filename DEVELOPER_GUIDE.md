@@ -529,6 +529,81 @@ php artisan route:list
 
 ---
 
+## AI Chatbot Module
+
+The platform has an AI assistant that appears as a floating button on every page. Its behaviour is context-aware — the system prompt changes depending on which page the user is on.
+
+### How context is wired
+
+| Page | Chat type | Backend class | Route |
+|---|---|---|---|
+| All other pages | `platform` | `PlatformChatContext` | `POST /{locale}/chat/platform` |
+| Course show page | `course` | `CourseChatContext` | `POST /{locale}/courses/{course}/chat` |
+| Learn page | `resource` | `ResourceChatContext` | `POST /{locale}/courses/{course}/learn/{resource}/chat` |
+
+On the learn page the active resource changes as the user scrolls. The frontend tracks `activeResourceId` and recomputes the `chatContext` (`endpoint` + `key`) in a `useMemo`, so the correct resource context is always sent without any page navigation.
+
+### User context injection
+
+Every system prompt receives one injected line built server-side by `ChatContextMeta::toContextLine()`:
+
+```
+User: authenticated. Tier: paid. Course access: full.
+```
+
+`AiChatController::buildContextMeta()` resolves all three values from `$request->user()` and the enrollment record — the client never sends this; it is always trusted from the server.
+
+### How to inject new context in future
+
+**Step 1 — Add a field to `ChatContextMeta`** ([app/AiChat/ChatContextMeta.php](app/AiChat/ChatContextMeta.php)):
+
+```php
+readonly class ChatContextMeta
+{
+    public function __construct(
+        public string $authStatus,
+        public string $userTier,
+        public string $courseAccess = 'none',
+        public string $myNewField = 'default',  // ← add here
+    ) {}
+}
+```
+
+**Step 2 — Populate it in `buildContextMeta()`** ([app/Http/Controllers/AiChatController.php](app/Http/Controllers/AiChatController.php)):
+
+```php
+return new ChatContextMeta(
+    authStatus: $authStatus,
+    userTier: $userTier,
+    courseAccess: $courseAccess,
+    myNewField: $resolvedValue,  // ← populate here
+);
+```
+
+**Step 3a — Expose it in the shared context line** (if it should appear in all prompts):
+
+```php
+// In ChatContextMeta::toContextLine():
+$line .= " My field: {$this->myNewField}.";
+```
+
+**Step 3b — Or use it only in a specific context class** (if it only makes sense for one prompt type):
+
+```php
+// In ResourceChatContext::buildSystemPrompt():
+$lines[] = "Learner's current score: {$meta->myNewField}";
+```
+
+### Adding a new chat scope (e.g. a portfolio page assistant)
+
+1. Create `app/AiChat/PortfolioChatContext.php` — static `buildSystemPrompt(User $profile, ChatContextMeta $meta): string`
+2. Add `portfolio()` action to `AiChatController`, call `buildContextMeta()` and the new context class
+3. Register route: `Route::post('u/{username}/chat', [AiChatController::class, 'portfolio'])->name('chat.portfolio')`
+4. Run `php artisan wayfinder:generate --no-interaction`
+5. In the frontend page, import the Wayfinder action, build a `ChatContext` with `type: 'portfolio'` (add it to the union in `use-chat.ts`), and pass it to `<FloatingChatButton>`
+
+---
+
 ## Documentation Files
 
 - **`CLAUDE.md`** — AI assistant guidelines (do not edit)

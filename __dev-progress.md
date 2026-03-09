@@ -87,6 +87,31 @@
 
 ---
 
+## ✅ Part 8 Pre-Addendum — AI Chat Context Engineering (Complete)
+
+### Context Architecture
+- `ChatContextMeta` DTO (`app/AiChat/ChatContextMeta.php`) — carries `authStatus`, `userTier`, `courseAccess`
+- Every system prompt now injects one context line: `User: authenticated. Tier: paid. Course access: full.`
+- New `CourseChatContext` for the course show page — includes title, description, what_you_will_learn, prerequisites, module list
+- `PlatformChatContext` + `ResourceChatContext` updated to accept `ChatContextMeta`
+- `AiChatController::buildContextMeta()` resolves all context server-side (no client trust needed)
+
+### New Route
+- `POST /{locale}/courses/{course}/chat` → `AiChatController::course` (throttle:15/min, public)
+
+### Frontend
+- `ChatContext.type` union: `'platform' | 'course' | 'resource'`
+- `courses/show.tsx` — course-specific `FloatingChatButton`, `hidePlatformChat` on layout
+- `chat-panel.tsx` — empty state copy for `course` type
+
+### Extensibility hook
+- Add `courseAccess` field to `ChatContextMeta` — already present for course/resource contexts
+- To inject more context later: add fields to `ChatContextMeta` and call `toContextLine()` or extend it
+
+**Tests**: 14 passing in `AiChatTest` (4 new course chat tests) | **Build**: ✓ | **Last Updated**: 2026-03-09
+
+---
+
 ## 🟡 Part 8 — Rich Text & Visual Polish (In Progress)
 
 ### TipTap Editor Integration ✓

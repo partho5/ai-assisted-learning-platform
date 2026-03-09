@@ -30,7 +30,7 @@ export default function Login({
             <Head title="Log in" />
 
             <Form
-                {...store.form()}
+                action={store()}
                 resetOnSuccess={['password']}
                 className="flex flex-col gap-6"
             >
