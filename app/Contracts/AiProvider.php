@@ -22,4 +22,12 @@ interface AiProvider
      * @param  array<int, array{role: 'user'|'assistant', content: string}>  $history
      */
     public function streamChat(string $systemPrompt, array $history, callable $onChunk, string $model = 'gpt-4o-mini'): void;
+
+    /**
+     * Generate a 512-dimension embedding vector for the given text.
+     * Results are cached by content hash + model name (TTL 24h) to avoid redundant API calls.
+     *
+     * @return float[]
+     */
+    public function embed(string $text): array;
 }

@@ -14,12 +14,17 @@ use App\Http\Requests\AiChatRequest;
 use App\Models\ChatSession;
 use App\Models\Course;
 use App\Models\Resource;
+use App\Services\RagRetriever;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AiChatController extends Controller
 {
-    public function __construct(private readonly AiProvider $ai) {}
+    public function __construct(
+        private readonly AiProvider $ai,
+        private readonly RagRetriever $rag,
+    ) {}
 
     /**
      * Platform assistant — available to all visitors, no auth required.
@@ -28,15 +33,21 @@ class AiChatController extends Controller
     {
         $meta = $this->buildContextMeta($request);
         $courses = $request->validated('courses', []) ?? [];
+        $message = $request->validated('message');
 
-        $systemPrompt = ! empty($courses)
-            ? CoursesListChatContext::buildSystemPrompt($courses, $meta)
-            : PlatformChatContext::buildSystemPrompt($meta);
+        // Courses list page uses its own context builder — no RAG needed (data already in prompt)
+        if (! empty($courses)) {
+            $systemPrompt = CoursesListChatContext::buildSystemPrompt($courses, $meta);
+        } else {
+            $ragResult = $this->rag->retrieve($message, null, null);
+            $chunks = $this->chunksFromResult($ragResult);
+            $systemPrompt = PlatformChatContext::buildSystemPrompt($meta, $chunks);
+        }
 
         $session = $this->resolveSession($request, 'platform');
         $history = $this->buildHistory($request);
 
-        return $this->stream($this->ai, $systemPrompt, $history, $session, $request->validated('message'));
+        return $this->stream($this->ai, $systemPrompt, $history, $session, $message);
     }
 
     /**
@@ -46,12 +57,16 @@ class AiChatController extends Controller
     {
         $course->load('modules.resources');
         $meta = $this->buildContextMeta($request, $course);
-        $systemPrompt = CourseChatContext::buildSystemPrompt($course, $meta);
+        $message = $request->validated('message');
+
+        $ragResult = $this->rag->retrieve($message, 'course', $course->id);
+        $chunks = $this->chunksFromResult($ragResult);
+        $systemPrompt = CourseChatContext::buildSystemPrompt($course, $meta, $chunks);
 
         $session = $this->resolveSession($request, 'course');
         $history = $this->buildHistory($request);
 
-        return $this->stream($this->ai, $systemPrompt, $history, $session, $request->validated('message'));
+        return $this->stream($this->ai, $systemPrompt, $history, $session, $message);
     }
 
     /**
@@ -61,12 +76,42 @@ class AiChatController extends Controller
     {
         $resource->load('module');
         $meta = $this->buildContextMeta($request, $course);
-        $systemPrompt = ResourceChatContext::buildSystemPrompt($resource, $course, $meta);
+        $message = $request->validated('message');
+
+        $ragResult = $this->rag->retrieve($message, 'resource', $resource->id);
+
+        // If resource-scoped retrieval returns nothing, fall back to course-scoped
+        if ($ragResult['type'] === 'none') {
+            $ragResult = $this->rag->retrieve($message, 'course', $course->id);
+        }
+
+        $chunks = $this->chunksFromResult($ragResult);
+        $systemPrompt = ResourceChatContext::buildSystemPrompt($resource, $course, $meta, $chunks);
 
         $session = $this->resolveSession($request, 'resource');
         $history = $this->buildHistory($request);
 
-        return $this->stream($this->ai, $systemPrompt, $history, $session, $request->validated('message'));
+        return $this->stream($this->ai, $systemPrompt, $history, $session, $message);
+    }
+
+    /**
+     * Extract chunk collection from a RAG result, or null for FAQ hits (handled separately).
+     */
+    private function chunksFromResult(array $ragResult): ?Collection
+    {
+        if ($ragResult['type'] === 'faq') {
+            // FAQ answers bypass the LLM entirely — return null to skip chunk injection
+            // Note: FAQ interception before stream() would be the ideal place; for now,
+            // return an empty collection so the prompt signals "no extra knowledge".
+            return collect();
+        }
+
+        if (isset($ragResult['chunks'])) {
+            return $ragResult['chunks'];
+        }
+
+        // type === 'none'
+        return collect();
     }
 
     /**

@@ -213,6 +213,12 @@ class AiChatTest extends TestCase
             {
                 $onChunk($this->reply);
             }
+
+            /** @return float[] */
+            public function embed(string $text): array
+            {
+                return array_fill(0, 512, 0.1);
+            }
         });
     }
 }

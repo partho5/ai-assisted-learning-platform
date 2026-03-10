@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\AiProvider;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -13,6 +14,10 @@ class OpenAiProvider implements AiProvider
     private string $model;
 
     private string $endpoint = 'https://api.openai.com/v1/chat/completions';
+
+    private string $embeddingModel = 'text-embedding-3-small';
+
+    private int $embeddingDimensions = 512;
 
     public function __construct()
     {
@@ -151,5 +156,36 @@ PROMPT;
                 $onChunk($content);
             }
         }
+    }
+
+    /**
+     * Generate a 512-dimension embedding vector for the given text.
+     *
+     * Cache key = SHA-256(text) + model name — avoids redundant API calls for identical
+     * content (e.g. same question asked by 10 users = 1 API call). TTL: 24 hours.
+     * Cache key includes model name so stale vectors are never served after a model change.
+     *
+     * @return float[]
+     */
+    public function embed(string $text): array
+    {
+        $cacheKey = 'embed:'.hash('sha256', $text).':'.$this->embeddingModel.':'.$this->embeddingDimensions;
+
+        /** @var float[] */
+        return Cache::remember($cacheKey, now()->addHours(24), function () use ($text): array {
+            $response = Http::withToken($this->apiKey)
+                ->timeout(30)
+                ->post('https://api.openai.com/v1/embeddings', [
+                    'model' => $this->embeddingModel,
+                    'input' => $text,
+                    'dimensions' => $this->embeddingDimensions,
+                ]);
+
+            if (! $response->successful()) {
+                throw new RuntimeException('Embedding API failed: '.$response->body());
+            }
+
+            return $response->json('data.0.embedding', []);
+        });
     }
 }

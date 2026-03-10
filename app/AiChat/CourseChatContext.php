@@ -3,10 +3,11 @@
 namespace App\AiChat;
 
 use App\Models\Course;
+use Illuminate\Support\Collection;
 
 class CourseChatContext
 {
-    public static function buildSystemPrompt(Course $course, ChatContextMeta $meta): string
+    public static function buildSystemPrompt(Course $course, ChatContextMeta $meta, ?Collection $chunks = null): string
     {
         $appName = config('app.name', 'SkillEvidence');
 
@@ -42,6 +43,18 @@ class CourseChatContext
                 $count = $module->resources->count();
                 $noun = $count === 1 ? 'resource' : 'resources';
                 $lines[] = "- {$module->title} ({$count} {$noun})";
+            }
+        }
+
+        // RAG-retrieved chunks specific to this course
+        if ($chunks && $chunks->isNotEmpty()) {
+            $lines[] = '';
+            $lines[] = '## Retrieved Course Knowledge';
+            $lines[] = 'Use the following retrieved content to answer specific questions about this course.';
+            foreach ($chunks as $chunk) {
+                $lines[] = '';
+                $lines[] = '---';
+                $lines[] = trim($chunk->chunk_text);
             }
         }
 

@@ -4,10 +4,11 @@ namespace App\AiChat;
 
 use App\Models\Course;
 use App\Models\Resource;
+use Illuminate\Support\Collection;
 
 class ResourceChatContext
 {
-    public static function buildSystemPrompt(Resource $resource, Course $course, ChatContextMeta $meta): string
+    public static function buildSystemPrompt(Resource $resource, Course $course, ChatContextMeta $meta, ?Collection $chunks = null): string
     {
         $appName = config('app.name', 'SkillEvidence');
         $resourceType = $resource->type instanceof \App\Enums\ResourceType
@@ -33,9 +34,22 @@ class ResourceChatContext
             $lines[] = "Mentor note: {$resource->mentor_note}";
         }
 
-        if ($resourceType === 'text' && $resource->content) {
+        // RAG-retrieved chunks replace the old hardcoded 3000-char content dump.
+        // Only the most relevant sections are retrieved — saves tokens on every call.
+        if ($chunks && $chunks->isNotEmpty()) {
+            $lines[] = '';
+            $lines[] = '## Relevant Content';
+            $lines[] = 'Answer questions using ONLY the following retrieved content from this resource and course.';
+            $lines[] = 'For general learning questions or clarifications, you may draw on your own knowledge.';
+            foreach ($chunks as $chunk) {
+                $lines[] = '';
+                $lines[] = '---';
+                $lines[] = trim($chunk->chunk_text);
+            }
+        } elseif ($resourceType === 'text' && $resource->content) {
+            // Fallback: resource not yet indexed — use direct content (graceful degradation)
             $plainText = strip_tags($resource->content);
-            $plainText = preg_replace('/\s+/', ' ', $plainText);
+            $plainText = preg_replace('/\s+/', ' ', $plainText) ?? $plainText;
             $plainText = trim(mb_substr($plainText, 0, 3000));
             $lines[] = '';
             $lines[] = '## Resource Content';
