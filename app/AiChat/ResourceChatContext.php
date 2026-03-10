@@ -20,11 +20,19 @@ class ResourceChatContext
             '',
             '## User Context',
             $meta->toContextLine(),
-            '',
-            '## Current Learning Context',
-            "Course: {$course->title}",
-            "Resource: {$resource->title} ({$resourceType})",
         ];
+
+        // Progress snapshot scoped to this course — single extension point for future signals
+        $progressSection = $meta->progress?->toPromptSection($course->title);
+        if ($progressSection) {
+            $lines[] = '';
+            $lines[] = $progressSection;
+        }
+
+        $lines[] = '';
+        $lines[] = '## Current Learning Context';
+        $lines[] = "Course: {$course->title}";
+        $lines[] = "Resource: {$resource->title} ({$resourceType})";
 
         if ($resource->why_this_resource) {
             $lines[] = "Why this resource: {$resource->why_this_resource}";

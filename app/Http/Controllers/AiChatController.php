@@ -7,6 +7,7 @@ use App\AiChat\CourseChatContext;
 use App\AiChat\CoursesListChatContext;
 use App\AiChat\PlatformChatContext;
 use App\AiChat\ResourceChatContext;
+use App\AiChat\UserProgressSummary;
 use App\Contracts\AiProvider;
 use App\Enums\EnrollmentAccess;
 use App\Enums\UserTier;
@@ -195,7 +196,10 @@ class AiChatController extends Controller
             };
         }
 
-        return new ChatContextMeta($authStatus, $userTier, $courseAccess);
+        // Load progress snapshot for authenticated users only — null for guests (no DB cost)
+        $progress = $user ? UserProgressSummary::forUser($user, $course) : null;
+
+        return new ChatContextMeta($authStatus, $userTier, $courseAccess, $progress);
     }
 
     /**

@@ -11,6 +11,8 @@ readonly class ChatContextMeta
         public string $userTier,
         /** none | observer | full — only relevant when a course is in context */
         public string $courseAccess = 'none',
+        /** Null for guests — no progress context injected */
+        public ?UserProgressSummary $progress = null,
     ) {}
 
     /**

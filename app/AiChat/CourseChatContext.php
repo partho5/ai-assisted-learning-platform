@@ -16,10 +16,18 @@ class CourseChatContext
             '',
             '## User Context',
             $meta->toContextLine(),
-            '',
-            '## Course Being Viewed',
-            "Title: {$course->title}",
         ];
+
+        // Progress snapshot scoped to this course — single extension point for future signals
+        $progressSection = $meta->progress?->toPromptSection($course->title);
+        if ($progressSection) {
+            $lines[] = '';
+            $lines[] = $progressSection;
+        }
+
+        $lines[] = '';
+        $lines[] = '## Course Being Viewed';
+        $lines[] = "Title: {$course->title}";
 
         if ($course->description) {
             $plain = trim(mb_substr(preg_replace('/\s+/', ' ', strip_tags($course->description)), 0, 500));
