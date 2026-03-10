@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Enums\EnrollmentAccess;
+use App\Models\ChatMessage;
+use App\Models\ChatSession;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\User;
@@ -188,6 +190,54 @@ class DashboardTest extends TestCase
                 ->has('stats')
                 ->has('recentUsers')
                 ->has('recentCourses')
+                ->has('recentChatSessions')
+                ->where('stats.total_chat_sessions', 0)
+                ->where('stats.chat_messages_today', 0)
+            );
+    }
+
+    public function test_admin_dashboard_includes_chat_session_data(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $learner = User::factory()->create();
+
+        $session = ChatSession::factory()->forUser($learner)->create(['context_type' => 'platform', 'context_key' => 'platform', 'created_at' => now()->subMinutes(5)]);
+        ChatMessage::factory()->create(['chat_session_id' => $session->id, 'role' => 'user', 'content' => 'What courses are available?']);
+        ChatMessage::factory()->create(['chat_session_id' => $session->id, 'role' => 'assistant', 'content' => 'We have many great courses!']);
+
+        $guestSession = ChatSession::factory()->create(['context_type' => 'course', 'context_key' => 'course:1', 'created_at' => now()]);
+        ChatMessage::factory()->create(['chat_session_id' => $guestSession->id, 'role' => 'user', 'content' => 'Tell me about this course.']);
+
+        $this->actingAs($admin)
+            ->get($this->adminDashboardRoute())
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('admin/dashboard')
+                ->has('recentChatSessions', 2)
+                ->where('stats.total_chat_sessions', 2)
+                ->where('recentChatSessions.0.identity.type', 'guest')
+                ->where('recentChatSessions.1.identity.type', 'user')
+                ->where('recentChatSessions.1.identity.name', $learner->name)
+                ->where('recentChatSessions.1.messages_count', 2)
+                ->where('recentChatSessions.1.first_question', 'What courses are available?')
+            );
+    }
+
+    public function test_admin_dashboard_chat_messages_today_counts_only_user_messages_from_today(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $session = ChatSession::factory()->create();
+
+        ChatMessage::factory()->create(['chat_session_id' => $session->id, 'role' => 'user']);
+        ChatMessage::factory()->create(['chat_session_id' => $session->id, 'role' => 'assistant']);
+        // Old message — should not count
+        ChatMessage::factory()->create(['chat_session_id' => $session->id, 'role' => 'user', 'created_at' => now()->subDays(2)]);
+
+        $this->actingAs($admin)
+            ->get($this->adminDashboardRoute())
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('stats.chat_messages_today', 1)
             );
     }
 }

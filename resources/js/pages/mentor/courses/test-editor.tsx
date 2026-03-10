@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Course, CourseModule, CourseResource, Test, TestQuestion, TestQuestionOption } from '@/types';
 
@@ -41,6 +42,18 @@ const QUESTION_TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPES_WITH_OPTIONS = ['multiple_choice', 'checkboxes', 'dropdown'];
+
+// ─── Info tooltip icon ────────────────────────────────────────────────────────
+function InfoTip({ text }: { text: string }) {
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <span className="ml-1.5 inline-flex cursor-default items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground w-4.5 h-4.5 leading-none select-none">?</span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs text-sm">{text}</TooltipContent>
+        </Tooltip>
+    );
+}
 
 // ─── Shared select style ──────────────────────────────────────────────────────
 const SELECT_CLS =
@@ -306,7 +319,7 @@ function QuestionCard({
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-border text-[11px] font-semibold text-muted-foreground">
                     {index + 1}
                 </span>
-                <span className="flex-1 truncate text-sm font-medium">{question.body || 'Untitled question'}</span>
+                <span className="flex-1 truncate text-sm font-medium" title="Click to edit">{question.body || 'Untitled question'}</span>
                 <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <Badge variant="secondary" className="text-xs capitalize">{QUESTION_TYPE_LABELS[question.question_type]}</Badge>
                     <span className="text-xs font-medium text-muted-foreground">{question.points}pt</span>
@@ -366,7 +379,10 @@ function QuestionCard({
                         <FormSection title="Evaluation">
                             <div className="space-y-3">
                                 <div>
-                                    <Label className="text-xs">Method</Label>
+                                    <Label className="text-xs">
+                                        Method
+                                        <InfoTip text="Exact Match: learner must type the exact correct answer. Numeric: checks a number with an operator (e.g. ≥ 80). AI Graded: GPT scores the answer 0–100 based on your rubric." />
+                                    </Label>
                                     <select
                                         className={SELECT_CLS}
                                         value={form.data.evaluation_method}
@@ -395,7 +411,10 @@ function QuestionCard({
                                 )}
                                 {!isAiGraded && !hasOptions && (
                                     <div>
-                                        <Label className="text-xs">Correct Answer</Label>
+                                        <Label className="text-xs">
+                                            Correct Answer
+                                            <InfoTip text="For Exact Match: type the expected answer exactly. For Numeric: enter the target number (the operator is set above)." />
+                                        </Label>
                                         <Input
                                             className="mt-1 text-sm"
                                             value={form.data.correct_answer}
@@ -406,7 +425,10 @@ function QuestionCard({
                                 )}
                                 {isAiGraded && (
                                     <div>
-                                        <Label className="text-xs">AI Grading Rubric</Label>
+                                        <Label className="text-xs">
+                                            AI Grading Rubric
+                                            <InfoTip text="Write in % terms for best results. e.g. 'Score 100 if answer includes X and Y. Score 50 if only X. Score 0 if neither.' The AI returns 0–100 which is scaled to the question's points." />
+                                        </Label>
                                         <textarea
                                             rows={3}
                                             className={TEXTAREA_CLS}
@@ -423,7 +445,10 @@ function QuestionCard({
                         <FormSection title="Behaviour">
                             <div className="space-y-3">
                                 <div>
-                                    <Label className="text-xs">Hint (shown to learner on request)</Label>
+                                    <Label className="text-xs">
+                                        Hint (shown to learner on request)
+                                        <InfoTip text="Shown only when the learner clicks 'Show hint'. Keep it guiding, not revealing — e.g. 'Think about which library is best for statistical plots.'" />
+                                    </Label>
                                     <Input
                                         className="mt-1 text-sm"
                                         value={form.data.hint}
@@ -543,7 +568,7 @@ export default function TestEditor({ course, module, resource, test, questions }
 
                 {/* Questions */}
                 {test && (
-                    <div className="space-y-3">
+                    <div className="space-y-3 mb-48">
                         <div className="flex items-center justify-between">
                             <h2 className="font-semibold text-foreground">Questions</h2>
                             <Button size="compact" onClick={addQuestion}>+ Add Question</Button>

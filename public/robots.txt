@@ -1,2 +1,12 @@
 User-agent: *
-Disallow:
+Allow: /
+
+Disallow: /en/dashboard
+Disallow: /bn/dashboard
+Disallow: /en/admin/
+Disallow: /bn/admin/
+Disallow: /en/mentor/
+Disallow: /bn/mentor/
+Disallow: /settings/
+
+Sitemap: /sitemap.xml

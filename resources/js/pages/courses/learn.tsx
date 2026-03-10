@@ -144,7 +144,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
         return (
             <div className="rounded-lg border border-border bg-card p-5">
                 <div
-                    className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed"
+                    className="prose dark:prose-invert max-w-none text-base leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: resource.content || '' }}
                 />
             </div>
@@ -222,7 +222,7 @@ function QuestionField({
         return (
             <div className="space-y-2">
                 {question.options.map((opt) => (
-                    <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                    <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-base">
                         <input
                             type="radio"
                             name={`q-${question.id}`}
@@ -247,7 +247,7 @@ function QuestionField({
         return (
             <div className="space-y-2">
                 {question.options.map((opt) => (
-                    <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                    <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-base">
                         <input
                             type="checkbox"
                             checked={selected.includes(opt.id)}
@@ -265,7 +265,7 @@ function QuestionField({
         return (
             <textarea
                 rows={4}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-ring"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             />
@@ -362,15 +362,15 @@ function TestForm({
             {questions.map((question, index) => (
                 <div key={question.id} className="rounded-lg border border-border bg-card p-4">
                     <div className="mb-1 flex items-start justify-between gap-2">
-                        <Label className="text-sm font-medium leading-relaxed">
+                        <Label className="text-base font-medium leading-relaxed">
                             {index + 1}. {question.body}
                             {question.is_required && <span className="ml-1 text-destructive">*</span>}
                         </Label>
-                        <span className="shrink-0 text-xs text-muted-foreground">
+                        <span className="shrink-0 text-sm text-muted-foreground">
                             {question.points} pt{question.points !== 1 ? 's' : ''}
                         </span>
                     </div>
-                    {question.hint && <p className="mb-2 text-xs text-muted-foreground">{question.hint}</p>}
+                    {question.hint && <p className="mb-2 text-sm text-muted-foreground">{question.hint}</p>}
                     <QuestionField
                         question={question}
                         value={values[question.id] ?? ''}
@@ -418,22 +418,22 @@ function ResourceBlock({
         <div>
             {/* Resource header */}
             <div className="mb-4">
-                <h2 className="text-lg font-bold">{resource.title}</h2>
+                <h2 className="text-xl font-bold">{resource.title}</h2>
                 {resource.estimated_time && (
-                    <p className="mt-0.5 text-sm text-muted-foreground">
+                    <p className="mt-0.5 text-base text-muted-foreground">
                         ~{resource.estimated_time} min
                     </p>
                 )}
             </div>
 
             {resource.why_this_resource && !isAssignment && (
-                <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
+                <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-base text-muted-foreground">
                     <span className="mb-1 block font-medium">
                         Why this resource:
                     </span>
                     <RichHtml
                         content={resource.why_this_resource}
-                        className="text-sm text-muted-foreground"
+                        className="text-base text-muted-foreground"
                     />
                 </div>
             )}
@@ -462,7 +462,7 @@ function ResourceBlock({
                     {hasTest && enrollment && (
                         <div className="mt-4 space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="font-semibold">
+                                <h3 className="text-lg font-semibold">
                                     {isAssignment ? 'Assignment' : 'Self-Check'}
                                 </h3>
                                 {isCompleted && <Badge>Endorsed ✓</Badge>}
@@ -480,7 +480,7 @@ function ResourceBlock({
                                         {resource.previousAttempts.map((pa) => (
                                             <div
                                                 key={pa.id}
-                                                className="flex items-center justify-between text-sm"
+                                                className="flex items-center justify-between text-base"
                                             >
                                                 <span>
                                                     Attempt #{pa.attempt_number}

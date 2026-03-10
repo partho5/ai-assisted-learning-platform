@@ -78,12 +78,28 @@ interface Props {
 // ─── Component ─────────────────────────────────────────────────────────────
 export function FloatingChatButton({ context, className }: Props) {
     const [isOpen, setIsOpen] = useState(false);
+    const [isMinimized, setIsMinimized] = useState(false);
+
+    function handleClose() {
+        setIsOpen(false);
+        setIsMinimized(false);
+    }
+
+    function handleToggleMinimize() {
+        setIsMinimized((v) => !v);
+    }
 
     return (
         <>
             <style>{STYLES}</style>
 
-            <ChatPanel context={context} isOpen={isOpen} onClose={() => setIsOpen(false)} />
+            <ChatPanel
+                context={context}
+                isOpen={isOpen}
+                isMinimized={isMinimized}
+                onClose={handleClose}
+                onToggleMinimize={handleToggleMinimize}
+            />
 
             {/*
               Wrapper: fixed + overflow-hidden clips the oversized spinning
@@ -91,17 +107,16 @@ export function FloatingChatButton({ context, className }: Props) {
               p-[3px] = border thickness. box-shadow (ai-glow-pulse) is on the
               wrapper — not clipped by overflow-hidden, no scrollbar side effects.
             */}
-            <div
-                className={cn(
-                    'fixed bottom-6 right-6 z-50 rounded-full',
-                    'transition-transform duration-200 hover:scale-105 active:scale-95',
-                    !isOpen ? 'p-[3px] overflow-hidden ai-glow-pulse' : 'p-px',
-                    className,
-                )}
-                style={isOpen ? { border: '1.5px solid rgba(255,255,255,0.10)' } : undefined}
-            >
-                {/* Spinning conic-gradient — clipped by wrapper to form the border */}
-                {!isOpen && (
+            {(!isOpen || isMinimized) && (
+                <div
+                    className={cn(
+                        'fixed bottom-6 right-6 z-50 rounded-full',
+                        'transition-transform duration-200 hover:scale-105 active:scale-95',
+                        'p-[3px] overflow-hidden ai-glow-pulse',
+                        className,
+                    )}
+                >
+                    {/* Spinning conic-gradient — clipped by wrapper to form the border */}
                     <span
                         className="ai-border-spin pointer-events-none absolute rounded-full"
                         style={{
@@ -112,38 +127,25 @@ export function FloatingChatButton({ context, className }: Props) {
                         }}
                         aria-hidden="true"
                     />
-                )}
 
-                <button
-                    type="button"
-                    onClick={() => setIsOpen((v) => !v)}
-                    aria-label={isOpen ? 'Close AI assistant' : 'Open AI assistant'}
-                    className={cn(
-                        'relative flex items-center gap-2.5',
-                        'rounded-full px-4 py-2.5',
-                        'bg-[#060d08]',
-                        'text-sm font-semibold',
-                        isOpen ? 'text-red-400' : 'text-green-500',
-                    )}
-                >
-                    {isOpen ? (
-                        <span
-                            className="flex h-5 w-5 items-center justify-center rounded-md border border-red-500/40 text-xs text-red-400"
-                            aria-hidden="true"
-                        >
-                            ✕
-                        </span>
-                    ) : (
+                    <button
+                        type="button"
+                        onClick={() => { setIsOpen(true); setIsMinimized(false); }}
+                        aria-label="Open AI assistant"
+                        className={cn(
+                            'relative flex items-center gap-2.5',
+                            'rounded-full px-4 py-2.5',
+                            'bg-[#060d08]',
+                            'text-sm font-semibold text-green-500',
+                        )}
+                    >
                         <span className="ai-icon-wrap flex-shrink-0">
                             <SignalMindIcon size={20} />
                         </span>
-                    )}
-
-                    <span className="leading-none tracking-wide">
-                        {isOpen ? 'Close' : 'Ask AI'}
-                    </span>
-                </button>
-            </div>
+                        <span className="leading-none tracking-wide">Ask AI</span>
+                    </button>
+                </div>
+            )}
         </>
     );
 }

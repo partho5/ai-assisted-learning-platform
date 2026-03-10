@@ -14,7 +14,7 @@ const RESOURCE_SUGGESTIONS: Record<string, string[]> = {
 };
 
 interface Props {
-    contextType: 'platform' | 'resource';
+    contextType: 'platform' | 'course' | 'resource';
     resourceType?: string;
     onSelect: (text: string) => void;
 }

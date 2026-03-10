@@ -291,7 +291,7 @@ export default function CourseShow({ course, enrollment }: Props) {
                                                 </p>
                                             )}
                                             {course.mentor.bio && (
-                                                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                                                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
                                                     {course.mentor.bio}
                                                 </p>
                                             )}

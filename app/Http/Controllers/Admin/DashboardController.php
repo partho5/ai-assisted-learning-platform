@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\CourseStatus;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
+use App\Models\ChatMessage;
+use App\Models\ChatSession;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\User;
@@ -56,6 +58,34 @@ class DashboardController extends Controller
                 'created_at' => $course->created_at->toDateString(),
             ]);
 
+        $totalChatSessions = ChatSession::query()->count();
+        $chatMessagesToday = ChatMessage::query()
+            ->where('role', 'user')
+            ->whereDate('created_at', today())
+            ->count();
+
+        $recentChatSessions = ChatSession::query()
+            ->with([
+                'user:id,name,username',
+                'messages' => fn ($q) => $q->where('role', 'user')->oldest()->limit(1),
+            ])
+            ->withCount('messages')
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(fn (ChatSession $session) => [
+                'id' => $session->id,
+                'identity' => $session->user
+                    ? ['type' => 'user', 'name' => $session->user->name, 'username' => $session->user->username]
+                    : ['type' => 'guest', 'name' => 'Guest', 'username' => null],
+                'context_type' => $session->context_type,
+                'context_key' => $session->context_key,
+                'context_url' => $session->context_url,
+                'messages_count' => $session->messages_count,
+                'first_question' => $session->messages->first()?->content,
+                'last_activity' => $session->updated_at->diffForHumans(),
+            ]);
+
         return Inertia::render('admin/dashboard', [
             'stats' => [
                 'total_learners' => $totalLearners,
@@ -64,9 +94,12 @@ class DashboardController extends Controller
                 'draft_courses' => $draftCourses,
                 'total_enrollments' => $totalEnrollments,
                 'new_users_this_week' => $newUsersThisWeek,
+                'total_chat_sessions' => $totalChatSessions,
+                'chat_messages_today' => $chatMessagesToday,
             ],
             'recentUsers' => $recentUsers,
             'recentCourses' => $recentCourses,
+            'recentChatSessions' => $recentChatSessions,
         ]);
     }
 }

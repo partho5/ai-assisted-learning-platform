@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ChatSessionController as AdminChatSessionController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AiHelpController;
@@ -17,14 +18,18 @@ use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\ResourceCompletionController;
 use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\TestAttemptController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestQuestionController;
 use App\Http\Controllers\TestQuestionOptionController;
+use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Laravel\Fortify\Features;
+
+// Sitemap — outside locale prefix
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Redirect bare root to default locale
 Route::redirect('/', '/en');
@@ -34,11 +39,7 @@ Route::prefix('{locale}')
     ->where(['locale' => 'en|bn'])
     ->middleware('setlocale')
     ->group(function () {
-        Route::get('/', function () {
-            return Inertia::render('welcome', [
-                'canRegister' => Features::enabled(Features::registration()),
-            ]);
-        })->name('home');
+        Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
         Route::get('about-us', function () {
             return Inertia::render('about-us');
@@ -57,6 +58,11 @@ Route::prefix('{locale}')
         Route::get('admin/dashboard', [AdminDashboardController::class, 'index'])
             ->middleware(['auth', 'verified', 'role:admin'])
             ->name('admin.dashboard');
+
+        // Admin-only routes
+        Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+            Route::get('admin/chats/{chatSession}', [AdminChatSessionController::class, 'show'])->name('admin.chats.show');
+        });
 
         // Admin category management
         Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {

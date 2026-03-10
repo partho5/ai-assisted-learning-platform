@@ -1,5 +1,6 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { BookOpen, BookText, Users, UserPlus } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { show as showChatSession } from '@/actions/App/Http/Controllers/Admin/ChatSessionController';
+import { BookOpen, BookText, Users, UserPlus, MessageSquare, MessagesSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
@@ -31,12 +32,32 @@ interface Stats {
     draft_courses: number;
     total_enrollments: number;
     new_users_this_week: number;
+    total_chat_sessions: number;
+    chat_messages_today: number;
+}
+
+interface ChatIdentity {
+    type: 'user' | 'guest';
+    name: string;
+    username: string | null;
+}
+
+interface RecentChatSession {
+    id: number;
+    identity: ChatIdentity;
+    context_type: string;
+    context_key: string;
+    context_url: string;
+    messages_count: number;
+    first_question: string | null;
+    last_activity: string;
 }
 
 interface Props {
     stats: Stats;
     recentUsers: RecentUser[];
     recentCourses: RecentCourse[];
+    recentChatSessions: RecentChatSession[];
 }
 
 function StatCard({ label, value, icon: Icon }: { label: string; value: number; icon: React.ElementType }) {
@@ -59,7 +80,13 @@ const ROLE_VARIANT: Record<string, 'default' | 'secondary' | 'destructive'> = {
     learner: 'secondary',
 };
 
-export default function AdminDashboard({ stats, recentUsers, recentCourses }: Props) {
+const CONTEXT_TYPE_LABEL: Record<string, string> = {
+    platform: 'Platform',
+    course: 'Course',
+    resource: 'Resource',
+};
+
+export default function AdminDashboard({ stats, recentUsers, recentCourses, recentChatSessions }: Props) {
     const { locale, ui } = usePage().props;
     const l = String(locale);
 
@@ -78,13 +105,76 @@ export default function AdminDashboard({ stats, recentUsers, recentCourses }: Pr
                 </div>
 
                 {/* Stats */}
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <StatCard label="Learners" value={stats.total_learners} icon={Users} />
                     <StatCard label="Mentors" value={stats.total_mentors} icon={Users} />
                     <StatCard label="New users (7d)" value={stats.new_users_this_week} icon={UserPlus} />
+                    <StatCard label="Total enrollments" value={stats.total_enrollments} icon={Users} />
                     <StatCard label="Published courses" value={stats.published_courses} icon={BookOpen} />
                     <StatCard label="Draft courses" value={stats.draft_courses} icon={BookText} />
-                    <StatCard label="Total enrollments" value={stats.total_enrollments} icon={Users} />
+                    <StatCard label="AI chat sessions" value={stats.total_chat_sessions} icon={MessagesSquare} />
+                    <StatCard label="AI messages today" value={stats.chat_messages_today} icon={MessageSquare} />
+                </div>
+
+                {/* Recent AI Conversations */}
+                <div>
+                    <h2 className="mb-4 text-base font-semibold">Recent AI Conversations</h2>
+                    <div className="overflow-hidden rounded-xl border border-border bg-card">
+                        {recentChatSessions.length === 0 ? (
+                            <p className="p-6 text-center text-sm text-muted-foreground">No chat sessions yet.</p>
+                        ) : (
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-border bg-muted/30 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                                        <th className="px-4 py-3">User</th>
+                                        <th className="px-4 py-3">Context</th>
+                                        <th className="px-4 py-3">First question</th>
+                                        <th className="px-4 py-3">Msgs</th>
+                                        <th className="px-4 py-3">Last activity</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border">
+                                    {recentChatSessions.map((session) => (
+                                        <tr
+                                            key={session.id}
+                                            className="cursor-pointer hover:bg-muted/20"
+                                            onClick={() => router.visit(showChatSession.url({ locale: l, chatSession: session.id }))}
+                                        >
+                                            <td className="px-4 py-3">
+                                                {session.identity.type === 'user' ? (
+                                                    <>
+                                                        <p className="font-medium">{session.identity.name}</p>
+                                                        <p className="text-xs text-muted-foreground">@{session.identity.username}</p>
+                                                    </>
+                                                ) : (
+                                                    <p className="text-muted-foreground">Guest</p>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <Badge variant="secondary" className="text-xs">
+                                                    {CONTEXT_TYPE_LABEL[session.context_type] ?? session.context_type}
+                                                </Badge>
+                                                <p className="mt-1 max-w-[120px] truncate text-xs text-muted-foreground" title={session.context_key}>
+                                                    {session.context_key}
+                                                </p>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <p className="max-w-[280px] truncate text-muted-foreground" title={session.first_question ?? ''}>
+                                                    {session.first_question ?? <span className="italic">—</span>}
+                                                </p>
+                                            </td>
+                                            <td className="px-4 py-3 text-center tabular-nums">
+                                                {session.messages_count}
+                                            </td>
+                                            <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                                                {session.last_activity}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
                 </div>
 
                 <div className="grid gap-8 lg:grid-cols-2">
