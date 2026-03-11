@@ -7,6 +7,7 @@ use App\Listeners\MergeGuestChatHistory;
 use App\Services\OpenAiProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
@@ -29,6 +30,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        RedirectIfAuthenticated::redirectUsing(
+            fn ($request) => route('dashboard', ['locale' => $request->route('locale', config('app.locale', 'en'))]),
+        );
 
         Event::listen(Registered::class, MergeGuestChatHistory::class);
     }

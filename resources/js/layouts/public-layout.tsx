@@ -100,46 +100,70 @@ export default function PublicLayout({
 
                     {/* Mobile hamburger */}
                     <button
-                        className="flex items-center justify-center md:hidden"
+                        className="relative z-[60] flex items-center justify-center md:hidden"
                         onClick={() => setMobileOpen((v) => !v)}
                         aria-label="Toggle menu"
+                        aria-expanded={mobileOpen}
                     >
                         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                     </button>
                 </div>
-
-                {/* Mobile menu */}
-                {mobileOpen && (
-                    <nav
-                        className="border-t border-border bg-background px-4 py-4 md:hidden"
-                        aria-label="Mobile navigation"
-                    >
-                        <div className="flex flex-col gap-4">
-                            {navLinks.map((link) => (
-                                <NavLink key={link.label} href={link.href}>
-                                    {link.label}
-                                </NavLink>
-                            ))}
-                            <div className="mt-2 flex flex-col gap-2">
-                                {auth.user ? (
-                                    <Button asChild variant="secondary" size="compact">
-                                        <Link href={`/${l}/dashboard`}>Dashboard</Link>
-                                    </Button>
-                                ) : (
-                                    <>
-                                        <Button asChild variant="ghost" size="compact">
-                                            <Link href={login()}>Log in</Link>
-                                        </Button>
-                                        <Button asChild variant="enroll" size="compact">
-                                            <Link href={register()}>Sign up free</Link>
-                                        </Button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </nav>
-                )}
             </header>
+
+            {/* Mobile drawer backdrop */}
+            <div
+                className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 md:hidden ${mobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+                aria-hidden="true"
+                onClick={() => setMobileOpen(false)}
+            />
+
+            {/* Mobile drawer */}
+            <nav
+                className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-background shadow-xl transition-transform duration-300 ease-in-out md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                aria-label="Mobile navigation"
+                aria-hidden={!mobileOpen}
+            >
+                {/* Drawer header */}
+                <div className="border-b border-border px-4 py-3">
+                    <Link href={`/${l}/`} className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+                        <img src="/logo.png" alt="SkillEvidence" width={28} height={28} className="h-7 w-7" />
+                        <span className="text-base font-semibold tracking-tight">
+                            {import.meta.env.VITE_APP_NAME}
+                        </span>
+                    </Link>
+                </div>
+
+                {/* Drawer nav links */}
+                <div className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
+                    {navLinks.map((link) => (
+                        <NavLink key={link.label} href={link.href}>
+                            <span onClick={() => setMobileOpen(false)} className="block px-2 py-2">
+                                {link.label}
+                            </span>
+                        </NavLink>
+                    ))}
+                </div>
+
+                {/* Drawer auth buttons */}
+                <div className="border-t border-border px-4 py-4">
+                    <div className="flex flex-col gap-2">
+                        {auth.user ? (
+                            <Button asChild variant="secondary" size="compact">
+                                <Link href={`/${l}/dashboard`} onClick={() => setMobileOpen(false)}>Dashboard</Link>
+                            </Button>
+                        ) : (
+                            <>
+                                <Button asChild variant="ghost" size="compact">
+                                    <Link href={login()} onClick={() => setMobileOpen(false)}>Log in</Link>
+                                </Button>
+                                <Button asChild variant="enroll" size="compact">
+                                    <Link href={register()} onClick={() => setMobileOpen(false)}>Sign up free</Link>
+                                </Button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            </nav>
 
             <main>{children}</main>
 

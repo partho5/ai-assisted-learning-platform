@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, BookOpen, CheckCircle, ChevronRight, Clock, Users } from 'lucide-react';
+import { ArrowRight, BookOpen, CheckCircle, ChevronRight, Sparkles, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/public-layout';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
@@ -229,80 +229,110 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             </Head>
 
             {/* ── HERO ─────────────────────────────────────────────────── */}
-            <section aria-label="Hero" className="relative overflow-hidden border-b border-border">
-                {/* subtle grid bg */}
+            <style>{`
+                @keyframes blobFloat1 {
+                    0%,100% { transform: translateX(-50%) translateY(0px)   scale(1);    background-color: rgba(125,211,252,0.40); }
+                    35%     { transform: translateX(-50%) translateY(-32px)  scale(1.06); background-color: rgba(253,186,116,0.38); }
+                    70%     { transform: translateX(-50%) translateY(18px)   scale(0.96); background-color: rgba(251,113,133,0.30); }
+                }
+                @keyframes blobFloat2 {
+                    0%,100% { transform: translate(0px,   0px)   scale(1);   background-color: rgba(103,232,249,0.30); }
+                    50%     { transform: translate(-44px,-28px)  scale(1.10); background-color: rgba(253,164,175,0.38); }
+                }
+                @keyframes blobFloat3 {
+                    0%,100% { transform: translate(0px,  0px)   scale(1);    background-color: rgba(94,234,212,0.25); }
+                    40%     { transform: translate(32px,-22px)   scale(1.06); background-color: rgba(252,211,77, 0.32); }
+                    80%     { transform: translate(-20px,16px)   scale(0.94); background-color: rgba(253,186,116,0.28); }
+                }
+                @keyframes gradientFlow {
+                    0%, 100% { background-position: 0% 50%; }
+                    50%       { background-position: 100% 50%; }
+                }
+                @keyframes badgePulse {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50%       { opacity: 0.5; transform: scale(0.75); }
+                }
+            `}</style>
+            <section aria-label="Hero" className="relative overflow-hidden border-b border-border bg-[#e8f4fd] dark:bg-background">
+                {/* subtle grid */}
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:48px_48px] opacity-40 dark:opacity-20"
+                    className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(14,165,233,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(14,165,233,0.08)_1px,transparent_1px)] bg-[size:48px_48px]"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+                {/* ocean glow blobs — animated */}
+                <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 h-[440px] w-[640px] rounded-full blur-[110px]" style={{ animation: 'blobFloat1 20s ease-in-out infinite' }} />
+                <div aria-hidden className="pointer-events-none absolute bottom-0 right-10 h-72 w-72 rounded-full blur-[90px]" style={{ animation: 'blobFloat2 25s ease-in-out infinite' }} />
+                <div aria-hidden className="pointer-events-none absolute left-0 top-1/3 h-56 w-56 rounded-full blur-[80px]" style={{ animation: 'blobFloat3 17s ease-in-out infinite' }} />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-transparent" />
 
                 <div className="relative mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28 lg:py-36">
                     <div className="mx-auto max-w-3xl text-center">
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm text-muted-foreground shadow-sm">
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                            Mentor-verified skill evidence
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-black px-4 py-1.5  text-sky-400 shadow-sm backdrop-blur-sm">
+                            <span className="h-1.5 w-1.5 rounded-full bg-green-400" style={{ animation: 'badgePulse 2s ease-in-out infinite' }} />
+                            Recruiters don't care about your certificates
                         </div>
 
                         <h1
                             style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
-                            className="mb-3 text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl lg:text-6xl"
+                            className="mb-4 text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-5xl lg:text-6xl"
                         >
-                            Learn. Prove.{' '}
-                            <span className="text-primary">Get Hired.</span>
+                            Stop collecting courses.{' '}
+                            <span
+                                className="bg-clip-text text-transparent"
+                                style={{
+                                    backgroundImage: 'linear-gradient(90deg, #0f172a, #2563eb, #0ea5e9, #6366f1, #0f172a)',
+                                    backgroundSize: '300% auto',
+                                    animation: 'gradientFlow 6s ease-in-out infinite',
+                                }}
+                            >
+                                Build work that gets you hired.
+                            </span>
                         </h1>
 
-                        <p
-                            style={{
-                                fontFamily: "'Bricolage Grotesque', sans-serif",
-                                background: 'linear-gradient(to right, #10ffb5, #6366f1, #f97316)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                backgroundClip: 'text',
-                            }}
-                            className="mb-6 text-xl font-semibold md:text-2xl"
-                        >
-                            Or build your own business as a 2nd income source.
-                        </p>
-
-                        <p className="mx-auto mb-10 max-w-xl text-lg text-muted-foreground">
-                            Stop listing skills on a resume. Build a portfolio of real, mentor-reviewed work that employers can actually verify.
+                        <p className="mx-auto mb-10 max-w-xl text-lg text-slate-600">
+                            Complete real assignments, get them publicly endorsed, that proves what you can actually do.
                         </p>
 
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                             {canRegister && (
-                                <Button asChild variant="enroll" size="lg">
-                                    <Link href={register()}>
-                                        Start for free
-                                        <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Link>
+                                <Button asChild variant="hero" size="lg" className="bg-indigo-700 hover:bg-black">
+                                    <Link href={register()}>Join now</Link>
                                 </Button>
                             )}
-                            <Button asChild variant="ghost" size="lg">
-                                <Link href={coursesIndex.url(l)}>Browse courses</Link>
+                            <Button asChild size="lg" className="group bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md hover:from-black hover:to-blue-700">
+                                <Link href={coursesIndex.url(l)}>
+                                    Browse courses
+                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                                </Link>
                             </Button>
                         </div>
 
-                        <p className="mt-4 text-xs text-muted-foreground">No credit card required</p>
+                        <p className="mt-4 text-xs text-slate-400">No credit card required</p>
                     </div>
                 </div>
             </section>
 
             {/* ── TRUST BAR ────────────────────────────────────────────── */}
-            <div className="border-b border-border bg-muted/40">
-                <div className="mx-auto max-w-7xl px-4 py-5 md:px-6">
-                    <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-muted-foreground">
+            <div className="border-b border-border bg-white">
+                <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                         {[
-                            { icon: <BookOpen className="h-4 w-4" />, label: 'Structured courses' },
-                            { icon: <CheckCircle className="h-4 w-4" />, label: 'Mentor-endorsed work' },
-                            { icon: <Users className="h-4 w-4" />, label: 'Public skill portfolio' },
-                            { icon: <Clock className="h-4 w-4" />, label: 'AI-assisted learning' },
-                        ].map(({ icon, label }) => (
-                            <div key={label} className="flex items-center gap-2">
-                                <span className="text-primary">{icon}</span>
-                                <span>{label}</span>
+                            { icon: <BookOpen className="h-5 w-5" />, label: 'High-value courses',    color: 'bg-orange-50 text-orange-600 border-orange-100' },
+                            { icon: <CheckCircle className="h-5 w-5" />, label: 'Mentor-endorsed work', color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
+                            { icon: <Users className="h-5 w-5" />, label: 'Public skill portfolio',   color: 'bg-violet-50 text-violet-600 border-violet-100' },
+                        ].map(({ icon, label, color }) => (
+                            <div key={label} className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${color}`}>
+                                <span className="shrink-0">{icon}</span>
+                                <span className="text-sm font-medium">{label}</span>
                             </div>
                         ))}
+                        {/* AI card — Google-style rainbow gradient border */}
+                        <div className="rounded-xl p-[2px]" style={{ background: 'linear-gradient(135deg, #4285F4, #EA4335, #FBBC04, #34A853)' }}>
+                            <div className="flex items-center gap-3 rounded-[10px] bg-white px-4 py-3">
+                                <Sparkles className="h-5 w-5 shrink-0" style={{ color: '#4285F4' }} />
+                                <span className="text-sm font-medium text-slate-700">AI-native learning</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -316,31 +346,40 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     >
                         How it works
                     </h2>
-                    <p className="text-muted-foreground">Three steps from enrolled to evidenced.</p>
+                    <p className="text-muted-foreground">Three steps from enrolled to someone recruiters actually call back.</p>
                 </div>
 
-                <div className="grid gap-8 md:grid-cols-3">
+                <div className="grid gap-6 md:grid-cols-3">
                     {[
                         {
                             step: '01',
-                            title: 'Pick a course',
-                            body: 'Mentors build structured courses with videos, articles, and assignments. Browse the catalog and enroll in minutes.',
+                            title: 'Pick a skill gap to close',
+                            body: 'Not another course to add to your list — a real gap to close. Mentor-built content with videos, articles, and assignments designed around hireable outcomes.',
+                            gradient: 'from-sky-500 to-cyan-400',
+                            bg: 'bg-sky-50 dark:bg-sky-950/30',
+                            border: 'border-sky-100 dark:border-sky-900',
                         },
                         {
                             step: '02',
-                            title: 'Do the work',
-                            body: 'Complete resources, take knowledge tests, and submit assignments. An AI assistant helps you along the way.',
+                            title: 'Do work a recruiter can read',
+                            body: 'Assignments aren\'t busywork. They\'re portfolio pieces. Submit real work a hiring manager can open, read, and evaluate — not a multiple-choice score.',
+                            gradient: 'from-indigo-500 to-violet-500',
+                            bg: 'bg-indigo-50 dark:bg-indigo-950/30',
+                            border: 'border-indigo-100 dark:border-indigo-900',
                         },
                         {
                             step: '03',
-                            title: 'Earn your evidence',
-                            body: 'Mentors review and endorse your submissions. Every endorsement is permanently recorded on your public portfolio.',
+                            title: 'Get a mentor\'s public verdict',
+                            body: 'A real mentor reviews your submission and writes a public endorsement — permanently recorded on your portfolio. Not a certificate. A verdict from someone who knows.',
+                            gradient: 'from-violet-500 to-fuchsia-500',
+                            bg: 'bg-violet-50 dark:bg-violet-950/30',
+                            border: 'border-violet-100 dark:border-violet-900',
                         },
-                    ].map(({ step, title, body }) => (
-                        <div key={step} className="relative flex flex-col gap-4">
+                    ].map(({ step, title, body, gradient, bg, border }) => (
+                        <div key={step} className={`relative flex flex-col gap-4 rounded-2xl border p-8 ${bg} ${border}`}>
                             <span
                                 style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
-                                className="text-5xl font-bold text-primary/20 leading-none"
+                                className={`bg-gradient-to-r ${gradient} bg-clip-text text-6xl font-black leading-none text-transparent`}
                             >
                                 {step}
                             </span>
@@ -362,7 +401,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             >
                                 Live courses
                             </h2>
-                            <p className="text-muted-foreground">Real content, built by real mentors.</p>
+                            <p className="text-muted-foreground">Each one built to produce work — not just completions.</p>
                         </div>
                         <Button asChild variant="ghost" size="compact" className="hidden md:flex">
                             <Link href={coursesIndex.url(l)}>
@@ -398,21 +437,22 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
                             className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                         >
-                            Not a certificate.
-                            <br />A living record.
+                            A certificate says you sat through it.
+                            <br />This shows what you can actually do.
                         </h2>
                         <p className="mb-6 text-muted-foreground">
-                            Every course you complete, every test you pass, every assignment a mentor endorses — it all lives at{' '}
+                            Every assignment a mentor endorses, every test you pass — it's all publicly verified at{' '}
                             <code className="rounded bg-muted px-1.5 py-0.5 text-sm text-foreground">
                                 {typeof window !== 'undefined' ? window.location.host : 'yoursite.com'}/en/u/yourname
                             </code>
+                            . One link. No PDFs. No "trust me."
                         </p>
                         <ul className="mb-8 space-y-3">
                             {[
-                                'Employers see exactly what you learned and how you scored',
-                                'Mentors leave written endorsements visible on your profile',
-                                'You choose which achievements to feature — up to 5',
-                                'Share one link. No PDFs, no screenshots.',
+                                'Recruiters see your actual work — not a completion badge',
+                                'Mentors write public endorsements that vouch for your output',
+                                'Pin your strongest pieces — up to 5 featured submissions',
+                                'Share one URL in job applications, LinkedIn, anywhere',
                             ].map((item) => (
                                 <li key={item} className="flex items-start gap-3">
                                     <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -603,10 +643,10 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
                         className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                     >
-                        Start building your evidence portfolio today.
+                        Your next job application should link here.
                     </h2>
                     <p className="mb-8 text-muted-foreground">
-                        Join learners who prove their skills with real work — not just certificates.
+                        Stop attaching PDFs. Build a portfolio of mentor-endorsed work and send one link that does the talking for you.
                     </p>
                     {canRegister && (
                         <Button asChild variant="enroll" size="lg">

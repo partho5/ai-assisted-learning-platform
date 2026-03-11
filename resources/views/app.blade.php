@@ -59,6 +59,7 @@
         @inertia
 
         {{-- Google Translate Widget (free, no API key required) --}}
+        <style>@media(max-width:767px){#gt_wrapper{top:6px!important;right:3.5rem!important;}}</style>
         <div id="gt_wrapper" style="position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
             <button id="gt_toggle" onclick="(function(){var p=document.getElementById('gt_panel');var open=p.style.display==='block';p.style.display=open?'none':'block';})()" style="background:white;border:1px solid #e2e8f0;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;line-height:1;" title="Translate page">🌐</button>
             <div id="gt_panel" style="display:none;background:white;padding:6px 10px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.2);border:1px solid #e2e8f0;">
