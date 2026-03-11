@@ -15,7 +15,7 @@ class EnrollmentController extends Controller
             abort(404);
         }
 
-        $accessLevel = $course->isPaid() ? 'observer' : 'full';
+        $accessLevel = 'observer';
 
         $enrollment = Enrollment::firstOrCreate(
             ['user_id' => $request->user()->id, 'course_id' => $course->id],
