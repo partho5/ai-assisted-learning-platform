@@ -22,6 +22,9 @@ export function AppSidebar() {
 
     const mainNavItems: NavItem[] = [
         { title: ui.nav.dashboard, href: dashboardHref, icon: LayoutGrid },
+        ...(!isMentorOrAdmin
+            ? [{ title: ui.nav.courses, href: `/${locale}/courses`, icon: BookOpen }]
+            : []),
         ...(isAdmin
             ? [{ title: ui.nav.categories, href: `/${locale}/admin/categories`, icon: Tag }]
             : []),
