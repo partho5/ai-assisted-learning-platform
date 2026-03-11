@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import AppearanceTabs from '@/components/appearance-tabs';
+import FontScaleTabs from '@/components/font-scale-tabs';
 import Heading from '@/components/heading';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
@@ -28,6 +29,11 @@ export default function Appearance() {
                         description="Update your account's appearance settings"
                     />
                     <AppearanceTabs />
+
+                    <div className="space-y-2">
+                        <p className="text-sm font-medium">Font size</p>
+                        <FontScaleTabs />
+                    </div>
                 </div>
             </SettingsLayout>
         </AppLayout>

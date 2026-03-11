@@ -4,6 +4,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
+import { initializeFontScale } from './hooks/use-font-scale';
 
 const appName = import.meta.env.VITE_APP_NAME;
 
@@ -30,3 +31,6 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// This will apply font scale preference on load...
+initializeFontScale();

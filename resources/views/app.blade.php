@@ -4,6 +4,16 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        {{-- Inline script to apply font scale before render to avoid flash --}}
+        <script>
+            (function() {
+                var scale = localStorage.getItem('font-scale');
+                if (scale && scale !== '1') {
+                    document.documentElement.style.fontSize = scale + 'rem';
+                }
+            })();
+        </script>
+
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
             (function() {
@@ -47,5 +57,23 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
+
+        {{-- Google Translate Widget (free, no API key required) --}}
+        <div id="gt_wrapper" style="position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <button id="gt_toggle" onclick="(function(){var p=document.getElementById('gt_panel');var open=p.style.display==='block';p.style.display=open?'none':'block';})()" style="background:white;border:1px solid #e2e8f0;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;line-height:1;" title="Translate page">🌐</button>
+            <div id="gt_panel" style="display:none;background:white;padding:6px 10px;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,0.2);border:1px solid #e2e8f0;">
+                <div id="google_translate_element"></div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                    autoDisplay: false,
+                }, 'google_translate_element');
+            }
+        </script>
+        <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     </body>
 </html>

@@ -1,6 +1,6 @@
 # SkillEvidence — Production Deployment Guide
 
-Target: **Ubuntu 22.04 LTS or 24.04 LTS** · **Nginx** · **PostgreSQL 17 + pgvector** · **PHP 8.4**
+Target: **Ubuntu 20.04 LTS or later** · **Nginx** · **PostgreSQL 17 + pgvector (Docker)** · **PHP 8.4**
 
 ---
 
@@ -24,6 +24,7 @@ Target: **Ubuntu 22.04 LTS or 24.04 LTS** · **Nginx** · **PostgreSQL 17 + pgve
 16. [RAG Knowledge Index (Initial Run)](#16-rag-knowledge-index-initial-run)
 17. [Health Check](#17-health-check)
 18. [Deploying Updates](#18-deploying-updates)
+19. [Database Backup, Restore & Transfer](#19-database-backup-restore--transfer)
 
 ---
 
@@ -539,3 +540,72 @@ sudo nginx -t && sudo systemctl reload nginx
 > # ... run deploy steps ...
 > sudo -u www-data php artisan up
 > ```
+
+---
+
+## 19. Database Backup, Restore & Transfer
+
+PostgreSQL runs inside a Docker container named `postgres17`. All `pg_dump` and `psql` commands go through `docker exec`.
+
+### scp on Ubuntu (local machine)
+
+`scp` is built into Ubuntu — no install needed. It works like `cp` but over SSH:
+
+```
+scp [source] [destination]
+```
+
+Remote paths use the format `user@host:/path/to/file`.
+
+---
+
+### Export: Server → Local
+
+Run on your **local machine**:
+
+```bash
+# 1. Dump the database on the server into /tmp
+ssh root@YOUR_SERVER_IP \
+  "docker exec postgres17 pg_dump -U skillevidence skillevidence_db > /tmp/skillevidence_dump.sql"
+
+# 2. Download the dump to your current local directory
+scp root@YOUR_SERVER_IP:/tmp/skillevidence_dump.sql ./skillevidence_dump.sql
+
+# 3. Clean up /tmp on the server (optional)
+ssh root@YOUR_SERVER_IP "rm /tmp/skillevidence_dump.sql"
+```
+
+---
+
+### Import: Local → Server
+
+Run on your **local machine**:
+
+```bash
+# 1. Upload the dump to /tmp on the server
+scp ./skillevidence_dump.sql root@YOUR_SERVER_IP:/tmp/skillevidence_dump.sql
+
+# 2. Restore into the database
+ssh root@YOUR_SERVER_IP \
+  "cat /tmp/skillevidence_dump.sql | docker exec -i postgres17 psql -U skillevidence -d skillevidence_db"
+
+# 3. Clean up
+ssh root@YOUR_SERVER_IP "rm /tmp/skillevidence_dump.sql"
+```
+
+> **Restoring into an existing database:** if the schema already exists, add `--clean` to pg_dump so it drops objects before recreating them:
+> ```bash
+> docker exec postgres17 pg_dump --clean -U skillevidence skillevidence_db > /tmp/skillevidence_dump.sql
+> ```
+
+---
+
+### Scheduled Backups on the Server
+
+Add to root's crontab (`crontab -e`) to keep 7 daily backups:
+
+```bash
+0 2 * * * docker exec postgres17 pg_dump -U skillevidence skillevidence_db \
+  | gzip > /var/backups/skillevidence_$(date +\%Y-\%m-\%d).sql.gz \
+  && find /var/backups -name "skillevidence_*.sql.gz" -mtime +7 -delete
+```
