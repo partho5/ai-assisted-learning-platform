@@ -9,6 +9,7 @@ export type UiTranslations = {
         courses: string;
         categories: string;
         analytics: string;
+        submissions: string;
         my_courses: string;
         profile: string;
     };

@@ -418,7 +418,7 @@ function ResourceBlock({
         <div>
             {/* Resource header */}
             <div className="mb-4">
-                <h2 className="text-xl font-bold">{resource.title}</h2>
+                <h2 className="text-xl text-blue-600 font-bold">{resource.title}</h2>
                 {resource.estimated_time && (
                     <p className="mt-0.5 text-base text-muted-foreground">
                         ~{resource.estimated_time} min
@@ -472,15 +472,15 @@ function ResourceBlock({
                             </div>
 
                             {resource.previousAttempts.length > 0 && (
-                                <div className="rounded-lg border border-border bg-card p-3">
-                                    <p className="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                <div className="rounded-lg border border-indigo-200 bg-indigo-100 p-3">
+                                    <p className="mb-2 text-xs font-medium tracking-wide text-muted-foreground">
                                         Previous Attempts
                                     </p>
                                     <div className="space-y-1">
                                         {resource.previousAttempts.map((pa) => (
                                             <div
                                                 key={pa.id}
-                                                className="flex items-center justify-between text-base"
+                                                className="flex items-center justify-between text-base dark:text-gray-900"
                                             >
                                                 <span>
                                                     Attempt #{pa.attempt_number}
@@ -501,7 +501,7 @@ function ResourceBlock({
                                                                 `/${locale}/test-attempts/${pa.id}/result`,
                                                             )
                                                         }
-                                                        className="text-xs text-primary hover:underline"
+                                                        className="text-xs text-primary hover:underline dark:text-blue-600"
                                                     >
                                                         View
                                                     </button>
@@ -689,10 +689,10 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                 ref={sidebarRef}
                 className="w-full shrink-0 overflow-y-auto border-b border-border md:w-64 md:border-b-0 md:border-r md:sticky md:top-0 md:h-screen"
             >
-                <div className="p-4">
+                <div className="p-0">
                     {/* Progress bar — enrolled only */}
                     {enrollment && (
-                        <div className="mb-3">
+                        <div className="mb-3 p-2">
                             <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
                                 <span>{progressPercent}% complete</span>
                                 <span>
@@ -708,12 +708,12 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                         </div>
                     )}
 
-                    <h2 className="mb-3 text-sm font-semibold">{course.title}</h2>
+                    <h2 className="mb-3 text-sm font-semibold p-2">{course.title}</h2>
 
                     {/* Module + resource list */}
                     {course.modules.map((mod) => (
                         <div key={mod.id} className="mb-3">
-                            <p className="mb-1 text-xs font-semibold  tracking-wide text-muted-foreground">
+                            <p className="mb-1 p-2 text-xs font-semibold  tracking-wide text-muted-foreground">
                                 {mod.title}
                             </p>
                             <ul className="space-y-0.5">
@@ -728,9 +728,9 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                                                 onClick={() =>
                                                     scrollToResource(r.id)
                                                 }
-                                                className={`flex w-full items-center gap-2 rounded bg-blue-50/50 px-2 py-1.5 text-left text-sm transition-colors ${
+                                                className={`bg-blue-50dark:bg-blue-950/40 flex w-full items-center gap-2 rounded px-2 py-2 text-left text-sm text-gray-900 transition-colors dark:text-gray-100 ${
                                                     isActive
-                                                        ? 'border-blue-600 bg-sky-100 font-medium'
+                                                        ? 'border-blue-600 bg-sky-200 font-medium dark:bg-sky-600'
                                                         : ''
                                                 }`}
                                             >

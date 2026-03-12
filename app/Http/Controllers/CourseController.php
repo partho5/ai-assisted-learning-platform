@@ -34,14 +34,18 @@ class CourseController extends Controller
 
     private function mentorIndex(\App\Models\User $user): Response
     {
-        $courses = $user->courses()
-            ->with('category')
+        $query = $user->isAdmin()
+            ? Course::query()->with(['category', 'mentor:id,name,username'])
+            : $user->courses()->with('category');
+
+        $courses = $query
             ->withCount('modules')
             ->latest()
             ->get();
 
         return Inertia::render('mentor/courses/index', [
             'courses' => $courses,
+            'isAdmin' => $user->isAdmin(),
         ]);
     }
 

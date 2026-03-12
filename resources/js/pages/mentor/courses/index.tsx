@@ -4,6 +4,7 @@ import {
     edit as courseEdit,
     index as coursesIndex,
 } from '@/actions/App/Http/Controllers/CourseController';
+import { index as submissionsIndex } from '@/actions/App/Http/Controllers/SubmissionController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -11,36 +12,43 @@ import type { BreadcrumbItem, Course } from '@/types';
 
 interface Props {
     courses: Course[];
+    isAdmin: boolean;
 }
 
-export default function CoursesIndex({ courses }: Props) {
+export default function CoursesIndex({ courses, isAdmin }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'My Courses', href: coursesIndex.url(l) },
+        { title: isAdmin ? 'All Courses' : 'My Courses', href: coursesIndex.url(l) },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="My Courses" />
+            <Head title={isAdmin ? 'All Courses' : 'My Courses'} />
 
             <div className="flex flex-col gap-6 p-4 md:p-6">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold tracking-tight">My Courses</h1>
-                    <Link href={courseCreate.url(l)}>
-                        <Button variant="enroll">New Course</Button>
-                    </Link>
+                    <h1 className="text-2xl font-semibold tracking-tight">
+                        {isAdmin ? 'All Courses' : 'My Courses'}
+                    </h1>
+                    {!isAdmin && (
+                        <Link href={courseCreate.url(l)}>
+                            <Button variant="enroll">New Course</Button>
+                        </Link>
+                    )}
                 </div>
 
                 {courses.length === 0 ? (
                     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-sidebar-border py-20 text-center">
                         <p className="text-sm text-muted-foreground">No courses yet.</p>
-                        <Link href={courseCreate.url(l)} className="mt-3">
-                            <Button variant="secondary" size="compact">
-                                Create your first course
-                            </Button>
-                        </Link>
+                        {!isAdmin && (
+                            <Link href={courseCreate.url(l)} className="mt-3">
+                                <Button variant="secondary" size="compact">
+                                    Create your first course
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -73,6 +81,12 @@ export default function CoursesIndex({ courses }: Props) {
                                     </div>
 
                                     <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                                        {isAdmin && course.mentor && (
+                                            <>
+                                                <span className="font-medium text-foreground/70">{course.mentor.name}</span>
+                                                <span>·</span>
+                                            </>
+                                        )}
                                         {course.category && <span>{course.category.name}</span>}
                                         {course.category && <span>·</span>}
                                         <span className="capitalize">{course.difficulty}</span>
@@ -87,12 +101,33 @@ export default function CoursesIndex({ courses }: Props) {
                                         )}
                                     </div>
 
-                                    <div className="mt-auto pt-2">
-                                        <Link href={courseEdit.url({ locale: l, course: course.slug })}>
-                                            <Button variant="secondary" size="compact" className="w-full">
-                                                Edit Course
-                                            </Button>
-                                        </Link>
+                                    <div className="mt-auto flex flex-col gap-2 pt-2">
+                                        <div className="flex gap-2">
+                                            <Link
+                                                href={courseEdit.url({ locale: l, course: course.slug })}
+                                                className="flex-1"
+                                            >
+                                                <Button variant="secondary" size="compact" className="w-full">
+                                                    Edit
+                                                </Button>
+                                            </Link>
+                                            <Link
+                                                href={submissionsIndex.url({ locale: l, course: course.slug })}
+                                                className="flex-1"
+                                            >
+                                                <Button variant="outline" size="compact" className="w-full">
+                                                    Submissions
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                        {course.status === 'published' && (
+                                            <Link
+                                                href={`/${l}/courses/${course.slug}`}
+                                                className="text-center text-xs text-primary hover:underline"
+                                            >
+                                                View course →
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             </div>

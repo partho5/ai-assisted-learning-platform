@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\AttemptStatus;
 use App\Models\TestAttempt;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class PortfolioController extends Controller
@@ -12,7 +12,7 @@ class PortfolioController extends Controller
     /**
      * Toggle whether an endorsed attempt is showcased on the learner's public portfolio.
      */
-    public function toggleShowcase(Request $request, TestAttempt $attempt): JsonResponse
+    public function toggleShowcase(Request $request, TestAttempt $attempt): RedirectResponse
     {
         $user = $request->user();
 
@@ -27,7 +27,7 @@ class PortfolioController extends Controller
             $showcased = array_values(array_filter($showcased, fn ($v) => $v !== $id));
         } else {
             if (count($showcased) >= 5) {
-                return response()->json(['message' => 'You can feature at most 5 assignments.'], 422);
+                return back()->with('error', 'You can feature at most 5 assignments.');
             }
             $showcased[] = $id;
         }
@@ -35,6 +35,6 @@ class PortfolioController extends Controller
         $user->showcased_attempt_ids = $showcased;
         $user->save();
 
-        return response()->json(['showcased' => in_array($id, $showcased)]);
+        return back();
     }
 }

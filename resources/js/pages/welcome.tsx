@@ -204,13 +204,23 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     name="description"
                     content="Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers actually trust. Free to start."
                 />
-                <meta name="keywords" content="skill evidence, online courses, verified learning, skill portfolio, mentor courses, learn online" />
+                <meta
+                    name="keywords"
+                    content="skill evidence, online courses, verified learning, skill portfolio, mentor courses, learn online"
+                />
                 <link rel="canonical" href={`${appUrl}/${l}/`} />
                 <link rel="alternate" hrefLang="en" href={`${appUrl}/en/`} />
                 <link rel="alternate" hrefLang="bn" href={`${appUrl}/bn/`} />
-                <link rel="alternate" hrefLang="x-default" href={`${appUrl}/en/`} />
+                <link
+                    rel="alternate"
+                    hrefLang="x-default"
+                    href={`${appUrl}/en/`}
+                />
                 <meta property="og:type" content="website" />
-                <meta property="og:title" content={`${appName} — Learn, Prove, Get Hired`} />
+                <meta
+                    property="og:title"
+                    content={`${appName} — Learn, Prove, Get Hired`}
+                />
                 <meta
                     property="og:description"
                     content="Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers actually trust."
@@ -222,10 +232,20 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <meta property="og:locale" content="en_US" />
                 <meta property="og:locale:alternate" content="bn_BD" />
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={`${appName} — Learn, Prove, Get Hired`} />
-                <meta name="twitter:description" content="Build a verified skill portfolio with real mentor-reviewed work." />
+                <meta
+                    name="twitter:title"
+                    content={`${appName} — Learn, Prove, Get Hired`}
+                />
+                <meta
+                    name="twitter:description"
+                    content="Build a verified skill portfolio with real mentor-reviewed work."
+                />
                 <meta name="twitter:image" content={`${appUrl}/og-image.png`} />
-                <SchemaOrg courses={courses} appUrl={appUrl} appName={appName} />
+                <SchemaOrg
+                    courses={courses}
+                    appUrl={appUrl}
+                    appName={appName}
+                />
             </Head>
 
             {/* ── HERO ─────────────────────────────────────────────────── */}
@@ -253,53 +273,89 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     50%       { opacity: 0.5; transform: scale(0.75); }
                 }
             `}</style>
-            <section aria-label="Hero" className="relative overflow-hidden border-b border-border bg-[#e8f4fd] dark:bg-background">
+            <section
+                aria-label="Hero"
+                className="relative overflow-hidden border-b border-border bg-[#e8f4fd] dark:bg-background"
+            >
                 {/* subtle grid */}
                 <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(14,165,233,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(14,165,233,0.08)_1px,transparent_1px)] bg-[size:48px_48px]"
                 />
                 {/* ocean glow blobs — animated */}
-                <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 h-[440px] w-[640px] rounded-full blur-[110px]" style={{ animation: 'blobFloat1 20s ease-in-out infinite' }} />
-                <div aria-hidden className="pointer-events-none absolute bottom-0 right-10 h-72 w-72 rounded-full blur-[90px]" style={{ animation: 'blobFloat2 25s ease-in-out infinite' }} />
-                <div aria-hidden className="pointer-events-none absolute left-0 top-1/3 h-56 w-56 rounded-full blur-[80px]" style={{ animation: 'blobFloat3 17s ease-in-out infinite' }} />
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute -top-24 left-1/2 h-[440px] w-[640px] rounded-full blur-[110px]"
+                    style={{ animation: 'blobFloat1 20s ease-in-out infinite' }}
+                />
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute right-10 bottom-0 h-72 w-72 rounded-full blur-[90px]"
+                    style={{ animation: 'blobFloat2 25s ease-in-out infinite' }}
+                />
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute top-1/3 left-0 h-56 w-56 rounded-full blur-[80px]"
+                    style={{ animation: 'blobFloat3 17s ease-in-out infinite' }}
+                />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-transparent" />
 
                 <div className="relative mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28 lg:py-36">
                     <div className="mx-auto max-w-3xl text-center">
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-black px-4 py-1.5  text-sky-400 shadow-sm backdrop-blur-sm">
-                            <span className="h-1.5 w-1.5 rounded-full bg-green-400" style={{ animation: 'badgePulse 2s ease-in-out infinite' }} />
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-black px-4 py-1.5 text-sky-400 shadow-sm backdrop-blur-sm">
+                            <span
+                                className="h-1.5 w-1.5 rounded-full bg-green-400"
+                                style={{
+                                    animation:
+                                        'badgePulse 2s ease-in-out infinite',
+                                }}
+                            />
                             Recruiters don't care about your certificates
                         </div>
 
                         <h1
-                            style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
-                            className="mb-4 text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-5xl lg:text-6xl"
+                            style={{
+                                fontFamily: "'Bricolage Grotesque', sans-serif",
+                            }}
+                            className="mb-4 text-4xl leading-tight font-bold tracking-tight text-slate-900 md:text-5xl lg:text-6xl"
                         >
-                            Stop collecting courses.{' '}
+                            Stop chasing certificates.{' '}
                             <span
                                 className="bg-clip-text text-transparent"
                                 style={{
-                                    backgroundImage: 'linear-gradient(90deg, #0f172a, #2563eb, #0ea5e9, #6366f1, #0f172a)',
+                                    backgroundImage:
+                                        'linear-gradient(90deg, #0f172a, #2563eb, #0ea5e9, #6366f1, #0f172a)',
                                     backgroundSize: '300% auto',
-                                    animation: 'gradientFlow 6s ease-in-out infinite',
+                                    animation:
+                                        'gradientFlow 6s ease-in-out infinite',
                                 }}
                             >
-                                Build work that gets you hired.
+                                Build real work that gets you hired.
                             </span>
                         </h1>
 
                         <p className="mx-auto mb-10 max-w-xl text-lg text-slate-600">
-                            Complete real assignments, get them publicly endorsed, that proves what you can actually do.
+                            Complete real assignments, get them publicly
+                            endorsed, that proves what you can{' '}
+                            <i>actually do</i>.
                         </p>
 
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                             {canRegister && (
-                                <Button asChild variant="hero" size="lg" className="bg-indigo-700 hover:bg-black">
+                                <Button
+                                    asChild
+                                    variant="hero"
+                                    size="lg"
+                                    className="bg-indigo-700 hover:bg-black"
+                                >
                                     <Link href={register()}>Join now</Link>
                                 </Button>
                             )}
-                            <Button asChild size="lg" className="group bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md hover:from-black hover:to-blue-700">
+                            <Button
+                                asChild
+                                size="lg"
+                                className="group bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md hover:from-black hover:to-blue-700"
+                            >
                                 <Link href={coursesIndex.url(l)}>
                                     Browse courses
                                     <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -307,7 +363,9 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             </Button>
                         </div>
 
-                        <p className="mt-4 text-xs text-slate-400">No credit card required</p>
+                        <p className="mt-4 text-xs text-slate-400">
+                            No credit card required
+                        </p>
                     </div>
                 </div>
             </section>
@@ -317,20 +375,48 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                         {[
-                            { icon: <BookOpen className="h-5 w-5" />, label: 'High-value courses',    color: 'bg-orange-50 text-orange-600 border-orange-100' },
-                            { icon: <CheckCircle className="h-5 w-5" />, label: 'Mentor-endorsed work', color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
-                            { icon: <Users className="h-5 w-5" />, label: 'Public skill portfolio',   color: 'bg-violet-50 text-violet-600 border-violet-100' },
+                            {
+                                icon: <BookOpen className="h-5 w-5" />,
+                                label: 'High-value courses',
+                                color: 'bg-orange-50 text-orange-600 border-orange-100',
+                            },
+                            {
+                                icon: <CheckCircle className="h-5 w-5" />,
+                                label: 'Mentor-endorsed work',
+                                color: 'bg-indigo-50 text-indigo-600 border-indigo-100',
+                            },
+                            {
+                                icon: <Users className="h-5 w-5" />,
+                                label: 'Public skill portfolio',
+                                color: 'bg-violet-50 text-violet-600 border-violet-100',
+                            },
                         ].map(({ icon, label, color }) => (
-                            <div key={label} className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${color}`}>
+                            <div
+                                key={label}
+                                className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${color}`}
+                            >
                                 <span className="shrink-0">{icon}</span>
-                                <span className="text-sm font-medium">{label}</span>
+                                <span className="text-sm font-medium">
+                                    {label}
+                                </span>
                             </div>
                         ))}
                         {/* AI card — Google-style rainbow gradient border */}
-                        <div className="rounded-xl p-[2px]" style={{ background: 'linear-gradient(135deg, #4285F4, #EA4335, #FBBC04, #34A853)' }}>
+                        <div
+                            className="rounded-xl p-[2px]"
+                            style={{
+                                background:
+                                    'linear-gradient(135deg, #4285F4, #EA4335, #FBBC04, #34A853)',
+                            }}
+                        >
                             <div className="flex items-center gap-3 rounded-[10px] bg-white px-4 py-3">
-                                <Sparkles className="h-5 w-5 shrink-0" style={{ color: '#4285F4' }} />
-                                <span className="text-sm font-medium text-slate-700">AI-native learning</span>
+                                <Sparkles
+                                    className="h-5 w-5 shrink-0"
+                                    style={{ color: '#4285F4' }}
+                                />
+                                <span className="text-sm font-medium text-slate-700">
+                                    AI-native learning
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -338,15 +424,23 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             </div>
 
             {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
-            <FadeIn id="how-it-works" className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
+            <FadeIn
+                id="how-it-works"
+                className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24"
+            >
                 <div className="mb-14 text-center">
                     <h2
-                        style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                        style={{
+                            fontFamily: "'Bricolage Grotesque', sans-serif",
+                        }}
                         className="mb-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                     >
                         How it works
                     </h2>
-                    <p className="text-muted-foreground">Three steps from enrolled to someone recruiters actually call back.</p>
+                    <p className="text-muted-foreground">
+                        Three steps from enrolled to someone recruiters actually
+                        call back.
+                    </p>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-3">
@@ -362,28 +456,36 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         {
                             step: '02',
                             title: 'Do work a recruiter can read',
-                            body: 'Assignments aren\'t busywork. They\'re portfolio pieces. Submit real work a hiring manager can open, read, and evaluate — not a multiple-choice score.',
+                            body: "Assignments aren't busywork. They're portfolio pieces. Submit real work a hiring manager can open, read, and evaluate — not a multiple-choice score.",
                             gradient: 'from-indigo-500 to-violet-500',
                             bg: 'bg-indigo-50 dark:bg-indigo-950/30',
                             border: 'border-indigo-100 dark:border-indigo-900',
                         },
                         {
                             step: '03',
-                            title: 'Get a mentor\'s public verdict',
+                            title: "Get a mentor's public verdict",
                             body: 'A real mentor reviews your submission and writes a public endorsement — permanently recorded on your portfolio. Not a certificate. A verdict from someone who knows.',
                             gradient: 'from-violet-500 to-fuchsia-500',
                             bg: 'bg-violet-50 dark:bg-violet-950/30',
                             border: 'border-violet-100 dark:border-violet-900',
                         },
                     ].map(({ step, title, body, gradient, bg, border }) => (
-                        <div key={step} className={`relative flex flex-col gap-4 rounded-2xl border p-8 ${bg} ${border}`}>
+                        <div
+                            key={step}
+                            className={`relative flex flex-col gap-4 rounded-2xl border p-8 ${bg} ${border}`}
+                        >
                             <span
-                                style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
-                                className={`bg-gradient-to-r ${gradient} bg-clip-text text-6xl font-black leading-none text-transparent`}
+                                style={{
+                                    fontFamily:
+                                        "'Bricolage Grotesque', sans-serif",
+                                }}
+                                className={`bg-gradient-to-r ${gradient} bg-clip-text text-6xl leading-none font-black text-transparent`}
                             >
                                 {step}
                             </span>
-                            <h3 className="text-xl font-semibold text-foreground">{title}</h3>
+                            <h3 className="text-xl font-semibold text-foreground">
+                                {title}
+                            </h3>
                             <p className="text-muted-foreground">{body}</p>
                         </div>
                     ))}
@@ -391,35 +493,59 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             </FadeIn>
 
             {/* ── FEATURED COURSES ─────────────────────────────────────── */}
-            <section aria-label="Courses" className="border-t border-border bg-muted/30">
+            <section
+                aria-label="Courses"
+                className="border-t border-border bg-muted/30"
+            >
                 <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
                     <div className="mb-10 flex items-end justify-between">
                         <div>
                             <h2
-                                style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                                style={{
+                                    fontFamily:
+                                        "'Bricolage Grotesque', sans-serif",
+                                }}
                                 className="mb-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                             >
                                 Live courses
                             </h2>
-                            <p className="text-muted-foreground">Each one built to produce work — not just completions.</p>
+                            <p className="text-muted-foreground">
+                                Each one built to produce work — not just
+                                completions.
+                            </p>
                         </div>
-                        <Button asChild variant="ghost" size="compact" className="hidden md:flex">
+                        <Button
+                            asChild
+                            variant="ghost"
+                            size="compact"
+                            className="hidden md:flex"
+                        >
                             <Link href={coursesIndex.url(l)}>
-                                View all <ChevronRight className="ml-1 h-4 w-4" />
+                                View all{' '}
+                                <ChevronRight className="ml-1 h-4 w-4" />
                             </Link>
                         </Button>
                     </div>
 
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {courses.length > 0
-                            ? courses.map((course) => <CourseCard key={course.id} course={course} locale={l} />)
-                            : Array.from({ length: 3 }).map((_, i) => <CourseSkeleton key={i} />)}
+                            ? courses.map((course) => (
+                                  <CourseCard
+                                      key={course.id}
+                                      course={course}
+                                      locale={l}
+                                  />
+                              ))
+                            : Array.from({ length: 3 }).map((_, i) => (
+                                  <CourseSkeleton key={i} />
+                              ))}
                     </div>
 
                     <div className="mt-8 text-center md:hidden">
                         <Button asChild variant="ghost">
                             <Link href={coursesIndex.url(l)}>
-                                View all courses <ChevronRight className="ml-1 h-4 w-4" />
+                                View all courses{' '}
+                                <ChevronRight className="ml-1 h-4 w-4" />
                             </Link>
                         </Button>
                     </div>
@@ -434,16 +560,23 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             Your public portfolio
                         </div>
                         <h2
-                            style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                            style={{
+                                fontFamily: "'Bricolage Grotesque', sans-serif",
+                            }}
                             className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                         >
                             A certificate says you sat through it.
-                            <br />This shows what you can actually do.
+                            <br />
+                            This shows what you can actually do.
                         </h2>
                         <p className="mb-6 text-muted-foreground">
-                            Every assignment a mentor endorses, every test you pass — it's all publicly verified at{' '}
+                            Every assignment a mentor endorses, every test you
+                            pass — it's all publicly verified at{' '}
                             <code className="rounded bg-muted px-1.5 py-0.5 text-sm text-foreground">
-                                {typeof window !== 'undefined' ? window.location.host : 'yoursite.com'}/en/u/yourname
+                                {typeof window !== 'undefined'
+                                    ? window.location.host
+                                    : 'yoursite.com'}
+                                /en/u/yourname
                             </code>
                             . One link. No PDFs. No "trust me."
                         </p>
@@ -454,15 +587,22 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 'Pin your strongest pieces — up to 5 featured submissions',
                                 'Share one URL in job applications, LinkedIn, anywhere',
                             ].map((item) => (
-                                <li key={item} className="flex items-start gap-3">
+                                <li
+                                    key={item}
+                                    className="flex items-start gap-3"
+                                >
                                     <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                                    <span className="text-muted-foreground">{item}</span>
+                                    <span className="text-muted-foreground">
+                                        {item}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
                         {canRegister && (
                             <Button asChild variant="enroll">
-                                <Link href={register()}>Build your portfolio</Link>
+                                <Link href={register()}>
+                                    Build your portfolio
+                                </Link>
                             </Button>
                         )}
                     </div>
@@ -474,14 +614,26 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 A
                             </div>
                             <div>
-                                <p className="font-semibold text-foreground">Alex Johnson</p>
-                                <p className="text-sm text-muted-foreground">Full-Stack Developer</p>
+                                <p className="font-semibold text-foreground">
+                                    Alex Johnson
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    Full-Stack Developer
+                                </p>
                             </div>
                         </div>
 
                         <div className="mb-5 flex flex-wrap gap-2">
-                            {['React', 'Laravel', 'TypeScript', 'PostgreSQL'].map((skill) => (
-                                <span key={skill} className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                            {[
+                                'React',
+                                'Laravel',
+                                'TypeScript',
+                                'PostgreSQL',
+                            ].map((skill) => (
+                                <span
+                                    key={skill}
+                                    className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                                >
                                     {skill}
                                 </span>
                             ))}
@@ -489,14 +641,33 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
 
                         <div className="space-y-3">
                             {[
-                                { course: 'Advanced Laravel', score: '94%', endorsed: true },
-                                { course: 'React Patterns', score: '88%', endorsed: true },
-                                { course: 'TypeScript Deep Dive', score: '91%', endorsed: false },
+                                {
+                                    course: 'Advanced Laravel',
+                                    score: '94%',
+                                    endorsed: true,
+                                },
+                                {
+                                    course: 'React Patterns',
+                                    score: '88%',
+                                    endorsed: true,
+                                },
+                                {
+                                    course: 'TypeScript Deep Dive',
+                                    score: '91%',
+                                    endorsed: false,
+                                },
                             ].map(({ course, score, endorsed }) => (
-                                <div key={course} className="flex items-center justify-between rounded-lg bg-muted/60 px-4 py-3">
-                                    <span className="text-sm font-medium text-foreground">{course}</span>
+                                <div
+                                    key={course}
+                                    className="flex items-center justify-between rounded-lg bg-muted/60 px-4 py-3"
+                                >
+                                    <span className="text-sm font-medium text-foreground">
+                                        {course}
+                                    </span>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm text-muted-foreground">{score}</span>
+                                        <span className="text-sm text-muted-foreground">
+                                            {score}
+                                        </span>
                                         {endorsed && (
                                             <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
                                                 Endorsed
@@ -508,51 +679,87 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         </div>
 
                         <p className="mt-4 text-center text-xs text-muted-foreground">
-                            {typeof window !== 'undefined' ? window.location.host : 'yoursite.com'}/en/u/alexjohnson
+                            {typeof window !== 'undefined'
+                                ? window.location.host
+                                : 'yoursite.com'}
+                            /en/u/alexjohnson
                         </p>
                     </div>
                 </div>
             </FadeIn>
 
             {/* ── FOR MENTORS ──────────────────────────────────────────── */}
-            <section aria-label="For mentors" id="for-mentors" className="border-t border-border bg-muted/30">
+            <section
+                aria-label="For mentors"
+                id="for-mentors"
+                className="border-t border-border bg-muted/30"
+            >
                 <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
                     <div className="mx-auto max-w-2xl text-center">
                         <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
                             For mentors
                         </div>
                         <h2
-                            style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                            style={{
+                                fontFamily: "'Bricolage Grotesque', sans-serif",
+                            }}
                             className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                         >
                             Share what you know.
-                            <br />Earn from what you teach.
+                            <br />
+                            Earn from what you teach.
                         </h2>
                         <p className="mb-8 text-muted-foreground">
-                            Build structured courses with modules, rich-text lessons, videos, and real assignments. Review student submissions, write endorsements, and set your own price.
+                            Build structured courses with modules, rich-text
+                            lessons, videos, and real assignments. Review
+                            student submissions, write endorsements, and set
+                            your own price.
                         </p>
                         <div className="flex flex-wrap justify-center gap-3">
                             {canRegister && (
                                 <Button asChild variant="enroll">
-                                    <Link href={register()}>Start teaching</Link>
+                                    <Link href={register()}>
+                                        Start teaching
+                                    </Link>
                                 </Button>
                             )}
                             <Button asChild variant="ghost">
-                                <Link href={`/${l}/about-us`}>Our philosophy</Link>
+                                <Link href={`/${l}/about-us`}>
+                                    Our philosophy
+                                </Link>
                             </Button>
                         </div>
                     </div>
 
                     <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                         {[
-                            { title: 'Rich course builder', body: 'Modules, lessons, videos, articles, and assignments — all in one editor.' },
-                            { title: 'AI-assisted tests', body: 'Auto-generate quiz questions and rubrics, then fine-tune to your standards.' },
-                            { title: 'Submission review', body: 'Review student work, leave written feedback, and endorse strong submissions.' },
-                            { title: 'Flexible pricing', body: 'Set one-time or subscription pricing. Offer coupon codes to your community.' },
+                            {
+                                title: 'Rich course builder',
+                                body: 'Modules, lessons, videos, articles, and assignments — all in one editor.',
+                            },
+                            {
+                                title: 'AI-assisted tests',
+                                body: 'Auto-generate quiz questions and rubrics, then fine-tune to your standards.',
+                            },
+                            {
+                                title: 'Submission review',
+                                body: 'Review student work, leave written feedback, and endorse strong submissions.',
+                            },
+                            {
+                                title: 'Flexible pricing',
+                                body: 'Set one-time or subscription pricing. Offer coupon codes to your community.',
+                            },
                         ].map(({ title, body }) => (
-                            <div key={title} className="rounded-xl border border-border bg-card p-5">
-                                <h3 className="mb-2 font-semibold text-foreground">{title}</h3>
-                                <p className="text-sm text-muted-foreground">{body}</p>
+                            <div
+                                key={title}
+                                className="rounded-xl border border-border bg-card p-5"
+                            >
+                                <h3 className="mb-2 font-semibold text-foreground">
+                                    {title}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {body}
+                                </p>
                             </div>
                         ))}
                     </div>
@@ -564,20 +771,29 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
                     <div className="mb-12 text-center">
                         <h2
-                            style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                            style={{
+                                fontFamily: "'Bricolage Grotesque', sans-serif",
+                            }}
                             className="mb-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                         >
                             Simple pricing
                         </h2>
-                        <p className="text-muted-foreground">No subscriptions required. Pay for what you want.</p>
+                        <p className="text-muted-foreground">
+                            No subscriptions required. Pay for what you want.
+                        </p>
                     </div>
 
                     <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
                         {/* Free */}
                         <div className="flex flex-col rounded-2xl border border-border bg-card p-8">
-                            <p className="mb-1 text-sm font-medium text-muted-foreground">Free forever</p>
+                            <p className="mb-1 text-sm font-medium text-muted-foreground">
+                                Free forever
+                            </p>
                             <p
-                                style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                                style={{
+                                    fontFamily:
+                                        "'Bricolage Grotesque', sans-serif",
+                                }}
                                 className="mb-6 text-4xl font-bold text-foreground"
                             >
                                 $0
@@ -590,29 +806,45 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     'Public portfolio page',
                                     'Chat with the platform AI',
                                 ].map((item) => (
-                                    <li key={item} className="flex items-center gap-3 text-sm text-muted-foreground">
+                                    <li
+                                        key={item}
+                                        className="flex items-center gap-3 text-sm text-muted-foreground"
+                                    >
                                         <CheckCircle className="h-4 w-4 shrink-0 text-primary" />
                                         {item}
                                     </li>
                                 ))}
                             </ul>
                             {canRegister && (
-                                <Button asChild variant="secondary" className="w-full">
-                                    <Link href={register()}>Get started free</Link>
+                                <Button
+                                    asChild
+                                    variant="secondary"
+                                    className="w-full"
+                                >
+                                    <Link href={register()}>
+                                        Get started free
+                                    </Link>
                                 </Button>
                             )}
                         </div>
 
                         {/* Per course */}
                         <div className="flex flex-col rounded-2xl border border-primary/50 bg-card p-8 shadow-sm ring-1 ring-primary/20">
-                            <p className="mb-1 text-sm font-medium text-primary">Per course</p>
+                            <p className="mb-1 text-sm font-medium text-primary">
+                                Per course
+                            </p>
                             <p
-                                style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                                style={{
+                                    fontFamily:
+                                        "'Bricolage Grotesque', sans-serif",
+                                }}
                                 className="mb-1 text-4xl font-bold text-foreground"
                             >
                                 Mentor's price
                             </p>
-                            <p className="mb-6 text-sm text-muted-foreground">One-time or subscription, set by the mentor.</p>
+                            <p className="mb-6 text-sm text-muted-foreground">
+                                One-time or subscription, set by the mentor.
+                            </p>
                             <ul className="mb-8 flex-1 space-y-3">
                                 {[
                                     'Everything in Free',
@@ -622,14 +854,19 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     'Achievements on your portfolio',
                                     'Coupon codes accepted',
                                 ].map((item) => (
-                                    <li key={item} className="flex items-center gap-3 text-sm text-muted-foreground">
+                                    <li
+                                        key={item}
+                                        className="flex items-center gap-3 text-sm text-muted-foreground"
+                                    >
                                         <CheckCircle className="h-4 w-4 shrink-0 text-primary" />
                                         {item}
                                     </li>
                                 ))}
                             </ul>
                             <Button asChild variant="enroll" className="w-full">
-                                <Link href={coursesIndex.url(l)}>Browse courses</Link>
+                                <Link href={coursesIndex.url(l)}>
+                                    Browse courses
+                                </Link>
                             </Button>
                         </div>
                     </div>
@@ -637,41 +874,78 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             </section>
 
             {/* ── FINAL CTA ─────────────────────────────────────────────── */}
-            <section aria-label="Get started" className="border-t border-border bg-primary/5">
+            <section
+                aria-label="Get started"
+                className="border-t border-border bg-primary/5"
+            >
                 <FadeIn className="mx-auto max-w-7xl px-4 py-20 text-center md:px-6 md:py-24">
                     <h2
-                        style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                        style={{
+                            fontFamily: "'Bricolage Grotesque', sans-serif",
+                        }}
                         className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                     >
                         Your next job application should link here.
                     </h2>
                     <p className="mb-8 text-muted-foreground">
-                        Stop attaching PDFs. Build a portfolio of mentor-endorsed work and send one link that does the talking for you.
+                        Stop attaching PDFs. Build a portfolio of
+                        mentor-endorsed work and send one link that does the
+                        talking for you.
                     </p>
                     {canRegister && (
                         <Button asChild variant="enroll" size="lg">
                             <Link href={register()}>
-                                Sign up free <ArrowRight className="ml-2 h-4 w-4" />
+                                Sign up free{' '}
+                                <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
                         </Button>
                     )}
-                    <p className="mt-3 text-xs text-muted-foreground">No credit card required.</p>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                        No credit card required.
+                    </p>
                 </FadeIn>
             </section>
 
             {/* ── FOOTER ───────────────────────────────────────────────── */}
-            <footer role="contentinfo" className="border-t border-border bg-background">
+            <footer
+                role="contentinfo"
+                className="border-t border-border bg-background"
+            >
                 <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
                     <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
                         <div className="flex items-center gap-2">
-                            <img src="/logo.png" alt={appName} width={24} height={24} className="h-6 w-6" />
-                            <span className="text-sm font-semibold text-foreground">{appName}</span>
+                            <img
+                                src="/logo.png"
+                                alt={appName}
+                                width={24}
+                                height={24}
+                                className="h-6 w-6"
+                            />
+                            <span className="text-sm font-semibold text-foreground">
+                                {appName}
+                            </span>
                         </div>
 
-                        <nav aria-label="Footer navigation" className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-                            <Link href={coursesIndex.url(l)} className="hover:text-foreground">Courses</Link>
-                            <Link href={`/${l}/about-us`} className="hover:text-foreground">About</Link>
-                            <Link href={`/${l === 'en' ? 'bn' : 'en'}/`} className="hover:text-foreground">
+                        <nav
+                            aria-label="Footer navigation"
+                            className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
+                        >
+                            <Link
+                                href={coursesIndex.url(l)}
+                                className="hover:text-foreground"
+                            >
+                                Courses
+                            </Link>
+                            <Link
+                                href={`/${l}/about-us`}
+                                className="hover:text-foreground"
+                            >
+                                About
+                            </Link>
+                            <Link
+                                href={`/${l === 'en' ? 'bn' : 'en'}/`}
+                                className="hover:text-foreground"
+                            >
                                 {l === 'en' ? 'বাংলা' : 'English'}
                             </Link>
                         </nav>

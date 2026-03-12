@@ -11,6 +11,7 @@ return [
         'courses' => 'Courses',
         'categories' => 'Categories',
         'analytics' => 'Analytics',
+        'submissions' => 'Submissions',
 
         // Learner / Mentor panel
         'my_courses' => 'My Courses',

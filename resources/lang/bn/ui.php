@@ -11,6 +11,7 @@ return [
         'courses' => 'কোর্সসমূহ',
         'categories' => 'বিভাগসমূহ',
         'analytics' => 'বিশ্লেষণ',
+        'submissions' => 'সাবমিশন',
 
         // Learner / Mentor panel
         'my_courses' => 'আমার কোর্স',

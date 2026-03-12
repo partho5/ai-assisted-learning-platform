@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ChatSessionController as AdminChatSessionController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\SubmissionController as AdminSubmissionController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AiHelpController;
 use App\Http\Controllers\ChatHistoryController;
@@ -62,6 +63,7 @@ Route::prefix('{locale}')
         // Admin-only routes
         Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
             Route::get('admin/chats/{chatSession}', [AdminChatSessionController::class, 'show'])->name('admin.chats.show');
+            Route::get('admin/submissions', [AdminSubmissionController::class, 'index'])->name('admin.submissions.index');
         });
 
         // Admin category management
