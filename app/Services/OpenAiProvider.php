@@ -128,6 +128,7 @@ PROMPT;
                 'model' => $model,
                 'messages' => $messages,
                 'stream' => true,
+                'stream_options' => ['include_usage' => true],
             ]);
 
         if (! $response->successful()) {
@@ -135,6 +136,8 @@ PROMPT;
         }
 
         $body = $response->getBody();
+        $inputTokens = 0;
+        $outputTokens = 0;
 
         while (! $body->eof()) {
             $line = '';
@@ -165,6 +168,17 @@ PROMPT;
             if ($content !== null) {
                 $onChunk($content);
             }
+
+            // Capture usage from the final chunk (some OpenAI responses include it)
+            if (isset($chunk['usage'])) {
+                $inputTokens = $chunk['usage']['prompt_tokens'] ?? 0;
+                $outputTokens = $chunk['usage']['completion_tokens'] ?? 0;
+            }
+        }
+
+        // Log tokens if captured (even if 0, still log for consistency)
+        if ($inputTokens > 0 || $outputTokens > 0) {
+            $this->logTokens('chat', $inputTokens, $outputTokens);
         }
     }
 
