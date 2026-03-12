@@ -1,5 +1,8 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { BookOpen, CheckCircle, Clock, CreditCard } from 'lucide-react';
+import { platform } from '@/actions/App/Http/Controllers/AiChatController';
+import { index as chatHistory } from '@/routes/chat/history';
+import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
@@ -87,6 +90,16 @@ export default function Dashboard({ enrolledCourses, payments, stats }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: ui.nav.dashboard, href: `/${l}/dashboard` },
     ];
+
+    const chatContext = {
+        type: 'platform' as const,
+        key: 'dashboard',
+        endpoint: platform.url(l),
+        historyEndpoint: chatHistory.url(l),
+        locale: l,
+        autoTrigger: true,
+        pageContext: 'Learner dashboard — shows enrolled courses, progress percentages, and payment history.',
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -257,6 +270,8 @@ export default function Dashboard({ enrolledCourses, payments, stats }: Props) {
                     )}
                 </div>
             </div>
+
+            <FloatingChatButton context={chatContext} />
         </AppLayout>
     );
 }

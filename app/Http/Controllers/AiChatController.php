@@ -35,20 +35,22 @@ class AiChatController extends Controller
         $meta = $this->buildContextMeta($request);
         $courses = $request->validated('courses', []) ?? [];
         $message = $request->validated('message');
+        $isTrigger = (bool) $request->validated('is_trigger', false);
+        $pageContext = $request->validated('page_context');
 
         // Courses list page uses its own context builder — no RAG needed (data already in prompt)
         if (! empty($courses)) {
-            $systemPrompt = CoursesListChatContext::buildSystemPrompt($courses, $meta);
+            $systemPrompt = CoursesListChatContext::buildSystemPrompt($courses, $meta, $isTrigger);
         } else {
             $ragResult = $this->rag->retrieve($message, null, null);
             $chunks = $this->chunksFromResult($ragResult);
-            $systemPrompt = PlatformChatContext::buildSystemPrompt($meta, $chunks);
+            $systemPrompt = PlatformChatContext::buildSystemPrompt($meta, $chunks, $isTrigger, $pageContext);
         }
 
         $session = $this->resolveSession($request, 'platform');
-        $history = $this->buildHistory($request);
+        $history = $this->buildHistory($request, $isTrigger);
 
-        return $this->stream($this->ai, $systemPrompt, $history, $session, $message);
+        return $this->stream($this->ai, $systemPrompt, $history, $session, $message, $isTrigger);
     }
 
     /**
@@ -59,15 +61,16 @@ class AiChatController extends Controller
         $course->load('modules.resources');
         $meta = $this->buildContextMeta($request, $course);
         $message = $request->validated('message');
+        $isTrigger = (bool) $request->validated('is_trigger', false);
 
         $ragResult = $this->rag->retrieve($message, 'course', $course->id);
         $chunks = $this->chunksFromResult($ragResult);
-        $systemPrompt = CourseChatContext::buildSystemPrompt($course, $meta, $chunks);
+        $systemPrompt = CourseChatContext::buildSystemPrompt($course, $meta, $chunks, $isTrigger);
 
         $session = $this->resolveSession($request, 'course');
-        $history = $this->buildHistory($request);
+        $history = $this->buildHistory($request, $isTrigger);
 
-        return $this->stream($this->ai, $systemPrompt, $history, $session, $message);
+        return $this->stream($this->ai, $systemPrompt, $history, $session, $message, $isTrigger);
     }
 
     /**
@@ -78,6 +81,7 @@ class AiChatController extends Controller
         $resource->load('module');
         $meta = $this->buildContextMeta($request, $course);
         $message = $request->validated('message');
+        $isTrigger = (bool) $request->validated('is_trigger', false);
 
         $ragResult = $this->rag->retrieve($message, 'resource', $resource->id);
 
@@ -87,12 +91,12 @@ class AiChatController extends Controller
         }
 
         $chunks = $this->chunksFromResult($ragResult);
-        $systemPrompt = ResourceChatContext::buildSystemPrompt($resource, $course, $meta, $chunks);
+        $systemPrompt = ResourceChatContext::buildSystemPrompt($resource, $course, $meta, $chunks, $isTrigger);
 
         $session = $this->resolveSession($request, 'resource');
-        $history = $this->buildHistory($request);
+        $history = $this->buildHistory($request, $isTrigger);
 
-        return $this->stream($this->ai, $systemPrompt, $history, $session, $message);
+        return $this->stream($this->ai, $systemPrompt, $history, $session, $message, $isTrigger);
     }
 
     /**
@@ -124,9 +128,12 @@ class AiChatController extends Controller
         array $history,
         ?ChatSession $session,
         string $userMessage,
+        bool $isTrigger = false,
     ): StreamedResponse {
-        // Persist user message immediately
-        $session?->messages()->create(['role' => 'user', 'content' => $userMessage]);
+        // Don't persist the hidden trigger token as a user message in chat history
+        if (! $isTrigger) {
+            $session?->messages()->create(['role' => 'user', 'content' => $userMessage]);
+        }
 
         return response()->stream(function () use ($ai, $systemPrompt, $history, $session): void {
             $fullContent = '';
@@ -159,12 +166,18 @@ class AiChatController extends Controller
     }
 
     /**
-     * Build the full message history including the new user message.
+     * Build the message history for the LLM.
+     * For trigger calls, returns a minimal history with just the trigger token as the user turn.
+     * The trigger token is never persisted — only the assistant's response is saved.
      *
      * @return array<int, array{role: 'user'|'assistant', content: string}>
      */
-    private function buildHistory(AiChatRequest $request): array
+    private function buildHistory(AiChatRequest $request, bool $isTrigger = false): array
     {
+        if ($isTrigger) {
+            return [['role' => 'user', 'content' => '__coach_open__']];
+        }
+
         $history = $request->validated('history', []) ?? [];
         $history[] = ['role' => 'user', 'content' => $request->validated('message')];
 

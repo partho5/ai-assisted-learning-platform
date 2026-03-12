@@ -88,6 +88,7 @@ export default function CourseCatalog({ courses, categories, difficulties, filte
             historyEndpoint: chatHistory.url(l),
             locale: l,
             extra: { courses: visibleCourses },
+            autoTrigger: true,
         }),
         [l, visibleCourses],
     );

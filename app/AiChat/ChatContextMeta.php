@@ -16,6 +16,15 @@ readonly class ChatContextMeta
     ) {}
 
     /**
+     * Coaching mode is active for paid-tier users or learners with full course access.
+     * In coaching mode the bot acts as a proactive tutor, not a passive Q&A assistant.
+     */
+    public function isCoachingMode(): bool
+    {
+        return $this->userTier === 'paid' || $this->courseAccess === 'full';
+    }
+
+    /**
      * Single-line context injection used in every system prompt template.
      */
     public function toContextLine(): string

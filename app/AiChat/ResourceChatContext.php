@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 class ResourceChatContext
 {
-    public static function buildSystemPrompt(Resource $resource, Course $course, ChatContextMeta $meta, ?Collection $chunks = null): string
+    public static function buildSystemPrompt(Resource $resource, Course $course, ChatContextMeta $meta, ?Collection $chunks = null, bool $isTrigger = false): string
     {
         $appName = config('app.name', 'SkillEvidence');
         $resourceType = $resource->type instanceof \App\Enums\ResourceType
@@ -64,15 +64,37 @@ class ResourceChatContext
             $lines[] = $plainText;
         }
 
+        if ($meta->isCoachingMode()) {
+            $lines[] = '';
+            $lines[] = '## Coaching Mandate';
+            $lines[] = 'You are a dedicated learning coach, not a passive Q&A bot. You have an agenda: move this learner forward.';
+            $lines[] = '- End EVERY response with a concrete next step (finish this resource, attempt the test, revisit a weak area, move to the next module).';
+            $lines[] = '- Before giving away an explanation, probe first — ask what they already understand to find the exact gap.';
+            $lines[] = '- After explaining, follow up: "Can you put that in your own words?" or "Want me to test you on this before you move on?"';
+            $lines[] = '- Never end with "Let me know if you have questions." End with a directive or a specific question that creates momentum.';
+            $lines[] = '- If they go off-topic, answer briefly then redirect: "Now, back to [topic] — [next step]."';
+            $lines[] = '- High expectations, warm support. They paid for real learning — deliver it.';
+        }
+
         $lines[] = '';
-        $lines[] = '## Your Role';
-        $lines[] = '- Help the learner understand concepts from this resource';
-        $lines[] = '- Give real-world examples, analogies, and clarifications';
-        $lines[] = '- Answer follow-up questions and help them go deeper';
-        $lines[] = '- If the resource is a video or article you cannot read, use the title and context above to guide your answers';
-        $lines[] = '- NEVER reveal test answers, rubrics, or grading criteria';
-        $lines[] = '- Keep responses concise (under 250 words) unless a detailed explanation is genuinely needed';
-        $lines[] = '- Use markdown for code blocks and bullet points when helpful';
+
+        if ($isTrigger) {
+            $lines[] = '## Session Opener';
+            $lines[] = 'The learner just opened this chat (system-initiated). Do NOT wait for them to ask something.';
+            $lines[] = 'Generate a 2–3 sentence coaching opener that:';
+            $lines[] = '1. Acknowledges exactly where they are (this specific resource and their progress if known).';
+            $lines[] = '2. Ends with ONE concrete directive or question to engage them immediately.';
+            $lines[] = 'Do NOT say "How can I help?" or "What would you like to know?" — you lead this session.';
+        } else {
+            $lines[] = '## Your Role';
+            $lines[] = '- Help the learner understand concepts from this resource';
+            $lines[] = '- Give real-world examples, analogies, and clarifications';
+            $lines[] = '- Answer follow-up questions and help them go deeper';
+            $lines[] = '- If the resource is a video or article you cannot read, use the title and context above to guide your answers';
+            $lines[] = '- NEVER reveal test answers, rubrics, or grading criteria';
+            $lines[] = '- Keep responses concise (under 250 words) unless a detailed explanation is genuinely needed';
+            $lines[] = '- Use markdown for code blocks and bullet points when helpful';
+        }
 
         return implode("\n", $lines);
     }

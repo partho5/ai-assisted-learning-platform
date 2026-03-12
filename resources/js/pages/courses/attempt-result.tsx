@@ -2,6 +2,9 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { usePoll } from '@inertiajs/react';
 import { Star } from 'lucide-react';
 import { toggleShowcase } from '@/actions/App/Http/Controllers/PortfolioController';
+import { platform } from '@/actions/App/Http/Controllers/AiChatController';
+import { index as chatHistory } from '@/routes/chat/history';
+import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -91,6 +94,16 @@ export default function AttemptResult({ attempt, isShowcased }: Props) {
     const passScore = attempt.test.passing_score;
     const passed = passScore !== null && attempt.score !== null && attempt.score >= passScore;
 
+    const chatContext = {
+        type: 'platform' as const,
+        key: `attempt-${attempt.id}`,
+        endpoint: platform.url(l),
+        historyEndpoint: chatHistory.url(l),
+        locale: l,
+        autoTrigger: !isGrading,
+        pageContext: `Attempt result page. Test: "${attempt.test.title}", Score: ${attempt.score ?? '?'}%${passScore !== null ? `, Passing score: ${passScore}%` : ''}, Status: ${attempt.status}${passed ? ' (passed)' : passScore !== null ? ' (not passed)' : ''}.`,
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Result — ${attempt.test.title}`} />
@@ -157,6 +170,8 @@ export default function AttemptResult({ attempt, isShowcased }: Props) {
                     Back
                 </Button>
             </div>
+
+            <FloatingChatButton context={chatContext} />
         </AppLayout>
     );
 }

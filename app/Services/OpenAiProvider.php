@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\AiProvider;
+use App\Models\AiTokenLog;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -59,6 +60,10 @@ PROMPT;
             throw new RuntimeException('AI grading failed: '.$response->body());
         }
 
+        $inputTokens = $response->json('usage.prompt_tokens', 0);
+        $outputTokens = $response->json('usage.completion_tokens', 0);
+        $this->logTokens('grade', $inputTokens, $outputTokens);
+
         $content = $response->json('choices.0.message.content', '{}');
         $result = json_decode($content, true) ?? [];
 
@@ -98,14 +103,19 @@ PROMPT;
             throw new RuntimeException('AI hint failed: '.$response->body());
         }
 
+        $inputTokens = $response->json('usage.prompt_tokens', 0);
+        $outputTokens = $response->json('usage.completion_tokens', 0);
+        $this->logTokens('hint', $inputTokens, $outputTokens);
+
         return $response->json('choices.0.message.content', 'I am not able to provide a hint right now. Please try again.');
     }
 
     /**
      * @param  array<int, array{role: 'user'|'assistant', content: string}>  $history
      */
-    public function streamChat(string $systemPrompt, array $history, callable $onChunk, string $model = 'gpt-4o-mini'): void
+    public function streamChat(string $systemPrompt, array $history, callable $onChunk, ?string $model = null): void
     {
+        $model ??= $this->model;
         $messages = array_merge(
             [['role' => 'system', 'content' => $systemPrompt]],
             $history,
@@ -185,7 +195,28 @@ PROMPT;
                 throw new RuntimeException('Embedding API failed: '.$response->body());
             }
 
+            $inputTokens = $response->json('usage.prompt_tokens', 0);
+            $this->logTokens('embed', $inputTokens, null);
+
             return $response->json('data.0.embedding', []);
         });
+    }
+
+    /**
+     * Log token usage for analytics and cost tracking.
+     */
+    private function logTokens(string $method, int $inputTokens, ?int $outputTokens): void
+    {
+        try {
+            AiTokenLog::create([
+                'model' => $this->model,
+                'method' => $method,
+                'input_tokens' => $inputTokens,
+                'output_tokens' => $outputTokens,
+                'cost_cents' => AiTokenLog::calculateCost($this->model, $inputTokens, $outputTokens),
+            ]);
+        } catch (Exception $e) {
+            // Silently fail — logging should never break the app
+        }
     }
 }

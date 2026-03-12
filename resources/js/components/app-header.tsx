@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { BarChart2, BookMarked, BookOpen, LayoutGrid, Menu, User, Users } from 'lucide-react';
+import { BarChart2, BookMarked, BookOpen, LayoutGrid, Menu, User, Users, Zap } from 'lucide-react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,7 @@ function buildNavItems(role: string, locale: string, nav: UiTranslations['nav'])
             { title: nav.users, href: `${prefix}/admin/users`, icon: Users },
             { title: nav.courses, href: `${prefix}/courses`, icon: BookOpen },
             { title: nav.analytics, href: `${prefix}/admin/analytics`, icon: BarChart2 },
+            { title: 'AI Stats', href: `${prefix}/admin/ai-stats`, icon: Zap },
         ];
     }
 

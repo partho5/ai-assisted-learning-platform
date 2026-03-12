@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, ClipboardList, LayoutGrid, Tag, Users } from 'lucide-react';
+import { BookOpen, ClipboardList, LayoutGrid, Tag, Users, Zap } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -32,6 +32,7 @@ export function AppSidebar() {
             { title: ui.nav.users, href: `/${locale}/admin/users`, icon: Users },
             { title: ui.nav.categories, href: `/${locale}/admin/categories`, icon: Tag },
             { title: ui.nav.submissions, href: `/${locale}/admin/submissions`, icon: ClipboardList },
+            { title: 'AI Stats', href: `/${locale}/admin/ai-stats`, icon: Zap },
         ]
         : isMentor
           ? [

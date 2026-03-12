@@ -89,12 +89,17 @@ export function FloatingChatButton({ context, className }: Props) {
         setIsMinimized((v) => !v);
     }
 
+    function handleAutoTrigger() {
+        setIsOpen(true);
+        setIsMinimized(false);
+    }
+
     return (
         <>
             <style>{STYLES}</style>
 
             <ChatPanel
-                context={context}
+                context={{ ...context, onAutoTrigger: handleAutoTrigger }}
                 isOpen={isOpen}
                 isMinimized={isMinimized}
                 onClose={handleClose}

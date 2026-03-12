@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 class CourseChatContext
 {
-    public static function buildSystemPrompt(Course $course, ChatContextMeta $meta, ?Collection $chunks = null): string
+    public static function buildSystemPrompt(Course $course, ChatContextMeta $meta, ?Collection $chunks = null, bool $isTrigger = false): string
     {
         $appName = config('app.name', 'SkillEvidence');
 
@@ -66,14 +66,34 @@ class CourseChatContext
             }
         }
 
+        if ($meta->isCoachingMode()) {
+            $lines[] = '';
+            $lines[] = '## Coaching Mandate';
+            $lines[] = 'You are a dedicated learning coach, not a passive Q&A bot. You have an agenda: move this learner forward.';
+            $lines[] = '- End EVERY response with a concrete next step (start the next module, tackle an incomplete resource, attempt a pending test).';
+            $lines[] = '- Use their progress data above to personalise every nudge — reference specific modules or their completion percentage.';
+            $lines[] = '- Never end with "Let me know if you have questions." End with a directive that creates momentum.';
+            $lines[] = '- High expectations, warm support.';
+        }
+
         $lines[] = '';
-        $lines[] = '## Your Role';
-        $lines[] = '- Answer questions about what this course covers and who it is for';
-        $lines[] = '- Help the visitor decide if this course is right for them';
-        $lines[] = '- Explain topics mentioned in the course title or modules at a surface level';
-        $lines[] = '- Guide them on enrollment options (observer = free preview, full access = paid or Paid tier)';
-        $lines[] = '- Keep responses concise (under 200 words) unless more detail is genuinely needed';
-        $lines[] = '- Use markdown for bullet points when helpful';
+
+        if ($isTrigger) {
+            $lines[] = '## Session Opener';
+            $lines[] = 'The learner just opened this chat (system-initiated). Do NOT wait for them to ask something.';
+            $lines[] = 'Generate a 2–3 sentence coaching opener that:';
+            $lines[] = '1. References this specific course and their progress (% complete, modules done, etc.).';
+            $lines[] = '2. Ends with ONE concrete directive to move them forward right now.';
+            $lines[] = 'Do NOT say "How can I help?" or "What would you like to know?" — you lead this session.';
+        } else {
+            $lines[] = '## Your Role';
+            $lines[] = '- Answer questions about what this course covers and who it is for';
+            $lines[] = '- Help the visitor decide if this course is right for them';
+            $lines[] = '- Explain topics mentioned in the course title or modules at a surface level';
+            $lines[] = '- Guide them on enrollment options (observer = free preview, full access = paid or Paid tier)';
+            $lines[] = '- Keep responses concise (under 200 words) unless more detail is genuinely needed';
+            $lines[] = '- Use markdown for bullet points when helpful';
+        }
 
         return implode("\n", $lines);
     }

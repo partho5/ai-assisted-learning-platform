@@ -48,6 +48,7 @@ export default function CourseShow({ course, enrollment }: Props) {
         endpoint: courseChatAction.url({ locale: l, course: course.slug }),
         historyEndpoint: chatHistory.url(l),
         locale: l,
+        autoTrigger: !!enrollment,
     };
 
     return (
@@ -204,7 +205,7 @@ export default function CourseShow({ course, enrollment }: Props) {
                                                                         ] ??
                                                                             resource.type}
                                                                     </Badge>
-                                                                    {resource.is_free ? (
+                                                                    {resource.is_free || enrollment?.access_level === 'full' ? (
                                                                         <Link
                                                                             href={`/${l}/courses/${course.slug}/learn/${resource.id}`}
                                                                             className="leading-snug font-medium text-blue-600 hover:text-primary hover:underline"

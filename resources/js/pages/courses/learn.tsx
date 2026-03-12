@@ -585,7 +585,8 @@ export default function Learn({ course, initialResourceId, resources, enrollment
         endpoint: resourceChatAction.url({ locale: l, course: course.slug, resource: activeResourceId }),
         historyEndpoint: chatHistory.url(l),
         locale: l,
-    }), [activeResourceId, activeResource, l, course.slug]);
+        autoTrigger: enrollment?.access_level === 'full',
+    }), [activeResourceId, activeResource, l, course.slug, enrollment?.access_level]);
     const mainRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const resourceRefs = useRef<Map<number, HTMLElement>>(new Map());
@@ -728,7 +729,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                                                 onClick={() =>
                                                     scrollToResource(r.id)
                                                 }
-                                                className={`bg-blue-50dark:bg-blue-950/40 flex w-full items-center gap-2 rounded px-2 py-2 text-left text-sm text-gray-900 transition-colors dark:text-gray-100 ${
+                                                className={`bg-blue-50dark:bg-blue-950/40 flex w-full items-center gap-2 px-2 py-2 text-left text-sm text-gray-900 transition-colors dark:text-gray-100 ${
                                                     isActive
                                                         ? 'border-blue-600 bg-sky-200 font-medium dark:bg-sky-600'
                                                         : ''

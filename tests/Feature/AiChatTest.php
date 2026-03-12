@@ -178,6 +178,110 @@ class AiChatTest extends TestCase
     }
 
     // ──────────────────────────────────────────────
+    // Coaching trigger
+    // ──────────────────────────────────────────────
+
+    public function test_trigger_fires_for_platform_chat_and_does_not_persist_user_message(): void
+    {
+        $this->mockAiStreamChat('Welcome back! You have 40% progress on Python. Ready to continue?');
+
+        $user = User::factory()->learner()->create();
+
+        $this->actingAs($user)
+            ->postJson(route('chat.platform', ['locale' => 'en']), [
+                'message' => '__coach_open__',
+                'is_trigger' => true,
+                'context_key' => 'dashboard',
+            ])->assertOk()
+            ->assertHeaderContains('Content-Type', 'text/event-stream');
+
+        // The hidden trigger token must never appear as a user message in the DB
+        $this->assertDatabaseMissing('chat_messages', [
+            'role' => 'user',
+            'content' => '__coach_open__',
+        ]);
+    }
+
+    public function test_trigger_fires_for_resource_chat(): void
+    {
+        $this->mockAiStreamChat('I see you\'re on Pandas DataFrames. What do you already know about tabular data?');
+
+        [$course, $resource] = $this->createCourseWithResource(isFree: false);
+
+        $this->actingAs(User::factory()->learner()->create())
+            ->postJson(
+                route('chat.resource', ['locale' => 'en', 'course' => $course, 'resource' => $resource]),
+                [
+                    'message' => '__coach_open__',
+                    'is_trigger' => true,
+                    'context_key' => "resource-{$resource->id}",
+                ],
+            )->assertOk();
+
+        $this->assertDatabaseMissing('chat_messages', [
+            'role' => 'user',
+            'content' => '__coach_open__',
+        ]);
+    }
+
+    public function test_coaching_mandate_appears_in_system_prompt_for_paid_user(): void
+    {
+        $meta = new \App\AiChat\ChatContextMeta(
+            authStatus: 'authenticated',
+            userTier: 'paid',
+            courseAccess: 'none',
+        );
+
+        $prompt = \App\AiChat\PlatformChatContext::buildSystemPrompt($meta, collect(), false);
+
+        $this->assertStringContainsString('Coaching Mandate', $prompt);
+        $this->assertStringNotContainsString('Session Opener', $prompt);
+    }
+
+    public function test_coaching_mandate_absent_for_free_user(): void
+    {
+        $meta = new \App\AiChat\ChatContextMeta(
+            authStatus: 'authenticated',
+            userTier: 'free',
+            courseAccess: 'none',
+        );
+
+        $prompt = \App\AiChat\PlatformChatContext::buildSystemPrompt($meta, collect(), false);
+
+        $this->assertStringNotContainsString('Coaching Mandate', $prompt);
+    }
+
+    public function test_session_opener_appears_in_system_prompt_on_trigger(): void
+    {
+        $meta = new \App\AiChat\ChatContextMeta(
+            authStatus: 'authenticated',
+            userTier: 'paid',
+            courseAccess: 'none',
+        );
+
+        $prompt = \App\AiChat\PlatformChatContext::buildSystemPrompt($meta, collect(), isTrigger: true);
+
+        $this->assertStringContainsString('Coaching Mandate', $prompt);
+        $this->assertStringContainsString('Session Opener', $prompt);
+    }
+
+    public function test_resource_context_includes_coaching_mandate_for_full_access(): void
+    {
+        $meta = new \App\AiChat\ChatContextMeta(
+            authStatus: 'authenticated',
+            userTier: 'free',
+            courseAccess: 'full',
+        );
+
+        [$course, $resource] = $this->createCourseWithResource(isFree: false);
+        $resource->load('module');
+
+        $prompt = \App\AiChat\ResourceChatContext::buildSystemPrompt($resource, $course, $meta, collect(), isTrigger: false);
+
+        $this->assertStringContainsString('Coaching Mandate', $prompt);
+    }
+
+    // ──────────────────────────────────────────────
     // Helpers
     // ──────────────────────────────────────────────
 

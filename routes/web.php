@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AiStatsController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ChatSessionController as AdminChatSessionController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -64,6 +65,7 @@ Route::prefix('{locale}')
         Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
             Route::get('admin/chats/{chatSession}', [AdminChatSessionController::class, 'show'])->name('admin.chats.show');
             Route::get('admin/submissions', [AdminSubmissionController::class, 'index'])->name('admin.submissions.index');
+            Route::get('admin/ai-stats', [AiStatsController::class, 'index'])->name('admin.ai-stats');
         });
 
         // Admin category management

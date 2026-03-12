@@ -28,6 +28,8 @@ class AiChatRequest extends FormRequest
             'guest_user_id' => ['nullable', 'string', 'max:120'],
             'context_key' => ['nullable', 'string', 'max:100'],
             'context_url' => ['nullable', 'string', 'max:2000'],
+            'is_trigger' => ['nullable', 'boolean'],
+            'page_context' => ['nullable', 'string', 'max:500'],
         ];
     }
 }
