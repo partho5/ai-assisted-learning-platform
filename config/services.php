@@ -40,6 +40,10 @@ return [
         'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
     ],
 
+    'dropbox' => [
+        'access_token' => env('DROPBOX_ACCESS_TOKEN'),
+    ],
+
     'paypal' => [
         'client_id' => env('PAYPAL_CLIENT_ID'),
         'client_secret' => env('PAYPAL_CLIENT_SECRET'),
