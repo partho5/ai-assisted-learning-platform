@@ -2,9 +2,11 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Award, BookOpen, CheckCircle2, ExternalLink } from 'lucide-react';
 import { show as portfolioShow } from '@/actions/App/Http/Controllers/PublicProfileController';
 import { toggleShowcase } from '@/actions/App/Http/Controllers/PortfolioController';
+import CourseCard from '@/components/course-card';
+import MentorCard from '@/components/mentor-card';
 import { Badge } from '@/components/ui/badge';
 import PublicLayout from '@/layouts/public-layout';
-import type { Category, PortfolioVisibility } from '@/types';
+import type { Category, Course, PortfolioVisibility } from '@/types';
 
 interface ProfileData {
     name: string;
@@ -49,12 +51,13 @@ interface ShowcasedAttempt {
 interface Props {
     profile: ProfileData;
     stats: Stats | null;
+    taughtCourses: Course[];
     enrolledCourses: EnrolledCourse[];
     showcasedAttempts: ShowcasedAttempt[];
     isPrivate?: boolean;
 }
 
-export default function PublicPortfolio({ profile, stats, enrolledCourses, showcasedAttempts, isPrivate = false }: Props) {
+export default function PublicPortfolio({ profile, stats, taughtCourses, enrolledCourses, showcasedAttempts, isPrivate = false }: Props) {
     const { locale, auth } = usePage().props;
     const l = String(locale);
 
@@ -88,55 +91,26 @@ export default function PublicPortfolio({ profile, stats, enrolledCourses, showc
             {/* Profile header */}
             <section className="border-b border-border bg-muted/30 px-4 py-10 md:px-6 md:py-14">
                 <div className="mx-auto max-w-4xl">
-                    <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-                        {/* Avatar */}
-                        {profile.avatar ? (
-                            <img
-                                src={profile.avatar}
-                                alt={profile.name}
-                                className="h-20 w-20 shrink-0 rounded-full object-cover ring-2 ring-border"
-                            />
-                        ) : (
-                            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary/10 text-2xl font-bold text-primary ring-2 ring-border">
-                                {profile.name.charAt(0).toUpperCase()}
+                    <MentorCard mentor={profile} locale={l} variant="hero">
+                        {profile.portfolio_visibility === 'unlisted' && (
+                            <Badge variant="outline" className="mt-2 text-xs">Unlisted</Badge>
+                        )}
+                        {isOwner && (
+                            <div className="mt-3 flex gap-2">
+                                <Link href="/settings/profile" className="text-xs text-primary hover:underline">
+                                    Edit profile
+                                </Link>
+                                <span className="text-xs text-muted-foreground">·</span>
+                                <Link
+                                    href={portfolioShow.url({ locale: l, username: profile.username })}
+                                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                                >
+                                    <ExternalLink className="h-3 w-3" />
+                                    Copy link
+                                </Link>
                             </div>
                         )}
-
-                        <div className="flex-1">
-                            <div className="flex flex-wrap items-center gap-3">
-                                <h1 className="text-2xl font-bold tracking-tight">{profile.name}</h1>
-                                {profile.portfolio_visibility === 'unlisted' && (
-                                    <Badge variant="outline" className="text-xs">Unlisted</Badge>
-                                )}
-                            </div>
-                            <p className="text-sm text-muted-foreground">@{profile.username}</p>
-                            {profile.headline && (
-                                <p className="mt-1 text-base text-foreground">{profile.headline}</p>
-                            )}
-                            {profile.bio && (
-                                <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-prose">{profile.bio}</p>
-                            )}
-
-                            {isOwner && (
-                                <div className="mt-3 flex gap-2">
-                                    <Link
-                                        href="/settings/profile"
-                                        className="text-xs text-primary hover:underline"
-                                    >
-                                        Edit profile
-                                    </Link>
-                                    <span className="text-xs text-muted-foreground">·</span>
-                                    <Link
-                                        href={portfolioShow.url({ locale: l, username: profile.username })}
-                                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                                    >
-                                        <ExternalLink className="h-3 w-3" />
-                                        Copy link
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                    </MentorCard>
 
                     {/* Stats */}
                     <div className="mt-8 grid grid-cols-3 gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-3">
@@ -169,25 +143,43 @@ export default function PublicPortfolio({ profile, stats, enrolledCourses, showc
                     </section>
                 )}
 
-                {/* Enrolled Courses */}
-                <section>
-                    <h2 className="mb-4 text-lg font-semibold flex items-center gap-2">
-                        <BookOpen className="h-5 w-5 text-primary" />
-                        Courses{enrolledCourses.length > 0 ? ` (${enrolledCourses.length})` : ''}
-                    </h2>
-
-                    {enrolledCourses.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-border py-12 text-center">
-                            <p className="text-sm text-muted-foreground">No courses yet.</p>
+                {/* Taught Courses */}
+                {taughtCourses.length > 0 && (
+                    <section>
+                        <h2 className="mb-4 text-lg font-semibold flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-primary" />
+                            Courses taught ({taughtCourses.length})
+                        </h2>
+                        <div className="grid gap-6 sm:grid-cols-2">
+                            {taughtCourses.map((course) => (
+                                <CourseCard key={course.id} course={course} locale={l} />
+                            ))}
                         </div>
-                    ) : (
+                    </section>
+                )}
+
+                {/* Enrolled Courses */}
+                {enrolledCourses.length > 0 && (
+                    <section>
+                        <h2 className="mb-4 text-lg font-semibold flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-primary" />
+                            Courses enrolled ({enrolledCourses.length})
+                        </h2>
                         <div className="grid gap-4 sm:grid-cols-2">
                             {enrolledCourses.map((item) => (
                                 <CourseProgressCard key={item.course.id} item={item} locale={l} />
                             ))}
                         </div>
-                    )}
-                </section>
+                    </section>
+                )}
+
+                {taughtCourses.length === 0 && enrolledCourses.length === 0 && (
+                    <section>
+                        <div className="rounded-xl border border-dashed border-border py-12 text-center">
+                            <p className="text-sm text-muted-foreground">No courses yet.</p>
+                        </div>
+                    </section>
+                )}
             </div>
         </PublicLayout>
     );
@@ -224,7 +216,7 @@ function CourseProgressCard({ item, locale }: { item: EnrolledCourse; locale: st
                         {item.course.title}
                     </h3>
                     {item.course.mentor && (
-                        <p className="mt-0.5 text-xs text-muted-foreground">by {item.course.mentor.name}</p>
+                        <MentorCard mentor={item.course.mentor} locale={locale} variant="inline" />
                     )}
                 </div>
 

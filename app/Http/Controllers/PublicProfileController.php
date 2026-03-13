@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AttemptStatus;
+use App\Models\Course;
 use App\Models\TestAttempt;
 use App\Models\User;
 use Inertia\Inertia;
@@ -27,6 +28,7 @@ class PublicProfileController extends Controller
                 ],
                 'isPrivate' => true,
                 'stats' => null,
+                'taughtCourses' => [],
                 'enrolledCourses' => [],
                 'showcasedAttempts' => [],
             ]);
@@ -78,6 +80,47 @@ class PublicProfileController extends Controller
                 ->get();
         }
 
+        $mentorData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'username' => $user->username,
+            'avatar' => $user->avatar,
+            'headline' => $user->headline,
+        ];
+
+        // Courses authored by this user (mentor/admin)
+        $taughtCourses = Course::query()
+            ->where('user_id', $user->id)
+            ->published()
+            ->with(['category:id,name,slug'])
+            ->withCount(['modules', 'resources'])
+            ->latest()
+            ->get()
+            ->map(fn ($course) => [
+                'id' => $course->id,
+                'user_id' => $course->user_id,
+                'category_id' => $course->category_id,
+                'title' => $course->title,
+                'slug' => $course->slug,
+                'description' => $course->description,
+                'what_you_will_learn' => $course->what_you_will_learn,
+                'prerequisites' => $course->prerequisites,
+                'difficulty' => $course->difficulty,
+                'estimated_duration' => $course->estimated_duration,
+                'thumbnail' => $course->thumbnail,
+                'status' => $course->status,
+                'is_featured' => $course->is_featured,
+                'price' => $course->price,
+                'currency' => $course->currency,
+                'billing_type' => $course->billing_type,
+                'subscription_duration_months' => $course->subscription_duration_months,
+                'category' => $course->category,
+                'mentor' => $mentorData,
+                'modules' => [],
+                'modules_count' => $course->modules_count,
+                'resources_count' => $course->resources_count,
+            ]);
+
         $endorsedTotal = TestAttempt::where('user_id', $user->id)
             ->where('status', AttemptStatus::Endorsed)
             ->count();
@@ -99,6 +142,7 @@ class PublicProfileController extends Controller
                 'joined_at' => $user->created_at?->toDateString(),
             ],
             'stats' => $stats,
+            'taughtCourses' => $taughtCourses->values(),
             'enrolledCourses' => $enrollments->values(),
             'showcasedAttempts' => $showcasedAttempts->map(fn ($attempt) => [
                 'id' => $attempt->id,

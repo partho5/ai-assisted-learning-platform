@@ -8,6 +8,7 @@ import { PurchaseButton } from '@/components/payment/purchase-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import MentorCard from '@/components/mentor-card';
 import RichHtml from '@/components/rich-html';
 import PublicLayout from '@/layouts/public-layout';
 import type { Course, Enrollment } from '@/types';
@@ -261,45 +262,7 @@ export default function CourseShow({ course, enrollment }: Props) {
 
                         {/* Mentor */}
                         {course.mentor && (
-                            <section className="overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800/60">
-                                <div className="border-b border-emerald-200 bg-emerald-50/80 px-5 py-3 dark:border-emerald-800/60 dark:bg-emerald-950/40">
-                                    <h2 className="font-semibold text-emerald-900 dark:text-emerald-100">
-                                        About the mentor
-                                    </h2>
-                                </div>
-                                <div className="bg-emerald-50/20 p-5 dark:bg-emerald-950/10">
-                                    <div className="flex items-start gap-4">
-                                        {course.mentor.avatar ? (
-                                            <img
-                                                src={course.mentor.avatar}
-                                                alt={course.mentor.name}
-                                                className="size-14 rounded-full object-cover ring-2 ring-emerald-200 dark:ring-emerald-800"
-                                            />
-                                        ) : (
-                                            <div className="flex size-14 items-center justify-center rounded-full bg-emerald-100 text-xl font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
-                                                {course.mentor.name
-                                                    .charAt(0)
-                                                    .toUpperCase()}
-                                            </div>
-                                        )}
-                                        <div>
-                                            <p className="font-semibold">
-                                                {course.mentor.name}
-                                            </p>
-                                            {course.mentor.headline && (
-                                                <p className="text-sm text-muted-foreground">
-                                                    {course.mentor.headline}
-                                                </p>
-                                            )}
-                                            {course.mentor.bio && (
-                                                <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-                                                    {course.mentor.bio}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
+                            <MentorCard mentor={course.mentor} locale={l} />
                         )}
                     </div>
 

@@ -58,6 +58,8 @@ export default function CourseCreate({ categories, difficulties }: Props) {
                     <div className="flex flex-col gap-4 rounded-lg border border-sky-200 bg-sky-50/60 p-4 dark:border-sky-800/50 dark:bg-sky-950/25">
                         <p className="text-[11px] font-semibold tracking-widest text-sky-600 dark:text-sky-400">
                             Basic Info
+                            <span className="ml-4 text-red-500 font-normal">Course URL can't be changed in future</span>
+                            <span className="text-gray-800 font-normal">, others info can be edited</span>
                         </p>
 
                         <Field label="Title" error={form.errors.title} required>
