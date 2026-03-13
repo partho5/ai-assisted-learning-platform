@@ -144,7 +144,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
         return (
             <div className="rounded-lg border border-border bg-card p-5">
                 <div
-                    className="prose dark:prose-invert max-w-none text-base leading-relaxed"
+                    className="prose dark:prose-invert rich-html max-w-none text-base leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: resource.content || '' }}
                 />
             </div>

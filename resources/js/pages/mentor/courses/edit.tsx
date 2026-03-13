@@ -1,5 +1,19 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+    DndContext,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    arrayMove,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
     destroy as courseDestroy,
     index as coursesIndex,
@@ -11,15 +25,18 @@ import {
 } from '@/actions/App/Http/Controllers/CouponCodeController';
 import {
     destroy as moduleDestroy,
+    reorder as moduleReorder,
     store as moduleStore,
     update as moduleUpdate,
 } from '@/actions/App/Http/Controllers/ModuleController';
 import {
     destroy as resourceDestroy,
+    reorder as resourceReorder,
     store as resourceStore,
     update as resourceUpdate,
 } from '@/actions/App/Http/Controllers/ResourceController';
 import { edit as testEdit } from '@/actions/App/Http/Controllers/TestController';
+import { GripVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -708,15 +725,38 @@ function ModulePanel({
     courseSlug,
     locale,
     resourceTypes,
+    dragHandleProps,
 }: {
     module: CourseModule;
     courseSlug: string;
     locale: string;
     resourceTypes: SelectOption[];
+    dragHandleProps?: React.HTMLAttributes<HTMLButtonElement>;
 }) {
     const [editingModule, setEditingModule] = useState(false);
     const [addingResource, setAddingResource] = useState(false);
     const [editingResourceId, setEditingResourceId] = useState<number | null>(null);
+    const [resources, setResources] = useState<CourseResource[]>(module.resources);
+
+    useEffect(() => setResources(module.resources), [module.resources]);
+
+    const sensors = useSensors(useSensor(PointerSensor));
+
+    function handleResourceDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+        if (!over || active.id === over.id) { return; }
+
+        const oldIndex = resources.findIndex((r) => r.id === active.id);
+        const newIndex = resources.findIndex((r) => r.id === over.id);
+        const reordered = arrayMove(resources, oldIndex, newIndex);
+
+        setResources(reordered);
+        router.post(
+            resourceReorder.url({ locale, course: courseSlug, module: module.id }),
+            { order: reordered.map((r) => r.id) },
+            { preserveScroll: true, preserveState: true },
+        );
+    }
 
     const moduleForm = useForm({ title: module.title, description: module.description ?? '', order: String(module.order) });
 
@@ -762,7 +802,17 @@ function ModulePanel({
                     </form>
                 ) : (
                     <>
-                        <h3 className="font-semibold text-violet-900 dark:text-violet-100">{module.title}</h3>
+                        <div className="flex min-w-0 items-center gap-2">
+                            <button
+                                type="button"
+                                className="shrink-0 cursor-grab touch-none text-violet-400 hover:text-violet-600 active:cursor-grabbing dark:text-violet-600 dark:hover:text-violet-400"
+                                aria-label="Drag to reorder module"
+                                {...dragHandleProps}
+                            >
+                                <GripVertical className="h-4 w-4" />
+                            </button>
+                            <h3 className="truncate font-semibold text-violet-900 dark:text-violet-100">{module.title}</h3>
+                        </div>
                         <div className="flex items-center gap-1">
                             <Button type="button" variant="ghost" size="compact" onClick={() => setEditingModule(true)}>
                                 Edit
@@ -776,58 +826,36 @@ function ModulePanel({
             </div>
 
             <div className="flex flex-col gap-2 p-4">
-                {module.resources.map((resource) =>
-                    editingResourceId === resource.id ? (
-                        <ResourceForm
-                            key={resource.id}
-                            moduleId={module.id}
-                            courseSlug={courseSlug}
-                            locale={locale}
-                            resourceTypes={resourceTypes}
-                            existing={resource}
-                            onDone={() => setEditingResourceId(null)}
-                        />
-                    ) : (
-                        <div
-                            key={resource.id}
-                            className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5 transition-colors hover:bg-muted/40"
-                        >
-                            <div className="flex min-w-0 items-center gap-2.5">
-                                <Badge variant="outline" className="shrink-0 capitalize text-xs">
-                                    {resource.type}
-                                </Badge>
-                                <span className="truncate text-sm font-medium">{resource.title}</span>
-                                {resource.is_free && (
-                                    <Badge variant="secondary" className="shrink-0 text-xs">
-                                        Free
-                                    </Badge>
-                                )}
-                            </div>
-                            <div className="ml-2 flex shrink-0 items-center gap-1">
-                                {(resource.type === 'assignment' || resource.test) && (
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        size="compact"
-                                        onClick={() =>
-                                            router.get(
-                                                testEdit.url({ locale, course: courseSlug, module: module.id, resource: resource.id }),
-                                            )
-                                        }
-                                    >
-                                        {resource.test ? 'Edit Test' : 'Add Test'}
-                                    </Button>
-                                )}
-                                <Button type="button" variant="ghost" size="compact" onClick={() => setEditingResourceId(resource.id)}>
-                                    Edit
-                                </Button>
-                                <Button type="button" variant="ghost" size="compact" onClick={() => deleteResource(resource.id)} className="text-destructive hover:text-destructive">
-                                    Delete
-                                </Button>
-                            </div>
-                        </div>
-                    ),
-                )}
+                <DndContext sensors={sensors} onDragEnd={handleResourceDragEnd}>
+                    <SortableContext
+                        items={resources.filter((r) => r.id !== editingResourceId).map((r) => r.id)}
+                        strategy={verticalListSortingStrategy}
+                    >
+                        {resources.map((resource) =>
+                            editingResourceId === resource.id ? (
+                                <ResourceForm
+                                    key={resource.id}
+                                    moduleId={module.id}
+                                    courseSlug={courseSlug}
+                                    locale={locale}
+                                    resourceTypes={resourceTypes}
+                                    existing={resource}
+                                    onDone={() => setEditingResourceId(null)}
+                                />
+                            ) : (
+                                <SortableResourceRow
+                                    key={resource.id}
+                                    resource={resource}
+                                    locale={locale}
+                                    courseSlug={courseSlug}
+                                    moduleId={module.id}
+                                    onEdit={() => setEditingResourceId(resource.id)}
+                                    onDelete={() => deleteResource(resource.id)}
+                                />
+                            ),
+                        )}
+                    </SortableContext>
+                </DndContext>
 
                 {addingResource ? (
                     <ResourceForm
@@ -920,6 +948,27 @@ export default function CourseEdit({ course, categories, difficulties, resourceT
     const { locale } = usePage().props;
     const l = String(locale);
 
+    const [modules, setModules] = useState<CourseModule[]>(course.modules);
+    useEffect(() => setModules(course.modules), [course.modules]);
+
+    const sensors = useSensors(useSensor(PointerSensor));
+
+    function handleModuleDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+        if (!over || active.id === over.id) { return; }
+
+        const oldIndex = modules.findIndex((m) => m.id === active.id);
+        const newIndex = modules.findIndex((m) => m.id === over.id);
+        const reordered = arrayMove(modules, oldIndex, newIndex);
+
+        setModules(reordered);
+        router.post(
+            moduleReorder.url({ locale: l, course: course.slug }),
+            { order: reordered.map((m) => m.id) },
+            { preserveScroll: true, preserveState: true },
+        );
+    }
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'My Courses', href: coursesIndex.url(l) },
         { title: course.title, href: '#' },
@@ -942,20 +991,113 @@ export default function CourseEdit({ course, categories, difficulties, resourceT
                 <section className="flex flex-col gap-4">
                     <h2 className="font-semibold">Curriculum</h2>
 
-                    {course.modules.map((module) => (
-                        <ModulePanel
-                            key={module.id}
-                            module={module}
-                            courseSlug={course.slug}
-                            locale={l}
-                            resourceTypes={resourceTypes}
-                        />
-                    ))}
+                    <DndContext sensors={sensors} onDragEnd={handleModuleDragEnd}>
+                        <SortableContext items={modules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+                            {modules.map((module) => (
+                                <SortableModulePanel
+                                    key={module.id}
+                                    module={module}
+                                    courseSlug={course.slug}
+                                    locale={l}
+                                    resourceTypes={resourceTypes}
+                                />
+                            ))}
+                        </SortableContext>
+                    </DndContext>
 
                     <AddModuleForm courseSlug={course.slug} locale={l} />
                 </section>
             </div>
         </AppLayout>
+    );
+}
+
+// ─── Sortable wrappers ───────────────────────────────────────────────────────
+
+function SortableModulePanel(props: React.ComponentProps<typeof ModulePanel>) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.module.id });
+
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style}>
+            <ModulePanel {...props} dragHandleProps={{ ...attributes, ...listeners }} />
+        </div>
+    );
+}
+
+function SortableResourceRow({
+    resource,
+    locale,
+    courseSlug,
+    moduleId,
+    onEdit,
+    onDelete,
+}: {
+    resource: CourseResource;
+    locale: string;
+    courseSlug: string;
+    moduleId: number;
+    onEdit: () => void;
+    onDelete: () => void;
+}) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: resource.id });
+
+    const style: React.CSSProperties = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2.5 transition-colors hover:bg-muted/40"
+        >
+            <div className="flex min-w-0 items-center gap-2.5">
+                <button
+                    type="button"
+                    className="shrink-0 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
+                    aria-label="Drag to reorder resource"
+                    {...attributes}
+                    {...listeners}
+                >
+                    <GripVertical className="h-4 w-4" />
+                </button>
+                <Badge variant="outline" className="shrink-0 text-xs capitalize">
+                    {resource.type}
+                </Badge>
+                <span className="truncate text-sm font-medium">{resource.title}</span>
+                {resource.is_free && (
+                    <Badge variant="secondary" className="shrink-0 text-xs">
+                        Free
+                    </Badge>
+                )}
+            </div>
+            <div className="ml-2 flex shrink-0 items-center gap-1">
+                {(resource.type === 'assignment' || resource.test) && (
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="compact"
+                        onClick={() => router.get(testEdit.url({ locale, course: courseSlug, module: moduleId, resource: resource.id }))}
+                    >
+                        {resource.test ? 'Edit Test' : 'Add Test'}
+                    </Button>
+                )}
+                <Button type="button" variant="ghost" size="compact" onClick={onEdit}>
+                    Edit
+                </Button>
+                <Button type="button" variant="ghost" size="compact" onClick={onDelete} className="text-destructive hover:text-destructive">
+                    Delete
+                </Button>
+            </div>
+        </div>
     );
 }
 

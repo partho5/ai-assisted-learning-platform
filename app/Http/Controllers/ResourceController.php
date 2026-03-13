@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\Module;
 use App\Models\Resource;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class ResourceController extends Controller
 {
@@ -23,6 +24,23 @@ class ResourceController extends Controller
         $module->resources()->create($data);
 
         return back()->with('success', 'Resource added.');
+    }
+
+    public function reorder(Request $request, Course $course, Module $module): RedirectResponse
+    {
+        $this->authorizeOwner($course);
+        abort_unless($module->course_id === $course->id, 404);
+
+        $request->validate([
+            'order' => ['required', 'array'],
+            'order.*' => ['integer'],
+        ]);
+
+        foreach ($request->input('order') as $position => $resourceId) {
+            $module->resources()->where('id', $resourceId)->update(['order' => $position]);
+        }
+
+        return back()->with('success', 'Resources reordered.');
     }
 
     public function update(UpdateResourceRequest $request, Course $course, Module $module, Resource $resource): RedirectResponse

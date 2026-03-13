@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateModuleRequest;
 use App\Models\Course;
 use App\Models\Module;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class ModuleController extends Controller
 {
@@ -21,6 +22,22 @@ class ModuleController extends Controller
         $course->modules()->create($data);
 
         return back()->with('success', 'Module added.');
+    }
+
+    public function reorder(Request $request, Course $course): RedirectResponse
+    {
+        $this->authorizeOwner($course);
+
+        $request->validate([
+            'order' => ['required', 'array'],
+            'order.*' => ['integer'],
+        ]);
+
+        foreach ($request->input('order') as $position => $moduleId) {
+            $course->modules()->where('id', $moduleId)->update(['order' => $position]);
+        }
+
+        return back()->with('success', 'Modules reordered.');
     }
 
     public function update(UpdateModuleRequest $request, Course $course, Module $module): RedirectResponse

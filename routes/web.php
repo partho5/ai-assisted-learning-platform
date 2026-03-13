@@ -132,6 +132,8 @@ Route::prefix('{locale}')
 
             Route::post('courses/{course}/modules', [ModuleController::class, 'store'])
                 ->name('modules.store');
+            Route::post('courses/{course}/modules/reorder', [ModuleController::class, 'reorder'])
+                ->name('modules.reorder');
             Route::put('courses/{course}/modules/{module}', [ModuleController::class, 'update'])
                 ->name('modules.update');
             Route::delete('courses/{course}/modules/{module}', [ModuleController::class, 'destroy'])
@@ -139,6 +141,8 @@ Route::prefix('{locale}')
 
             Route::post('courses/{course}/modules/{module}/resources', [ResourceController::class, 'store'])
                 ->name('resources.store');
+            Route::post('courses/{course}/modules/{module}/resources/reorder', [ResourceController::class, 'reorder'])
+                ->name('resources.reorder');
             Route::put('courses/{course}/modules/{module}/resources/{resource}', [ResourceController::class, 'update'])
                 ->name('resources.update');
             Route::delete('courses/{course}/modules/{module}/resources/{resource}', [ResourceController::class, 'destroy'])
