@@ -1,4 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
+import { BookOpen, GraduationCap } from 'lucide-react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -14,21 +15,28 @@ import { useState } from 'react';
 
 type Role = 'learner' | 'mentor';
 
-const roles: { value: Role; label: string; description: string }[] = [
+const roles: { value: Role; label: string; description: string; icon: React.ElementType }[] = [
     {
         value: 'learner',
+        icon: GraduationCap,
         label: 'Learner',
         description: 'Follow curated paths and build your evidence portfolio',
     },
     {
         value: 'mentor',
+        icon: BookOpen,
         label: 'Mentor',
         description: 'Curate resources and guide learners through your expertise',
     },
 ];
 
+function getInitialRole(): Role {
+    const param = new URLSearchParams(window.location.search).get('join_as');
+    return param === 'mentor' ? 'mentor' : 'learner';
+}
+
 export default function Register() {
-    const [selectedRole, setSelectedRole] = useState<Role>('learner');
+    const [selectedRole, setSelectedRole] = useState<Role>(getInitialRole);
 
     return (
         <AuthLayout
@@ -44,33 +52,49 @@ export default function Register() {
             >
                 {({ processing, errors }) => (
                     <>
-                        <input type="hidden" name="guest_user_id" value={getGuestUserId()} />
+                        <input
+                            type="hidden"
+                            name="guest_user_id"
+                            value={getGuestUserId()}
+                        />
                         <div className="grid gap-6">
                             <div className="grid gap-2">
                                 <Label>I am joining as a</Label>
                                 <div className="grid grid-cols-2 gap-3">
-                                    {roles.map((role) => (
-                                        <label
-                                            key={role.value}
-                                            className={cn(
-                                                'flex cursor-pointer flex-col gap-1 rounded-lg border p-4 transition-colors',
-                                                selectedRole === role.value
-                                                    ? 'border-primary bg-primary/5'
-                                                    : 'border-border hover:border-primary/50',
-                                            )}
-                                        >
-                                            <input
-                                                type="radio"
-                                                name="role"
-                                                value={role.value}
-                                                checked={selectedRole === role.value}
-                                                onChange={() => setSelectedRole(role.value)}
-                                                className="sr-only"
-                                            />
-                                            <span className="text-sm font-semibold">{role.label}</span>
-                                            <span className="text-xs text-muted-foreground leading-snug">{role.description}</span>
-                                        </label>
-                                    ))}
+                                    {roles.map((role) => {
+                                        const Icon = role.icon;
+                                        const selected = selectedRole === role.value;
+                                        return (
+                                            <label
+                                                key={role.value}
+                                                className={cn(
+                                                    'flex cursor-pointer flex-col gap-2 rounded-xl border-2 p-4 transition-all',
+                                                    selected
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-border hover:border-primary/40',
+                                                )}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="role"
+                                                    value={role.value}
+                                                    checked={selected}
+                                                    onChange={() => setSelectedRole(role.value)}
+                                                    className="sr-only"
+                                                />
+                                                <div className={cn(
+                                                    'flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                                                    selected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+                                                )}>
+                                                    <Icon className="size-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold">{role.label}</p>
+                                                    <p className="text-xs leading-snug text-muted-foreground">{role.description}</p>
+                                                </div>
+                                            </label>
+                                        );
+                                    })}
                                 </div>
                                 <InputError message={errors.role} />
                             </div>
@@ -131,7 +155,9 @@ export default function Register() {
                                     name="password_confirmation"
                                     placeholder="Confirm password"
                                 />
-                                <InputError message={errors.password_confirmation} />
+                                <InputError
+                                    message={errors.password_confirmation}
+                                />
                             </div>
 
                             <Button

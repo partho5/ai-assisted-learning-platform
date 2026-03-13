@@ -2,7 +2,7 @@
 
 **Status**: Pre-implementation planning
 **Route prefix**: `/{locale}/forum`
-**Philosophy**: Standalone module, same auth. First-class public content — not a course add-on. SEO from day one. Open by nature: even paid resource content is visible in public threads.
+**Philosophy**: Standalone module (even removing forum completely will not affect other parts of the app.), same auth. First-class public content — not a course add-on. SEO from day one. Open by nature: even paid resource content is visible in public threads.
 
 ---
 
