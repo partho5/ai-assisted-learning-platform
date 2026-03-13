@@ -32,11 +32,9 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
                     <h1 className="text-2xl font-semibold tracking-tight">
                         {isAdmin ? 'All Courses' : 'My Courses'}
                     </h1>
-                    {!isAdmin && (
-                        <Link href={courseCreate.url(l)}>
-                            <Button variant="enroll">New Course</Button>
-                        </Link>
-                    )}
+                    <Link href={courseCreate.url(l)}>
+                        <Button variant="enroll">New Course</Button>
+                    </Link>
                 </div>
 
                 {courses.length === 0 ? (
@@ -115,7 +113,7 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
                                                 href={submissionsIndex.url({ locale: l, course: course.slug })}
                                                 className="flex-1"
                                             >
-                                                <Button variant="outline" size="compact" className="w-full">
+                                                <Button variant="utility" size="compact" className="w-full">
                                                     Submissions
                                                 </Button>
                                             </Link>

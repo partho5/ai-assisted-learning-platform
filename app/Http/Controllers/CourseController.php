@@ -186,7 +186,7 @@ class CourseController extends Controller
 
     private function uniqueSlug(string $title, ?int $excludeId = null): string
     {
-        $base = Str::slug($title);
+        $base = Str::of($title)->lower()->replaceMatches('/[^\p{L}\p{N}\p{M}]+/u', '-')->trim('-')->toString();
         $slug = $base;
         $counter = 1;
 
