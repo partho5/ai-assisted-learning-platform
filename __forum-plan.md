@@ -348,8 +348,8 @@ On the learn page, below each resource:
 
 Notes:
 - Guest read access is intentional and critical for SEO
-- Observer tier can participate fully in forum — forum is the open layer
-- Course/resource access restrictions remain at the course level, not the forum
+- Observer tier can not participate, but only paid access full can fully participate in forum .
+- even when a paid user starts comment under a paid resource, public can view that resource content. not in courses but view in forum.
 
 ---
 
