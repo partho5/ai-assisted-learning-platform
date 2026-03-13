@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowRight, BookOpen, CheckCircle, ChevronRight, Sparkles, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { RotatingText } from '@/components/rotating-text';
 import PublicLayout from '@/layouts/public-layout';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { register } from '@/routes';
@@ -446,7 +447,10 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     {[
                         {
                             step: '01',
-                            title: 'Pick a skill gap to close',
+                            titleBefore: 'Pick a ',
+                            rotatingWords: ['skill gap', 'weak spot', 'blind spot', 'career gap'],
+                            titleAfter: ' to close',
+                            initialDelay: 0,
                             body: 'Not another course to add to your list — a real gap to close. Mentor-built content with videos, articles, and assignments designed around hireable outcomes.',
                             gradient: 'from-sky-500 to-cyan-400',
                             bg: 'bg-sky-50 dark:bg-sky-950/30',
@@ -454,7 +458,10 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         },
                         {
                             step: '02',
-                            title: 'Do work a recruiter can read',
+                            titleBefore: 'Do work a ',
+                            rotatingWords: ['recruiter', 'hiring manager', 'client', 'CEO'],
+                            titleAfter: ' can read',
+                            initialDelay: 900,
                             body: "Assignments aren't busywork. They're portfolio pieces. Submit real work a hiring manager can open, read, and evaluate — not a multiple-choice score.",
                             gradient: 'from-indigo-500 to-violet-500',
                             bg: 'bg-indigo-50 dark:bg-indigo-950/30',
@@ -462,13 +469,16 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         },
                         {
                             step: '03',
-                            title: "Get a mentor's public verdict",
+                            titleBefore: 'Get a ',
+                            rotatingWords: ["mentor's", "expert's", "professional's"],
+                            titleAfter: ' public verdict',
+                            initialDelay: 1800,
                             body: 'A real mentor reviews your submission and writes a public endorsement — permanently recorded on your portfolio. Not a certificate. A verdict from someone who knows.',
                             gradient: 'from-violet-500 to-fuchsia-500',
                             bg: 'bg-violet-50 dark:bg-violet-950/30',
                             border: 'border-violet-100 dark:border-violet-900',
                         },
-                    ].map(({ step, title, body, gradient, bg, border }) => (
+                    ].map(({ step, titleBefore, rotatingWords, titleAfter, initialDelay, body, gradient, bg, border }) => (
                         <div
                             key={step}
                             className={`relative flex flex-col gap-4 rounded-2xl border p-8 ${bg} ${border}`}
@@ -483,7 +493,13 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 {step}
                             </span>
                             <h3 className="text-xl font-semibold text-foreground">
-                                {title}
+                                {titleBefore}
+                                <RotatingText
+                                    words={rotatingWords}
+                                    initialDelay={initialDelay}
+                                    className="text-primary"
+                                />
+                                {titleAfter}
                             </h3>
                             <p className="text-muted-foreground">{body}</p>
                         </div>
@@ -948,7 +964,12 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         }}
                         className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                     >
-                        Your next job application should link here.
+                        Your next{' '}
+                        <RotatingText
+                            words={['job', 'business', 'career', 'client']}
+                            className="text-primary"
+                        />{' '}
+                        should start here.
                     </h2>
                     <p className="mb-8 text-muted-foreground">
                         Stop attaching PDFs. Build a portfolio of
