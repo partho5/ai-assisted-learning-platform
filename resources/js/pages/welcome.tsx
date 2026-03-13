@@ -62,11 +62,12 @@ function useInView(threshold = 0.12) {
     return { ref, inView };
 }
 
-function FadeIn({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+function FadeIn({ children, className = '', delay = 0, id }: { children: React.ReactNode; className?: string; delay?: number; id?: string }) {
     const { ref, inView } = useInView();
 
     return (
         <section
+            id={id}
             ref={ref}
             style={{ transitionDelay: `${delay}ms` }}
             className={`transition-all duration-700 ease-out ${inView ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'} ${className}`}
@@ -396,7 +397,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${color}`}
                             >
                                 <span className="shrink-0">{icon}</span>
-                                <span className="text-sm font-medium">
+                                <span className=" font-medium">
                                     {label}
                                 </span>
                             </div>
@@ -414,7 +415,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     className="h-5 w-5 shrink-0"
                                     style={{ color: '#4285F4' }}
                                 />
-                                <span className="text-sm font-medium text-slate-700">
+                                <span className=" font-medium text-slate-700">
                                     AI-native learning
                                 </span>
                             </div>
@@ -764,6 +765,65 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         ))}
                     </div>
                 </FadeIn>
+            </section>
+
+            {/* ── FOR FOUNDERS ─────────────────────────────────────────── */}
+            <section id="for-founders" aria-label="For founders">
+            <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
+                <div className="mx-auto max-w-2xl text-center">
+                    <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                        Start a business
+                    </div>
+                    <h2
+                        style={{
+                            fontFamily: "'Bricolage Grotesque', sans-serif",
+                        }}
+                        className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
+                    >
+                        Build a business that runs on technology.
+                    </h2>
+                    <p className="mb-8 text-muted-foreground">
+                        Not every learner wants a job. Some want clients. These
+                        courses teach the skills that run a real business — web
+                        apps, databases, systems, automation. When you finish,
+                        you will be able to create or speed up your own business.
+                    </p>
+                    {canRegister && (
+                        <Button asChild variant="enroll">
+                            <Link href={register()}>Start building</Link>
+                        </Button>
+                    )}
+                </div>
+
+                <div className="mt-14 grid gap-6 sm:grid-cols-3">
+                    {[
+                        {
+                            title: 'Take client work',
+                            body: 'Your portfolio shows real, endorsed work. Clients can see what you built — not just what you studied.',
+                        },
+                        {
+                            title: 'Build and sell products',
+                            body: 'Use your skills to build software products. Launch them, sell them, run them yourself.',
+                        },
+                        {
+                            title: 'Hire and grow',
+                            body: 'When your business grows, recruit people with verified skills. Or teach your own team on this platform.',
+                        },
+                    ].map(({ title, body }) => (
+                        <div
+                            key={title}
+                            className="rounded-xl border border-border bg-card p-5"
+                        >
+                            <h3 className="mb-2 font-semibold text-foreground">
+                                {title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                {body}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </FadeIn>
             </section>
 
             {/* ── PRICING ──────────────────────────────────────────────── */}

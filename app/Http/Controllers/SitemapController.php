@@ -11,7 +11,7 @@ class SitemapController extends Controller
     public function index(): Response
     {
         $baseUrl = rtrim(config('app.url'), '/');
-        $locales = ['en', 'bn'];
+        $locales = ['en'];
         $now = now()->toAtomString();
 
         $urls = [];

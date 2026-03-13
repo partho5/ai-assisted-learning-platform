@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { Menu, X } from 'lucide-react';
+import { ChevronUp, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { platform } from '@/actions/App/Http/Controllers/AiChatController';
@@ -15,25 +15,19 @@ interface NavLinkProps {
 }
 
 function NavLink({ href, children, external }: NavLinkProps) {
+    const cls = 'flex items-center self-stretch px-3 text-black transition-colors hover:bg-black hover:text-gray-100';
+
     if (external || href.startsWith('#')) {
-        return (
-            <a
-                href={href}
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-                {children}
-            </a>
-        );
+        const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+            if (!href.startsWith('#')) { return; }
+            e.preventDefault();
+            const el = document.getElementById(href.slice(1));
+            if (el) { el.scrollIntoView({ behavior: 'smooth' }); }
+        };
+        return <a href={href} className={cls} onClick={handleClick}>{children}</a>;
     }
 
-    return (
-        <Link
-            href={href}
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-            {children}
-        </Link>
-    );
+    return <Link href={href} className={cls}>{children}</Link>;
 }
 
 export default function PublicLayout({
@@ -48,13 +42,24 @@ export default function PublicLayout({
     const { auth, locale } = usePage().props;
     const l = String(locale);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [showTop, setShowTop] = useState(false);
+
+    useEffect(() => {
+        const onScroll = () => {
+            const nearBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 300;
+            setShowTop(nearBottom);
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     const navLinks = isLandingPage
         ? [
-              { label: 'Courses', href: coursesIndex.url(l) },
               { label: 'How It Works', href: '#how-it-works' },
               { label: 'For Mentors', href: '#for-mentors' },
+              { label: 'Business Minded', href: '#for-founders' },
               { label: 'Pricing', href: '#pricing' },
+              { label: 'Courses', href: coursesIndex.url(l) },
               { label: 'About', href: `/${l}/about-us` },
           ]
         : [{ label: 'Courses', href: coursesIndex.url(l) }];
@@ -62,9 +67,9 @@ export default function PublicLayout({
     return (
         <div className="min-h-screen bg-background text-foreground">
             <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm" role="banner">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
+                <div className="mx-auto flex max-w-7xl items-stretch justify-between px-4 md:px-6">
                     {/* Logo */}
-                    <Link href={`/${l}/`} className="flex items-center gap-2">
+                    <Link href={`/${l}/`} className="flex items-center gap-2 py-3">
                         <img src="/logo.png" alt="SkillEvidence" width={28} height={28} className="h-7 w-7" />
                         <span className="text-base font-semibold tracking-tight">
                             {import.meta.env.VITE_APP_NAME}
@@ -72,7 +77,7 @@ export default function PublicLayout({
                     </Link>
 
                     {/* Desktop nav */}
-                    <nav className="hidden items-center gap-6 md:flex" aria-label="Main navigation">
+                    <nav className="hidden items-stretch md:flex" aria-label="Main navigation">
                         {navLinks.map((link) => (
                             <NavLink key={link.label} href={link.href}>
                                 {link.label}
@@ -81,7 +86,7 @@ export default function PublicLayout({
                     </nav>
 
                     {/* Auth buttons — desktop */}
-                    <div className="hidden items-center gap-2 md:flex">
+                    <div className="hidden items-center gap-2 py-3 md:flex">
                         {auth.user ? (
                             <Button asChild variant="secondary" size="compact">
                                 <Link href={`/${l}/dashboard`}>Dashboard</Link>
@@ -100,7 +105,7 @@ export default function PublicLayout({
 
                     {/* Mobile hamburger */}
                     <button
-                        className="relative z-[60] flex items-center justify-center md:hidden"
+                        className="relative z-[60] flex items-center justify-center py-3 md:hidden"
                         onClick={() => setMobileOpen((v) => !v)}
                         aria-label="Toggle menu"
                         aria-expanded={mobileOpen}
@@ -172,6 +177,15 @@ export default function PublicLayout({
                     context={{ type: 'platform', key: 'platform', endpoint: platform.url(l), historyEndpoint: chatHistory.url(l), locale: l }}
                 />
             )}
+
+            {/* Back to top */}
+            <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                aria-label="Back to top"
+                className={`fixed bottom-[84px] right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-black text-white shadow-lg transition-all duration-300 hover:bg-gray-800 ${showTop ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'}`}
+            >
+                <ChevronUp className="h-5 w-5" />
+            </button>
         </div>
     );
 }
