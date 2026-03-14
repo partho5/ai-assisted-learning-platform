@@ -163,7 +163,7 @@ function CourseDetailsForm({
             <form onSubmit={submit} className="flex flex-col gap-5 p-5">
                 {/* ── Basic Info ─────────────────────────────────────── */}
                 <div className="flex flex-col gap-4 rounded-lg border border-sky-200 bg-sky-50/60 p-4 dark:border-sky-800/50 dark:bg-sky-950/25">
-                    <p className="text-[11px] font-semibold tracking-widest text-sky-600 dark:text-sky-400">
+                    <p className="text-[14px] font-semibold tracking-widest text-sky-600 dark:text-sky-400">
                         Basic Info
                     </p>
                     <Field label="Title" error={form.errors.title} required>
@@ -203,7 +203,7 @@ function CourseDetailsForm({
 
                 {/* ── Learning Content ───────────────────────────────── */}
                 <div className="flex flex-col gap-4 rounded-lg border border-indigo-300 bg-indigo-50/70 p-4 dark:border-indigo-700/60 dark:bg-indigo-950/35">
-                    <p className="text-[11px] font-semibold tracking-widest text-indigo-600 dark:text-indigo-400">
+                    <p className="text-[14px] font-semibold tracking-widest text-indigo-600 dark:text-indigo-400">
                         Learning Content
                     </p>
                     <Field
@@ -221,7 +221,7 @@ function CourseDetailsForm({
                         />
                     </Field>
                     <Field
-                        label="Prerequisites"
+                        label="What learners need to know before this course"
                         error={form.errors.prerequisites}
                     >
                         <RichTextEditor
@@ -307,7 +307,7 @@ function CourseDetailsForm({
                         </select>
                     </Field>
                     <Field
-                        label="🔗 Thumbnail URL"
+                        label="🔗 Thumbnail URL ( 16:9 )"
                         error={form.errors.thumbnail}
                     >
                         <Input
@@ -325,12 +325,17 @@ function CourseDetailsForm({
                                 type="checkbox"
                                 checked={form.data.is_featured}
                                 onChange={(e) =>
-                                    form.setData('is_featured', e.target.checked)
+                                    form.setData(
+                                        'is_featured',
+                                        e.target.checked,
+                                    )
                                 }
                                 disabled={form.processing}
                                 className="h-4 w-4 rounded border-input accent-primary"
                             />
-                            <span className="text-sm font-medium">Featured on homepage</span>
+                            <span className="text-sm font-medium">
+                                Featured on homepage
+                            </span>
                         </label>
                     )}
                 </div>
@@ -652,7 +657,7 @@ function ResourceForm({
         <form onSubmit={submit} className="flex flex-col gap-3 overflow-hidden rounded-lg border border-violet-200 bg-card dark:border-violet-800/50">
             {/* Resource form header */}
             <div className="border-b border-violet-200 bg-violet-50/60 px-4 py-2.5 dark:border-violet-800/50 dark:bg-violet-950/30">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">
+                <p className="text-[11px] font-semibold tracking-widest text-violet-600 dark:text-violet-400">
                     {existing ? 'Edit Resource' : 'New Resource'}
                 </p>
             </div>
@@ -660,14 +665,14 @@ function ResourceForm({
             <div className="flex flex-col gap-3 p-4">
                 {/* ── Resource Info ── */}
                 <div className="flex flex-col gap-3 rounded-lg border border-sky-200 bg-sky-50/50 p-3 dark:border-sky-800/40 dark:bg-sky-950/20">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400">Resource Info</p>
+                    <p className="text-[14px] font-semibold tracking-widest text-sky-600 dark:text-sky-400">Resource Info</p>
                     <div className="grid grid-cols-2 gap-3">
                         <Field label="Title" error={form.errors.title} required>
                             <Input
                                 value={form.data.title}
                                 onChange={(e) => form.setData('title', e.target.value)}
                                 disabled={form.processing}
-                                placeholder="Resource title"
+                                placeholder="Example: Creating Acount / Configuting Your Bot"
                             />
                         </Field>
                         <Field label="Type" error={form.errors.type} required>
@@ -723,7 +728,7 @@ function ResourceForm({
 
                 {/* ── Guidance ── */}
                 <div className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Guidance for Learners</p>
+                    <p className="text-[14px] font-semibold tracking-widest text-emerald-600 dark:text-emerald-400">Guidance for Learners</p>
                     <Field label="Why this resource?" error={form.errors.why_this_resource} required>
                         <RichTextEditor
                             value={form.data.why_this_resource}

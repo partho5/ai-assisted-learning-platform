@@ -28,7 +28,7 @@ export default function CourseCard({ course, locale, 'data-course-id': dataCours
                 <img
                     src={course.thumbnail}
                     alt={course.title}
-                    className="aspect-video w-full rounded-t-xl object-cover"
+                    className="aspect-video w-full rounded-t-xl object-contain bg-muted"
                 />
             ) : (
                 <div className="aspect-video w-full rounded-t-xl bg-gradient-to-br from-indigo-100 via-violet-100 to-sky-100 dark:from-indigo-900/40 dark:via-violet-900/30 dark:to-sky-900/30" />

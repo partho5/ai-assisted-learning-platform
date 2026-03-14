@@ -156,7 +156,7 @@ export default function CourseShow({ course, enrollment }: Props) {
                             <section className="mb-8 overflow-hidden rounded-xl border border-indigo-200 dark:border-indigo-800/60">
                                 <div className="border-b border-indigo-200 bg-indigo-50/80 px-5 py-3 dark:border-indigo-800/60 dark:bg-indigo-950/40">
                                     <h2 className="font-semibold text-indigo-900 dark:text-indigo-100">
-                                        Prerequisites
+                                        You need to know before this course
                                     </h2>
                                 </div>
                                 <div className="bg-indigo-50/30 p-5 dark:bg-indigo-950/10">
@@ -212,7 +212,9 @@ export default function CourseShow({ course, enrollment }: Props) {
                                                                         ] ??
                                                                             resource.type}
                                                                     </Badge>
-                                                                    {resource.is_free || enrollment?.access_level === 'full' ? (
+                                                                    {resource.is_free ||
+                                                                    enrollment?.access_level ===
+                                                                        'full' ? (
                                                                         <Link
                                                                             href={`/${l}/courses/${course.slug}/learn/${resource.id}`}
                                                                             className="leading-snug font-medium text-blue-600 hover:text-primary hover:underline"
@@ -223,13 +225,23 @@ export default function CourseShow({ course, enrollment }: Props) {
                                                                         </Link>
                                                                     ) : (
                                                                         <Tooltip>
-                                                                            <TooltipTrigger asChild>
-                                                                                <span className="flex cursor-default items-center gap-1 font-medium leading-snug">
-                                                                                    {resource.title} 🔒
+                                                                            <TooltipTrigger
+                                                                                asChild
+                                                                            >
+                                                                                <span className="flex cursor-default items-center gap-1 leading-snug font-medium">
+                                                                                    {
+                                                                                        resource.title
+                                                                                    }{' '}
+                                                                                    🔒
                                                                                 </span>
                                                                             </TooltipTrigger>
                                                                             <TooltipContent>
-                                                                                Available for enrolled (full access) users
+                                                                                Available
+                                                                                for
+                                                                                enrolled
+                                                                                (full
+                                                                                access)
+                                                                                users
                                                                             </TooltipContent>
                                                                         </Tooltip>
                                                                     )}

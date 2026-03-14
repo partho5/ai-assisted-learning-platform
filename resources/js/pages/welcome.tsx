@@ -134,7 +134,7 @@ function CourseCard({ course, locale }: { course: FeaturedCourse; locale: string
     return (
         <Link
             href={`/${locale}/courses/${course.slug}`}
-            className="group flex flex-col rounded-xl border border-border bg-card p-6 transition-all duration-200 hover:border-primary/40 hover:shadow-md"
+            className="group flex flex-col rounded-xl border border-border bg-card transition-all duration-200 hover:border-primary/40 hover:shadow-md"
         >
             {course.thumbnail ? (
                 <img
@@ -143,15 +143,15 @@ function CourseCard({ course, locale }: { course: FeaturedCourse; locale: string
                     width={600}
                     height={340}
                     loading="lazy"
-                    className="mb-4 h-40 w-full rounded-lg object-cover"
+                    className="aspect-video w-full rounded-t-xl object-contain bg-muted"
                 />
             ) : (
-                <div className="mb-4 flex h-40 w-full items-center justify-center rounded-lg bg-muted">
+                <div className="aspect-video w-full flex items-center justify-center rounded-t-xl bg-muted">
                     <BookOpen className="h-8 w-8 text-muted-foreground" />
                 </div>
             )}
 
-            <div className="flex flex-1 flex-col">
+            <div className="flex flex-1 flex-col p-5">
                 <div className="mb-2 flex items-center gap-2">
                     {course.difficulty && (
                         <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium capitalize text-primary">

@@ -27,7 +27,7 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
     ];
 
     const form = useForm({
-        language: 'en',
+        language: 'bn',
         title: '',
         subtitle: '',
         description: '',
@@ -61,10 +61,14 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                 <form onSubmit={submit} className="flex flex-col gap-5">
                     {/* ── Basic Info ─────────────────────────────────────── */}
                     <div className="flex flex-col gap-4 rounded-lg border border-sky-200 bg-sky-50/60 p-4 dark:border-sky-800/50 dark:bg-sky-950/25">
-                        <p className="text-[11px] font-semibold tracking-widest text-sky-600 dark:text-sky-400">
+                        <p className="text-[14px] font-semibold tracking-widest text-sky-600 dark:text-sky-400">
                             Basic Info
-                            <span className="ml-4 text-red-500 font-normal">Course URL can't be changed in future</span>
-                            <span className="text-gray-800 font-normal">, others info can be edited</span>
+                            <span className="ml-4 font-normal text-red-500">
+                                Course URL can't be changed in future
+                            </span>
+                            <span className="font-normal text-gray-800">
+                                , others info can be edited
+                            </span>
                         </p>
 
                         <Field label="Title" error={form.errors.title} required>
@@ -73,7 +77,7 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                                 onChange={(e) =>
                                     form.setData('title', e.target.value)
                                 }
-                                placeholder="e.g. Mastering Laravel"
+                                placeholder="Example: Automation for Beginners to Advanced "
                                 disabled={form.processing}
                             />
                         </Field>
@@ -84,7 +88,7 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                                 onChange={(e) =>
                                     form.setData('subtitle', e.target.value)
                                 }
-                                placeholder="A short tagline for this course"
+                                placeholder="Example: If you want to ........ , this course is for you"
                                 disabled={form.processing}
                             />
                         </Field>
@@ -96,7 +100,9 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                         >
                             <RichTextEditor
                                 value={form.data.description}
-                                onChange={(val) => form.setData('description', val)}
+                                onChange={(val) =>
+                                    form.setData('description', val)
+                                }
                                 placeholder="What is this course about?"
                                 disabled={form.processing}
                             />
@@ -118,7 +124,7 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                         </Field>
 
                         <Field
-                            label="Prerequisites"
+                            label="What learners need to know before this course"
                             error={form.errors.prerequisites}
                         >
                             <RichTextEditor
@@ -162,7 +168,10 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                                 <select
                                     value={form.data.difficulty}
                                     onChange={(e) =>
-                                        form.setData('difficulty', e.target.value)
+                                        form.setData(
+                                            'difficulty',
+                                            e.target.value,
+                                        )
                                     }
                                     disabled={form.processing}
                                     className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -214,7 +223,7 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                         </Field>
 
                         <Field
-                            label="Thumbnail URL"
+                            label="🔗 Thumbnail URL ( 16:9 )"
                             error={form.errors.thumbnail}
                         >
                             <Input
@@ -233,12 +242,17 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                                     type="checkbox"
                                     checked={form.data.is_featured}
                                     onChange={(e) =>
-                                        form.setData('is_featured', e.target.checked)
+                                        form.setData(
+                                            'is_featured',
+                                            e.target.checked,
+                                        )
                                     }
                                     disabled={form.processing}
                                     className="h-4 w-4 rounded border-input accent-primary"
                                 />
-                                <span className="text-sm font-medium">Featured on homepage</span>
+                                <span className="text-sm font-medium">
+                                    Featured on homepage
+                                </span>
                             </label>
                         )}
                     </div>
