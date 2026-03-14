@@ -300,43 +300,11 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                                         form.setData('currency', e.target.value)
                                     }
                                     options={[
-                                        {
-                                            value: 'USD',
-                                            label: 'USD — US Dollar',
-                                        },
+                                        { value: 'USD', label: 'USD — US Dollar' },
                                         { value: 'EUR', label: 'EUR — Euro' },
-                                        {
-                                            value: 'GBP',
-                                            label: 'GBP — British Pound',
-                                        },
-                                        {
-                                            value: 'INR',
-                                            label: 'INR — Indian Rupee',
-                                        },
-                                        {
-                                            value: 'BRL',
-                                            label: 'BRL — Brazilian Real',
-                                        },
-                                        {
-                                            value: 'MXN',
-                                            label: 'MXN — Mexican Peso',
-                                        },
-                                        {
-                                            value: 'JPY',
-                                            label: 'JPY — Japanese Yen',
-                                        },
-                                        {
-                                            value: 'AUD',
-                                            label: 'AUD — Australian Dollar',
-                                        },
-                                        {
-                                            value: 'CAD',
-                                            label: 'CAD — Canadian Dollar',
-                                        },
-                                        {
-                                            value: 'BDT',
-                                            label: 'BDT — Bangladeshi Taka',
-                                        },
+                                        { value: 'GBP', label: 'GBP — British Pound' },
+                                        { value: 'AUD', label: 'AUD — Australian Dollar' },
+                                        { value: 'CAD', label: 'CAD — Canadian Dollar' },
                                     ]}
                                     disabled={form.processing}
                                 />
