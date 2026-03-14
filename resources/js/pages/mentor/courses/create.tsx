@@ -13,9 +13,11 @@ import type { BillingType, BreadcrumbItem, Category, SelectOption } from '@/type
 interface Props {
     categories: Category[];
     difficulties: SelectOption[];
+    languages: SelectOption[];
+    isAdmin: boolean;
 }
 
-export default function CourseCreate({ categories, difficulties }: Props) {
+export default function CourseCreate({ categories, difficulties, languages, isAdmin }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
 
@@ -25,7 +27,9 @@ export default function CourseCreate({ categories, difficulties }: Props) {
     ];
 
     const form = useForm({
+        language: 'en',
         title: '',
+        subtitle: '',
         description: '',
         what_you_will_learn: '',
         prerequisites: '',
@@ -33,6 +37,7 @@ export default function CourseCreate({ categories, difficulties }: Props) {
         estimated_duration: '',
         category_id: '',
         thumbnail: '',
+        is_featured: false,
         billing_type: 'one_time' as BillingType,
         price: '',
         currency: 'USD',
@@ -69,6 +74,17 @@ export default function CourseCreate({ categories, difficulties }: Props) {
                                     form.setData('title', e.target.value)
                                 }
                                 placeholder="e.g. Mastering Laravel"
+                                disabled={form.processing}
+                            />
+                        </Field>
+
+                        <Field label="Tagline" error={form.errors.subtitle}>
+                            <Input
+                                value={form.data.subtitle}
+                                onChange={(e) =>
+                                    form.setData('subtitle', e.target.value)
+                                }
+                                placeholder="A short tagline for this course"
                                 disabled={form.processing}
                             />
                         </Field>
@@ -123,6 +139,21 @@ export default function CourseCreate({ categories, difficulties }: Props) {
                         </p>
 
                         <div className="grid grid-cols-2 gap-4">
+                            <Field
+                                label="Language"
+                                error={form.errors.language}
+                                required
+                            >
+                                <Select
+                                    value={form.data.language}
+                                    onChange={(e) =>
+                                        form.setData('language', e.target.value)
+                                    }
+                                    options={languages}
+                                    disabled={form.processing}
+                                />
+                            </Field>
+
                             <Field
                                 label="Difficulty"
                                 error={form.errors.difficulty}
@@ -195,6 +226,21 @@ export default function CourseCreate({ categories, difficulties }: Props) {
                                 disabled={form.processing}
                             />
                         </Field>
+
+                        {isAdmin && (
+                            <label className="flex cursor-pointer items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={form.data.is_featured}
+                                    onChange={(e) =>
+                                        form.setData('is_featured', e.target.checked)
+                                    }
+                                    disabled={form.processing}
+                                    className="h-4 w-4 rounded border-input accent-primary"
+                                />
+                                <span className="text-sm font-medium">Featured on homepage</span>
+                            </label>
+                        )}
                     </div>
 
                     {/* ── Pricing ────────────────────────────────────────── */}

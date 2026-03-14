@@ -49,7 +49,9 @@ interface Props {
     course: Course;
     categories: Category[];
     difficulties: SelectOption[];
+    languages: SelectOption[];
     resourceTypes: SelectOption[];
+    isAdmin: boolean;
 }
 
 // ─── Course Details Form ─────────────────────────────────────────────────────
@@ -58,15 +60,21 @@ function CourseDetailsForm({
     course,
     categories,
     difficulties,
+    languages,
     locale,
+    isAdmin,
 }: {
     course: Course;
     categories: Category[];
     difficulties: SelectOption[];
+    languages: SelectOption[];
     locale: string;
+    isAdmin: boolean;
 }) {
     const form = useForm({
+        language: course.language,
         title: course.title,
+        subtitle: course.subtitle ?? '',
         description: course.description,
         what_you_will_learn: course.what_you_will_learn,
         prerequisites: course.prerequisites ?? '',
@@ -74,6 +82,7 @@ function CourseDetailsForm({
         estimated_duration: String(course.estimated_duration ?? ''),
         category_id: String(course.category_id ?? ''),
         thumbnail: course.thumbnail ?? '',
+        is_featured: course.is_featured,
         status: course.status,
         billing_type: course.billing_type ?? 'one_time',
         price: course.price ?? '',
@@ -91,7 +100,9 @@ function CourseDetailsForm({
         router.put(
             courseUpdate.url({ locale, course: course.slug }),
             {
+                language: course.language,
                 title: course.title,
+                subtitle: course.subtitle,
                 description: course.description,
                 what_you_will_learn: course.what_you_will_learn,
                 prerequisites: course.prerequisites,
@@ -164,6 +175,16 @@ function CourseDetailsForm({
                             disabled={form.processing}
                         />
                     </Field>
+                    <Field label="Tagline" error={form.errors.subtitle}>
+                        <Input
+                            value={form.data.subtitle}
+                            onChange={(e) =>
+                                form.setData('subtitle', e.target.value)
+                            }
+                            placeholder="A short tagline for this course"
+                            disabled={form.processing}
+                        />
+                    </Field>
                     <Field
                         label="Description"
                         error={form.errors.description}
@@ -219,6 +240,20 @@ function CourseDetailsForm({
                         Settings
                     </p>
                     <div className="grid grid-cols-2 gap-4">
+                        <Field
+                            label="Language"
+                            error={form.errors.language}
+                            required
+                        >
+                            <Select
+                                value={form.data.language}
+                                onChange={(e) =>
+                                    form.setData('language', e.target.value)
+                                }
+                                options={languages}
+                                disabled={form.processing}
+                            />
+                        </Field>
                         <Field
                             label="Difficulty"
                             error={form.errors.difficulty}
@@ -283,6 +318,21 @@ function CourseDetailsForm({
                             disabled={form.processing}
                         />
                     </Field>
+
+                    {isAdmin && (
+                        <label className="flex cursor-pointer items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={form.data.is_featured}
+                                onChange={(e) =>
+                                    form.setData('is_featured', e.target.checked)
+                                }
+                                disabled={form.processing}
+                                className="h-4 w-4 rounded border-input accent-primary"
+                            />
+                            <span className="text-sm font-medium">Featured on homepage</span>
+                        </label>
+                    )}
                 </div>
 
                 {/* ── Pricing ────────────────────────────────────────── */}
@@ -944,7 +994,7 @@ function AddModuleForm({ courseSlug, locale }: { courseSlug: string; locale: str
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-export default function CourseEdit({ course, categories, difficulties, resourceTypes }: Props) {
+export default function CourseEdit({ course, categories, difficulties, languages, resourceTypes, isAdmin }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
 
@@ -983,7 +1033,9 @@ export default function CourseEdit({ course, categories, difficulties, resourceT
                     course={course}
                     categories={categories}
                     difficulties={difficulties}
+                    languages={languages}
                     locale={l}
+                    isAdmin={isAdmin}
                 />
 
                 <CouponCodeManager course={course} locale={l} />

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\CourseDifficulty;
+use App\Enums\CourseLanguage;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,7 +18,10 @@ class StoreCourseRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'language' => ['required', Rule::enum(CourseLanguage::class)],
             'title' => ['required', 'string', 'max:255'],
+            'subtitle' => ['nullable', 'string', 'max:255'],
+            'is_featured' => ['sometimes', 'boolean'],
             'description' => ['required', 'string'],
             'what_you_will_learn' => ['required', 'string'],
             'prerequisites' => ['nullable', 'string'],

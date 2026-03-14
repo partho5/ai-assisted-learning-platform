@@ -15,7 +15,7 @@ interface NavLinkProps {
 }
 
 function NavLink({ href, children, external }: NavLinkProps) {
-    const cls = 'flex items-center self-stretch px-3 text-black transition-colors hover:bg-black hover:text-gray-100';
+    const cls = 'flex items-center self-stretch px-3 text-black dark:text-gray-200 transition-colors hover:bg-black hover:text-gray-100';
 
     if (external || href.startsWith('#')) {
         const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {

@@ -12,6 +12,7 @@ import { register } from '@/routes';
 interface FeaturedCourse {
     id: number;
     title: string;
+    subtitle: string | null;
     slug: string;
     description: string;
     thumbnail: string | null;
@@ -160,7 +161,11 @@ function CourseCard({ course, locale }: { course: FeaturedCourse; locale: string
                     <span className="ml-auto text-sm font-semibold text-foreground">{course.price}</span>
                 </div>
 
-                <h3 className="mb-2 font-semibold leading-snug text-foreground group-hover:text-primary">{course.title}</h3>
+                <h3 className="mb-1 font-semibold leading-snug text-foreground group-hover:text-primary">{course.title}</h3>
+
+                {course.subtitle && (
+                    <p className="mb-2 text-sm font-medium text-blue-500 dark:text-indigo-400">{course.subtitle}</p>
+                )}
 
                 <p className="mb-4 line-clamp-2 flex-1 text-sm text-muted-foreground">{stripHtml(course.description ?? '')}</p>
 
@@ -319,7 +324,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             style={{
                                 fontFamily: "'Bricolage Grotesque', sans-serif",
                             }}
-                            className="mb-4 text-4xl leading-tight font-bold tracking-tight text-slate-900 md:text-5xl lg:text-6xl"
+                            className="mb-4 text-4xl leading-tight font-bold tracking-tight text-slate-900 md:text-5xl lg:text-6xl dark:text-gray-200"
                         >
                             Stop chasing certificates.{' '}
                             <span
@@ -380,17 +385,17 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             {
                                 icon: <BookOpen className="h-5 w-5" />,
                                 label: 'High-value courses',
-                                color: 'bg-orange-50 text-orange-600 border-orange-100',
+                                color: 'bg-orange-50 text-orange-600 border-orange-100 text-sm md:text-lg',
                             },
                             {
                                 icon: <CheckCircle className="h-5 w-5" />,
                                 label: 'Mentor-endorsed work',
-                                color: 'bg-indigo-50 text-indigo-600 border-indigo-100',
+                                color: 'bg-indigo-50 text-indigo-600 border-indigo-100 text-sm md:text-lg',
                             },
                             {
                                 icon: <Users className="h-5 w-5" />,
                                 label: 'Public skill portfolio',
-                                color: 'bg-violet-50 text-violet-600 border-violet-100',
+                                color: 'bg-violet-50 text-violet-600 border-violet-100 text-sm md:text-lg',
                             },
                         ].map(({ icon, label, color }) => (
                             <div
@@ -398,7 +403,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${color}`}
                             >
                                 <span className="shrink-0">{icon}</span>
-                                <span className="font-medium">{label}</span>
+                                <span className="">{label}</span>
                             </div>
                         ))}
                         {/* AI card — Google-style rainbow gradient border */}
@@ -414,7 +419,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     className="h-5 w-5 shrink-0"
                                     style={{ color: '#4285F4' }}
                                 />
-                                <span className="font-medium text-slate-700">
+                                <span className="text-sm font-medium text-slate-700 md:text-lg ">
                                     AI-native learning
                                 </span>
                             </div>
@@ -448,7 +453,12 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         {
                             step: '01',
                             titleBefore: 'Pick a ',
-                            rotatingWords: ['skill gap', 'weak spot', 'blind spot', 'career gap'],
+                            rotatingWords: [
+                                'skill gap',
+                                'weak spot',
+                                'blind spot',
+                                'career gap',
+                            ],
                             titleAfter: ' to close',
                             initialDelay: 0,
                             body: 'Not another course to add to your list — a real gap to close. Mentor-built content with videos, articles, and assignments designed around hireable outcomes.',
@@ -459,7 +469,12 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         {
                             step: '02',
                             titleBefore: 'Do work a ',
-                            rotatingWords: ['recruiter', 'hiring manager', 'client', 'CEO'],
+                            rotatingWords: [
+                                'recruiter',
+                                'hiring manager',
+                                'client',
+                                'CEO',
+                            ],
                             titleAfter: ' can read',
                             initialDelay: 900,
                             body: "Assignments aren't busywork. They're portfolio pieces. Submit real work a hiring manager can open, read, and evaluate — not a multiple-choice score.",
@@ -470,7 +485,11 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         {
                             step: '03',
                             titleBefore: 'Get a ',
-                            rotatingWords: ["mentor's", "expert's", "professional's"],
+                            rotatingWords: [
+                                "mentor's",
+                                "expert's",
+                                "professional's",
+                            ],
                             titleAfter: ' public verdict',
                             initialDelay: 1800,
                             body: 'A real mentor reviews your submission and writes a public endorsement — permanently recorded on your portfolio. Not a certificate. A verdict from someone who knows.',
@@ -478,32 +497,44 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             bg: 'bg-violet-50 dark:bg-violet-950/30',
                             border: 'border-violet-100 dark:border-violet-900',
                         },
-                    ].map(({ step, titleBefore, rotatingWords, titleAfter, initialDelay, body, gradient, bg, border }) => (
-                        <div
-                            key={step}
-                            className={`relative flex flex-col gap-4 rounded-2xl border p-8 ${bg} ${border}`}
-                        >
-                            <span
-                                style={{
-                                    fontFamily:
-                                        "'Bricolage Grotesque', sans-serif",
-                                }}
-                                className={`bg-gradient-to-r ${gradient} bg-clip-text text-6xl leading-none font-black text-transparent`}
+                    ].map(
+                        ({
+                            step,
+                            titleBefore,
+                            rotatingWords,
+                            titleAfter,
+                            initialDelay,
+                            body,
+                            gradient,
+                            bg,
+                            border,
+                        }) => (
+                            <div
+                                key={step}
+                                className={`relative flex flex-col gap-4 rounded-2xl border p-8 ${bg} ${border}`}
                             >
-                                {step}
-                            </span>
-                            <h3 className="text-xl font-semibold text-foreground">
-                                {titleBefore}
-                                <RotatingText
-                                    words={rotatingWords}
-                                    initialDelay={initialDelay}
-                                    className="text-primary"
-                                />
-                                {titleAfter}
-                            </h3>
-                            <p className="text-muted-foreground">{body}</p>
-                        </div>
-                    ))}
+                                <span
+                                    style={{
+                                        fontFamily:
+                                            "'Bricolage Grotesque', sans-serif",
+                                    }}
+                                    className={`bg-gradient-to-r ${gradient} bg-clip-text text-6xl leading-none font-black text-transparent`}
+                                >
+                                    {step}
+                                </span>
+                                <h3 className="text-xl font-semibold text-foreground">
+                                    {titleBefore}
+                                    <RotatingText
+                                        words={rotatingWords}
+                                        initialDelay={initialDelay}
+                                        className="text-primary"
+                                    />
+                                    {titleAfter}
+                                </h3>
+                                <p className="text-muted-foreground">{body}</p>
+                            </div>
+                        ),
+                    )}
                 </div>
             </FadeIn>
 

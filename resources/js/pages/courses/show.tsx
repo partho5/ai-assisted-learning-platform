@@ -88,9 +88,15 @@ export default function CourseShow({ course, enrollment }: Props) {
                             </Badge>
                         </div>
 
-                        <h1 className="mb-4 text-2xl font-bold tracking-tight md:text-3xl">
+                        <h1 className="mb-2 text-2xl font-bold tracking-tight md:text-3xl">
                             {course.title}
                         </h1>
+
+                        {course.subtitle && (
+                            <p className="mb-4 text-lg font-medium text-blue-500 dark:text-indigo-400">
+                                {course.subtitle}
+                            </p>
+                        )}
 
                         <div
                             className="prose prose-sm dark:prose-invert rich-html mb-5 max-w-none leading-relaxed text-muted-foreground"

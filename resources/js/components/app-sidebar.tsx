@@ -44,7 +44,10 @@ export function AppSidebar() {
           ];
 
     const secondaryNavItems: NavItem[] = isMentorOrAdmin
-        ? [{ title: ui.nav.my_courses, href: `/${locale}/courses`, icon: BookOpen }]
+        ? [
+            { title: ui.nav.my_courses, href: `/${locale}/courses`, icon: BookOpen },
+            ...(isMentor ? [{ title: ui.nav.categories, href: `/${locale}/mentor/categories`, icon: Tag }] : []),
+          ]
         : [];
 
     return (

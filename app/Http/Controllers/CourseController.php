@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\CourseDifficulty;
+use App\Enums\CourseLanguage;
 use App\Enums\ResourceType;
 use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
@@ -73,11 +74,16 @@ class CourseController extends Controller
             );
         }
 
+        $courseLang = $request->input('course_lang', 'en');
+        if ($courseLang !== 'all') {
+            $query->byLanguage($courseLang);
+        }
+
         return Inertia::render('courses/index', [
             'courses' => $query->paginate(12)->withQueryString(),
             'categories' => Category::orderBy('name')->get(['id', 'name', 'slug']),
             'difficulties' => collect(CourseDifficulty::cases())->map(fn ($c) => ['value' => $c->value, 'label' => ucfirst($c->value)]),
-            'filters' => $request->only(['category', 'difficulty', 'search']),
+            'filters' => $request->only(['category', 'difficulty', 'search', 'course_lang']),
         ]);
     }
 
@@ -114,6 +120,8 @@ class CourseController extends Controller
         return Inertia::render('mentor/courses/create', [
             'categories' => Category::orderBy('name')->get(),
             'difficulties' => collect(CourseDifficulty::cases())->map(fn ($c) => ['value' => $c->value, 'label' => ucfirst($c->value)]),
+            'languages' => collect(CourseLanguage::cases())->map(fn ($c) => ['value' => $c->value, 'label' => strtoupper($c->value)]),
+            'isAdmin' => auth()->user()->isAdmin(),
         ]);
     }
 
@@ -122,6 +130,10 @@ class CourseController extends Controller
         $data = $request->validated();
         $data['user_id'] = auth()->id();
         $data['slug'] = $this->uniqueSlug($data['title']);
+
+        if (! auth()->user()->isAdmin()) {
+            unset($data['is_featured']);
+        }
 
         $course = Course::create($data);
 
@@ -145,7 +157,9 @@ class CourseController extends Controller
             'course' => $course,
             'categories' => Category::orderBy('name')->get(),
             'difficulties' => collect(CourseDifficulty::cases())->map(fn ($c) => ['value' => $c->value, 'label' => ucfirst($c->value)]),
+            'languages' => collect(CourseLanguage::cases())->map(fn ($c) => ['value' => $c->value, 'label' => strtoupper($c->value)]),
             'resourceTypes' => collect(ResourceType::cases())->map(fn ($c) => ['value' => $c->value, 'label' => ucfirst($c->value)]),
+            'isAdmin' => auth()->user()->isAdmin(),
         ]);
     }
 
@@ -154,6 +168,10 @@ class CourseController extends Controller
         $this->authorizeOwner($course);
 
         $data = $request->validated();
+
+        if (! auth()->user()->isAdmin()) {
+            unset($data['is_featured']);
+        }
 
         if (isset($data['title']) && $data['title'] !== $course->title) {
             $data['slug'] = $this->uniqueSlug($data['title'], $course->id);

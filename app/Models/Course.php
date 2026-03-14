@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CourseDifficulty;
+use App\Enums\CourseLanguage;
 use App\Enums\CourseStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,6 +29,8 @@ class Course extends Model
         'estimated_duration',
         'thumbnail',
         'status',
+        'language',
+        'subtitle',
         'is_featured',
         'price',
         'currency',
@@ -41,6 +44,7 @@ class Course extends Model
     {
         return [
             'difficulty' => CourseDifficulty::class,
+            'language' => CourseLanguage::class,
             'status' => CourseStatus::class,
             'is_featured' => 'boolean',
             'is_free' => 'boolean',
@@ -154,5 +158,11 @@ class Course extends Model
     public function scopeDraft(Builder $query): void
     {
         $query->where('status', CourseStatus::Draft->value);
+    }
+
+    /** @param Builder<Course> $query */
+    public function scopeByLanguage(Builder $query, string $language): void
+    {
+        $query->where('language', $language);
     }
 }

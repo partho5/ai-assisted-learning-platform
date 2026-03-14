@@ -9,23 +9,25 @@ use Laravel\Fortify\Features;
 
 class WelcomeController extends Controller
 {
-    public function index(): Response
+    public function index(\Illuminate\Http\Request $request): Response
     {
+        $courseLang = $request->input('course_lang', 'en');
+
         return Inertia::render('welcome', [
             'canRegister' => Features::enabled(Features::registration()),
             'featuredCourses' => Inertia::defer(fn () => Course::query()
                 ->published()
+                ->when($courseLang !== 'all', fn ($q) => $q->byLanguage($courseLang))
                 ->with('mentor:id,name,username')
                 ->withCount('resources')
-                ->where('is_featured', true)
-                ->orWhere(fn ($q) => $q->published())
-                ->select(['id', 'user_id', 'title', 'slug', 'description', 'thumbnail', 'difficulty', 'price', 'currency', 'billing_type', 'estimated_duration', 'is_featured'])
+                ->select(['id', 'user_id', 'title', 'subtitle', 'slug', 'description', 'thumbnail', 'difficulty', 'price', 'currency', 'billing_type', 'estimated_duration', 'is_featured'])
                 ->orderByDesc('is_featured')
                 ->limit(3)
                 ->get()
                 ->map(fn (Course $course) => [
                     'id' => $course->id,
                     'title' => $course->title,
+                    'subtitle' => $course->subtitle,
                     'slug' => $course->slug,
                     'description' => $course->description,
                     'thumbnail' => $course->thumbnail,

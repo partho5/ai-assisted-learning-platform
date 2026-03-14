@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\CourseDifficulty;
+use App\Enums\CourseLanguage;
 use App\Enums\CourseStatus;
 use App\Models\Category;
 use App\Models\User;
@@ -21,6 +22,7 @@ class CourseFactory extends Factory
         return [
             'user_id' => User::factory()->mentor(),
             'category_id' => Category::factory(),
+            'language' => CourseLanguage::En,
             'title' => $title,
             'slug' => Str::slug($title).'-'.Str::lower(Str::random(4)),
             'description' => fake()->paragraphs(2, true),

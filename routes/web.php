@@ -13,6 +13,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\LearnController;
+use App\Http\Controllers\Mentor\CategoryController as MentorCategoryController;
 use App\Http\Controllers\Mentor\DashboardController as MentorDashboardController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PaymentController;
@@ -66,6 +67,15 @@ Route::prefix('{locale}')
             Route::get('admin/chats/{chatSession}', [AdminChatSessionController::class, 'show'])->name('admin.chats.show');
             Route::get('admin/submissions', [AdminSubmissionController::class, 'index'])->name('admin.submissions.index');
             Route::get('admin/ai-stats', [AiStatsController::class, 'index'])->name('admin.ai-stats');
+        });
+
+        // Mentor category management (create & edit, no delete)
+        Route::middleware(['auth', 'verified', 'role:mentor,admin'])->group(function () {
+            Route::get('mentor/categories', [MentorCategoryController::class, 'index'])->name('mentor.categories.index');
+            Route::get('mentor/categories/create', [MentorCategoryController::class, 'create'])->name('mentor.categories.create');
+            Route::post('mentor/categories', [MentorCategoryController::class, 'store'])->name('mentor.categories.store');
+            Route::get('mentor/categories/{category}/edit', [MentorCategoryController::class, 'edit'])->name('mentor.categories.edit');
+            Route::put('mentor/categories/{category}', [MentorCategoryController::class, 'update'])->name('mentor.categories.update');
         });
 
         // Admin category management

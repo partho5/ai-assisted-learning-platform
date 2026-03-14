@@ -52,6 +52,13 @@ export default function CourseCard({ course, locale, 'data-course-id': dataCours
                     {course.title}
                 </h2>
 
+                {/* Subtitle */}
+                {course.subtitle && (
+                    <p className="-mt-1 line-clamp-1 text-sm font-medium text-indigo-500 dark:text-indigo-400">
+                        {course.subtitle}
+                    </p>
+                )}
+
                 {/* Mentor */}
                 {course.mentor && (
                     <MentorCard mentor={course.mentor} locale={locale} variant="inline" />

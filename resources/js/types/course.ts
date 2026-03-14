@@ -1,4 +1,5 @@
 export type CourseStatus = 'draft' | 'published';
+export type CourseLanguage = 'en' | 'bn';
 export type EnrollmentAccess = 'observer' | 'full';
 
 export type Enrollment = {
@@ -70,7 +71,9 @@ export type Course = {
     id: number;
     user_id: number;
     category_id: number | null;
+    language: CourseLanguage;
     title: string;
+    subtitle: string | null;
     slug: string;
     description: string;
     what_you_will_learn: string;

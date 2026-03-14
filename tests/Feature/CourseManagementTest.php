@@ -75,6 +75,7 @@ class CourseManagementTest extends TestCase
 
         $this->actingAs($mentor)
             ->post(route('courses.store', ['locale' => 'en']), [
+                'language' => 'en',
                 'title' => 'Intro to Laravel',
                 'description' => 'A great course.',
                 'what_you_will_learn' => 'You will learn Laravel.',
@@ -96,6 +97,7 @@ class CourseManagementTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)->post(route('courses.store', ['locale' => 'en']), [
+            'language' => 'en',
             'title' => 'My Awesome Course',
             'description' => 'Desc',
             'what_you_will_learn' => 'Things',
@@ -111,6 +113,7 @@ class CourseManagementTest extends TestCase
         Course::factory()->for($mentor, 'mentor')->create(['slug' => 'my-course']);
 
         $this->actingAs($mentor)->post(route('courses.store', ['locale' => 'en']), [
+            'language' => 'en',
             'title' => 'My Course',
             'description' => 'Desc',
             'what_you_will_learn' => 'Things',
@@ -148,6 +151,7 @@ class CourseManagementTest extends TestCase
 
         $this->actingAs($mentor)
             ->post(route('courses.store', ['locale' => 'en']), [
+                'language' => 'en',
                 'title' => 'Paid Laravel Course',
                 'description' => 'Advanced course.',
                 'what_you_will_learn' => 'Advanced Laravel.',
@@ -173,6 +177,7 @@ class CourseManagementTest extends TestCase
 
         $this->actingAs($mentor)
             ->post(route('courses.store', ['locale' => 'en']), [
+                'language' => 'en',
                 'title' => 'Monthly Course',
                 'description' => 'Subscription course.',
                 'what_you_will_learn' => 'Something great.',
@@ -249,6 +254,7 @@ class CourseManagementTest extends TestCase
 
         $this->actingAs($mentor)
             ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
+                'language' => 'en',
                 'title' => 'Updated Title',
                 'description' => 'Updated description.',
                 'what_you_will_learn' => 'Updated outcomes.',
@@ -270,6 +276,7 @@ class CourseManagementTest extends TestCase
 
         $this->actingAs($mentor)
             ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
+                'language' => $course->language->value,
                 'title' => $course->title,
                 'description' => $course->description,
                 'what_you_will_learn' => $course->what_you_will_learn,
@@ -292,6 +299,7 @@ class CourseManagementTest extends TestCase
 
         $this->actingAs($mentor)
             ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
+                'language' => 'en',
                 'title' => 'Hacked',
                 'description' => 'x',
                 'what_you_will_learn' => 'x',
