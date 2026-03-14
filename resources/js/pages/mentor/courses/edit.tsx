@@ -704,8 +704,8 @@ function ResourceForm({
                             />
                         </Field>
                     )}
-                    <div className="grid grid-cols-2 gap-3">
-                        <Field label="Source" error={form.errors.source}>
+                    <div className="grid grid-cols-2 gap-3 text-muted-foreground">
+                        <Field label="Source ( optional )" error={form.errors.source}>
                             <Input
                                 value={form.data.source}
                                 onChange={(e) => form.setData('source', e.target.value)}
@@ -713,7 +713,7 @@ function ResourceForm({
                                 placeholder="YouTube, Medium…"
                             />
                         </Field>
-                        <Field label="Estimated time (min)" error={form.errors.estimated_time}>
+                        <Field label="Estimated time (minutes)" error={form.errors.estimated_time}>
                             <Input
                                 type="number"
                                 min={1}
@@ -729,7 +729,7 @@ function ResourceForm({
                 {/* ── Guidance ── */}
                 <div className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
                     <p className="text-[14px] font-semibold tracking-widest text-emerald-600 dark:text-emerald-400">Guidance for Learners</p>
-                    <Field label="Why this resource?" error={form.errors.why_this_resource} required>
+                    <Field label="Importance of this resource" error={form.errors.why_this_resource} required>
                         <RichTextEditor
                             value={form.data.why_this_resource}
                             onChange={(content) => form.setData('why_this_resource', content)}

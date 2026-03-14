@@ -429,7 +429,7 @@ function ResourceBlock({
             {resource.why_this_resource && !isAssignment && (
                 <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-base text-muted-foreground">
                     <span className="mb-1 block font-medium">
-                        Why this resource:
+                        Importance of this resource:
                     </span>
                     <RichHtml
                         content={resource.why_this_resource}
