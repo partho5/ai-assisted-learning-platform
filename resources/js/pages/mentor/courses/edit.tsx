@@ -41,6 +41,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
 import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
 import type { BillingType, BreadcrumbItem, Category, Course, CourseDifficulty, CouponCode, CourseModule, CourseResource, ResourceType, SelectOption } from '@/types';
@@ -307,15 +308,14 @@ function CourseDetailsForm({
                         </select>
                     </Field>
                     <Field
-                        label="🔗 Thumbnail URL ( 16:9 )"
+                        label="Thumbnail"
                         error={form.errors.thumbnail}
                     >
-                        <Input
+                        <CloudinaryImageUpload
                             value={form.data.thumbnail}
-                            onChange={(e) =>
-                                form.setData('thumbnail', e.target.value)
-                            }
+                            onChange={(url) => form.setData('thumbnail', url)}
                             disabled={form.processing}
+                            aspectHint="16:9"
                         />
                     </Field>
 
@@ -613,7 +613,7 @@ function ResourceForm({
         order: String(existing?.order ?? 0),
     });
 
-    const needsUrl = ['video', 'article', 'document', 'audio', 'image'].includes(form.data.type);
+    const needsUrl = ['video', 'article', 'document', 'audio'].includes(form.data.type);
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
@@ -643,7 +643,7 @@ function ResourceForm({
                                 value={form.data.title}
                                 onChange={(e) => form.setData('title', e.target.value)}
                                 disabled={form.processing}
-                                placeholder="Example: Creating Acount / Configuting Your Bot"
+                                placeholder="Example: Creating Acount / Security Best Practices / Tricks to Do ...."
                             />
                         </Field>
                         <Field label="Type" error={form.errors.type} required>
@@ -662,6 +662,15 @@ function ResourceForm({
                                 onChange={(e) => form.setData('url', e.target.value)}
                                 disabled={form.processing}
                                 placeholder="https://..."
+                            />
+                        </Field>
+                    )}
+                    {form.data.type === 'image' && (
+                        <Field label="Image" error={form.errors.url} required>
+                            <CloudinaryImageUpload
+                                value={form.data.url}
+                                onChange={(url) => form.setData('url', url)}
+                                disabled={form.processing}
                             />
                         </Field>
                     )}

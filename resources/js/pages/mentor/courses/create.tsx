@@ -6,6 +6,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
 import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
 import type { BillingType, BreadcrumbItem, Category, SelectOption } from '@/types';
@@ -223,16 +224,14 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                         </Field>
 
                         <Field
-                            label="🔗 Thumbnail URL ( 16:9 )"
+                            label="Thumbnail"
                             error={form.errors.thumbnail}
                         >
-                            <Input
+                            <CloudinaryImageUpload
                                 value={form.data.thumbnail}
-                                onChange={(e) =>
-                                    form.setData('thumbnail', e.target.value)
-                                }
-                                placeholder="https://..."
+                                onChange={(url) => form.setData('thumbnail', url)}
                                 disabled={form.processing}
+                                aspectHint="16:9"
                             />
                         </Field>
 
