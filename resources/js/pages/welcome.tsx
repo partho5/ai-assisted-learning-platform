@@ -205,7 +205,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
     const courses = featuredCourses ?? [];
 
     return (
-        <PublicLayout isLandingPage hidePlatformChat={false}>
+        <PublicLayout isLandingPage hideFooter hidePlatformChat={false}>
             <Head title={`${appName} — Learn, Prove, Get Hired`}>
                 <meta
                     name="description"
@@ -1022,51 +1022,58 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             </section>
 
             {/* ── FOOTER ───────────────────────────────────────────────── */}
-            <footer
-                role="contentinfo"
-                className="border-t border-border bg-background"
-            >
-                <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
-                    <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-                        <div className="flex items-center gap-2">
-                            <img
-                                src="/logo.png"
-                                alt={appName}
-                                width={24}
-                                height={24}
-                                className="h-6 w-6"
-                            />
-                            <span className="text-sm font-semibold text-foreground">
-                                {appName}
-                            </span>
+            <footer role="contentinfo" className="mb-48 border-t border-border bg-background">
+                <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
+                    {/* Top: brand + columns */}
+                    <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+                        {/* Brand */}
+                        <div className="col-span-2 md:col-span-1">
+                            <div className="mb-3 flex items-center gap-2">
+                                <img src="/logo.png" alt={appName} width={24} height={24} className="h-6 w-6" />
+                                <span className="text-sm font-semibold text-foreground">{appName}</span>
+                            </div>
+                            <p className="max-w-[200px] text-xs leading-relaxed text-muted-foreground">
+                                Skill-based learning with verified portfolios and AI-powered feedback.
+                            </p>
                         </div>
 
-                        <nav
-                            aria-label="Footer navigation"
-                            className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground"
-                        >
-                            <Link
-                                href={coursesIndex.url(l)}
-                                className="hover:text-foreground"
-                            >
-                                Courses
-                            </Link>
-                            <Link
-                                href={`/${l}/about-us`}
-                                className="hover:text-foreground"
-                            >
-                                About
-                            </Link>
-                            <Link
-                                href={`/${l === 'en' ? 'bn' : 'en'}/`}
-                                className="hover:text-foreground"
-                            >
-                                {l === 'en' ? 'বাংলা' : 'English'}
-                            </Link>
-                        </nav>
+                        {/* Platform */}
+                        <div>
+                            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Platform</p>
+                            <ul className="space-y-3">
+                                <li><Link href={coursesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Courses</Link></li>
+                                <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground hover:text-primary">About</Link></li>
+                                {/*<li>*/}
+                                {/*    <Link href={`/${l === 'en' ? 'bn' : 'en'}/`} className="text-sm text-muted-foreground hover:text-primary">*/}
+                                {/*        {l === 'en' ? 'বাংলা' : 'English'}*/}
+                                {/*    </Link>*/}
+                                {/*</li>*/}
+                            </ul>
+                        </div>
 
+                        {/* Support */}
+                        <div>
+                            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Support</p>
+                            <ul className="space-y-3">
+                                <li><Link href={`/${l}/contact`} className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link></li>
+                                <li><Link href={`/${l}/refund-policy`} className="text-sm text-muted-foreground hover:text-primary">Refund Policy</Link></li>
+                            </ul>
+                        </div>
+
+                        {/* Legal */}
+                        <div>
+                            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Legal</p>
+                            <ul className="space-y-3">
+                                <li><Link href={`/${l}/privacy-policy`} className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
+                                <li><Link href={`/${l}/terms`} className="text-sm text-muted-foreground hover:text-primary">Terms &amp; Conditions</Link></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Bottom: copyright */}
+                    <div className="mt-12 border-t border-border pt-6">
                         <p className="text-xs text-muted-foreground">
-                            © {new Date().getFullYear()} {appName}
+                            © {new Date().getFullYear()} {appName}. All rights reserved.
                         </p>
                     </div>
                 </div>

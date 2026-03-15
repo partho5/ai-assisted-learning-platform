@@ -33,10 +33,12 @@ function NavLink({ href, children, external }: NavLinkProps) {
 export default function PublicLayout({
     children,
     hidePlatformChat = false,
+    hideFooter = false,
     isLandingPage = false,
 }: {
     children: React.ReactNode;
     hidePlatformChat?: boolean;
+    hideFooter?: boolean;
     isLandingPage?: boolean;
 }) {
     const { auth, locale } = usePage().props;
@@ -171,6 +173,61 @@ export default function PublicLayout({
             </nav>
 
             <main>{children}</main>
+
+            {/* Site footer */}
+            {!hideFooter && (
+                <footer className="mb-48 border-t border-border bg-muted/20">
+                    <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
+                        <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+                            {/* Brand */}
+                            <div className="col-span-2 md:col-span-1">
+                                <Link href={`/${l}/`} className="mb-3 flex items-center gap-2">
+                                    <img src="/logo.png" alt="SkillEvidence" width={22} height={22} className="h-[22px] w-[22px]" />
+                                    <span className="text-sm font-semibold tracking-tight text-foreground">
+                                        {import.meta.env.VITE_APP_NAME}
+                                    </span>
+                                </Link>
+                                <p className="max-w-[200px] text-xs leading-relaxed text-muted-foreground">
+                                    Skill-based learning with verified portfolios and AI-powered feedback.
+                                </p>
+                            </div>
+
+                            {/* Platform */}
+                            <div>
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Platform</p>
+                                <ul className="space-y-3">
+                                    <li><Link href={`/${l}/`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Home</Link></li>
+                                    <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground transition-colors hover:text-primary">About</Link></li>
+                                </ul>
+                            </div>
+
+                            {/* Support */}
+                            <div>
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Support</p>
+                                <ul className="space-y-3">
+                                    <li><Link href={`/${l}/contact`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Contact Us</Link></li>
+                                    <li><Link href={`/${l}/refund-policy`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Refund Policy</Link></li>
+                                </ul>
+                            </div>
+
+                            {/* Legal */}
+                            <div>
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Legal</p>
+                                <ul className="space-y-3">
+                                    <li><Link href={`/${l}/privacy-policy`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Privacy Policy</Link></li>
+                                    <li><Link href={`/${l}/terms`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Terms &amp; Conditions</Link></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="mt-12 border-t border-border pt-6">
+                            <p className="text-xs text-muted-foreground">
+                                &copy; {new Date().getFullYear()} SkillEvidence. All rights reserved.
+                            </p>
+                        </div>
+                    </div>
+                </footer>
+            )}
 
             {!hidePlatformChat && (
                 <FloatingChatButton

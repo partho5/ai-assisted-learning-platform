@@ -48,6 +48,22 @@ Route::prefix('{locale}')
             return Inertia::render('about-us');
         })->name('about-us');
 
+        Route::get('privacy-policy', function () {
+            return Inertia::render('privacy-policy');
+        })->name('privacy-policy');
+
+        Route::get('terms', function () {
+            return Inertia::render('terms');
+        })->name('terms');
+
+        Route::get('refund-policy', function () {
+            return Inertia::render('refund-policy');
+        })->name('refund-policy');
+
+        Route::get('contact', function () {
+            return Inertia::render('contact');
+        })->name('contact');
+
         Route::get('dashboard', [DashboardController::class, 'index'])
             ->middleware(['auth', 'verified'])
             ->name('dashboard');

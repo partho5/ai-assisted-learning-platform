@@ -36,6 +36,30 @@ class SitemapController extends Controller
                 'changefreq' => 'monthly',
                 'priority' => '0.5',
             ];
+            $urls[] = [
+                'loc' => "{$baseUrl}/{$locale}/contact",
+                'lastmod' => $now,
+                'changefreq' => 'yearly',
+                'priority' => '0.4',
+            ];
+            $urls[] = [
+                'loc' => "{$baseUrl}/{$locale}/privacy-policy",
+                'lastmod' => $now,
+                'changefreq' => 'yearly',
+                'priority' => '0.3',
+            ];
+            $urls[] = [
+                'loc' => "{$baseUrl}/{$locale}/terms",
+                'lastmod' => $now,
+                'changefreq' => 'yearly',
+                'priority' => '0.3',
+            ];
+            $urls[] = [
+                'loc' => "{$baseUrl}/{$locale}/refund-policy",
+                'lastmod' => $now,
+                'changefreq' => 'yearly',
+                'priority' => '0.3',
+            ];
         }
 
         // Published courses
