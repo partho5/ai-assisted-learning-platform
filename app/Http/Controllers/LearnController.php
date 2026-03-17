@@ -16,14 +16,15 @@ class LearnController extends Controller
 {
     public function show(Request $request, Course $course, Resource $resource): Response|RedirectResponse
     {
-        if (! $course->isPublished()) {
+        $user = $request->user();
+        $isPreview = $request->boolean('preview') && $user && ($user->isAdmin() || $course->user_id === $user->id);
+
+        if (! $course->isPublished() && ! $isPreview) {
             abort(404);
         }
 
-        $user = $request->user();
-
         // Guests can only enter via a free resource
-        if (! $resource->is_free && ! $user) {
+        if (! $resource->is_free && ! $user && ! $isPreview) {
             return redirect()->route('login');
         }
 
@@ -31,8 +32,8 @@ class LearnController extends Controller
             ? Enrollment::where('user_id', $user->id)->where('course_id', $course->id)->first()
             : null;
 
-        // Non-enrolled auth user trying to enter via a non-free resource
-        if ($user && ! $enrollment && ! $resource->is_free) {
+        // Non-enrolled auth user trying to enter via a non-free resource (skip for preview)
+        if (! $isPreview && $user && ! $enrollment && ! $resource->is_free) {
             return redirect()->route('courses.show', [
                 'locale' => app()->getLocale(),
                 'course' => $course->slug,
@@ -86,7 +87,7 @@ class LearnController extends Controller
             }
         }
 
-        $hasFullAccess = $enrollment?->isFull() ?? false;
+        $hasFullAccess = $isPreview || ($enrollment?->isFull() ?? false);
 
         // Build enriched resources (flat array, one entry per resource)
         $resources = $allResources->map(function ($r) use ($completions, $activeAttempts, $pastAttempts, $hasFullAccess) {
@@ -114,6 +115,8 @@ class LearnController extends Controller
             'id' => $course->id,
             'title' => $course->title,
             'slug' => $course->slug,
+            'thumbnail' => $course->thumbnail,
+            'description' => $course->description,
             'modules' => $course->modules->map(fn ($m) => [
                 'id' => $m->id,
                 'title' => $m->title,
@@ -127,6 +130,8 @@ class LearnController extends Controller
             'initialResourceId' => $resource->id,
             'resources' => $resources,
             'enrollment' => $enrollment,
+            'ogUrl' => url()->route('courses.show', ['locale' => app()->getLocale(), 'course' => $course->slug]),
+            'isPreview' => $isPreview,
         ]);
     }
 }

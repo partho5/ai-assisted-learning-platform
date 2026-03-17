@@ -334,4 +334,178 @@ class CourseManagementTest extends TestCase
             ->delete(route('courses.destroy', ['locale' => 'en', 'course' => $course->slug]))
             ->assertForbidden();
     }
+
+    // ──────────────────────────────────────────────
+    // preview
+    // ──────────────────────────────────────────────
+
+    public function test_mentor_can_preview_own_draft_course(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
+
+        $this->actingAs($mentor)
+            ->get(route('courses.preview', ['locale' => 'en', 'course' => $course->slug]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('courses/show')
+                ->where('isPreview', true)
+            );
+    }
+
+    public function test_admin_can_preview_any_draft_course(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
+
+        $this->actingAs($admin)
+            ->get(route('courses.preview', ['locale' => 'en', 'course' => $course->slug]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('isPreview', true));
+    }
+
+    public function test_other_mentor_cannot_preview_course(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $other = User::factory()->mentor()->create();
+        $course = Course::factory()->for($other, 'mentor')->draft()->create();
+
+        $this->actingAs($mentor)
+            ->get(route('courses.preview', ['locale' => 'en', 'course' => $course->slug]))
+            ->assertForbidden();
+    }
+
+    public function test_guest_cannot_access_preview(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
+
+        $this->get(route('courses.preview', ['locale' => 'en', 'course' => $course->slug]))
+            ->assertRedirect();
+    }
+
+    // ──────────────────────────────────────────────
+    // approval workflow
+    // ──────────────────────────────────────────────
+
+    public function test_mentor_can_submit_course_for_review(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('courses.submit-review', ['locale' => 'en', 'course' => $course->slug]))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('courses', [
+            'id' => $course->id,
+            'status' => CourseStatus::PendingReview->value,
+            'rejection_reason' => null,
+        ]);
+    }
+
+    public function test_mentor_cannot_submit_another_mentors_course_for_review(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $other = User::factory()->mentor()->create();
+        $course = Course::factory()->for($other, 'mentor')->draft()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('courses.submit-review', ['locale' => 'en', 'course' => $course->slug]))
+            ->assertForbidden();
+    }
+
+    public function test_admin_can_approve_pending_review_course(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
+
+        $this->actingAs($admin)
+            ->post(route('courses.approve', ['locale' => 'en', 'course' => $course->slug]))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('courses', [
+            'id' => $course->id,
+            'status' => CourseStatus::Published->value,
+            'rejection_reason' => null,
+        ]);
+    }
+
+    public function test_non_admin_cannot_approve_course(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('courses.approve', ['locale' => 'en', 'course' => $course->slug]))
+            ->assertForbidden();
+    }
+
+    public function test_admin_can_reject_course_with_reason(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
+
+        $this->actingAs($admin)
+            ->post(route('courses.reject', ['locale' => 'en', 'course' => $course->slug]), [
+                'rejection_reason' => 'Content needs improvement.',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('courses', [
+            'id' => $course->id,
+            'status' => CourseStatus::Draft->value,
+            'rejection_reason' => 'Content needs improvement.',
+        ]);
+    }
+
+    public function test_reject_requires_a_reason(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
+
+        $this->actingAs($admin)
+            ->post(route('courses.reject', ['locale' => 'en', 'course' => $course->slug]), [
+                'rejection_reason' => '',
+            ])
+            ->assertSessionHasErrors('rejection_reason');
+    }
+
+    public function test_non_admin_cannot_reject_course(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('courses.reject', ['locale' => 'en', 'course' => $course->slug]), [
+                'rejection_reason' => 'Reason',
+            ])
+            ->assertForbidden();
+    }
+
+    public function test_draft_course_is_not_visible_in_public_catalog(): void
+    {
+        Course::factory()->draft()->create(['title' => 'Hidden Draft']);
+
+        $this->get(route('courses.index', ['locale' => 'en']))
+            ->assertInertia(fn ($page) => $page
+                ->component('courses/index')
+                ->where('courses.total', 0)
+            );
+    }
+
+    public function test_pending_review_course_is_not_visible_in_public_catalog(): void
+    {
+        Course::factory()->pendingReview()->create(['title' => 'Under Review']);
+
+        $this->get(route('courses.index', ['locale' => 'en']))
+            ->assertInertia(fn ($page) => $page
+                ->component('courses/index')
+                ->where('courses.total', 0)
+            );
+    }
 }

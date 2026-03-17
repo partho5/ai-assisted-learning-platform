@@ -1,4 +1,4 @@
-export type CourseStatus = 'draft' | 'published';
+export type CourseStatus = 'draft' | 'pending_review' | 'published';
 export type CourseLanguage = 'en' | 'bn';
 export type EnrollmentAccess = 'observer' | 'full';
 
@@ -82,6 +82,7 @@ export type Course = {
     estimated_duration: number | null;
     thumbnail: string | null;
     status: CourseStatus;
+    rejection_reason: string | null;
     is_featured: boolean;
     // Pricing
     price: string | null;

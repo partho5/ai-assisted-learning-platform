@@ -30,6 +30,7 @@ class User extends Authenticatable
         'avatar',
         'headline',
         'bio',
+        'personal_notes',
         'portfolio_visibility',
         'showcased_attempt_ids',
     ];
@@ -44,6 +45,7 @@ class User extends Authenticatable
         'two_factor_secret',
         'two_factor_recovery_codes',
         'remember_token',
+        'personal_notes',
     ];
 
     /**

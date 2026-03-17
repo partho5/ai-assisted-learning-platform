@@ -1,8 +1,11 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
+    approve as courseApprove,
     create as courseCreate,
     edit as courseEdit,
     index as coursesIndex,
+    preview as coursePreview,
+    reject as courseReject,
 } from '@/actions/App/Http/Controllers/CourseController';
 import { index as submissionsIndex } from '@/actions/App/Http/Controllers/SubmissionController';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +21,16 @@ interface Props {
 export default function CoursesIndex({ courses, isAdmin }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
+
+    function approveCourse(slug: string) {
+        router.post(courseApprove.url({ locale: l, course: slug }), {}, { preserveScroll: true });
+    }
+
+    function rejectCourse(slug: string) {
+        const reason = prompt('Rejection reason (required):');
+        if (!reason?.trim()) { return; }
+        router.post(courseReject.url({ locale: l, course: slug }), { rejection_reason: reason }, { preserveScroll: true });
+    }
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: isAdmin ? 'All Courses' : 'My Courses', href: coursesIndex.url(l) },
@@ -72,9 +85,9 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
                                         </h2>
                                         <Badge
                                             variant={course.status === 'published' ? 'default' : 'secondary'}
-                                            className="shrink-0 capitalize"
+                                            className={`shrink-0 capitalize ${course.status === 'pending_review' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : ''}`}
                                         >
-                                            {course.status}
+                                            {course.status === 'pending_review' ? 'Pending Review' : course.status}
                                         </Badge>
                                     </div>
 
@@ -118,13 +131,40 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
                                                 </Button>
                                             </Link>
                                         </div>
-                                        {course.status === 'published' && (
+                                        {course.status === 'published' ? (
                                             <Link
                                                 href={`/${l}/courses/${course.slug}`}
                                                 className="text-center text-xs text-primary hover:underline"
                                             >
                                                 View course →
                                             </Link>
+                                        ) : (
+                                            <Link
+                                                href={coursePreview.url({ locale: l, course: course.slug })}
+                                                className="text-center text-xs text-amber-600 hover:underline dark:text-amber-400"
+                                            >
+                                                Preview course →
+                                            </Link>
+                                        )}
+                                        {isAdmin && course.status === 'pending_review' && (
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="complete"
+                                                    size="compact"
+                                                    className="flex-1"
+                                                    onClick={() => approveCourse(course.slug)}
+                                                >
+                                                    Approve
+                                                </Button>
+                                                <Button
+                                                    variant="danger"
+                                                    size="compact"
+                                                    className="flex-1"
+                                                    onClick={() => rejectCourse(course.slug)}
+                                                >
+                                                    Reject
+                                                </Button>
+                                            </div>
                                         )}
                                     </div>
                                 </div>

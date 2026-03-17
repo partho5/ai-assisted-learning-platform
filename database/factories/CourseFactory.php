@@ -50,6 +50,13 @@ class CourseFactory extends Factory
         ]);
     }
 
+    public function pendingReview(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => CourseStatus::PendingReview,
+        ]);
+    }
+
     public function featured(): static
     {
         return $this->state(fn (array $attributes) => [

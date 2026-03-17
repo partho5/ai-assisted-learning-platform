@@ -46,6 +46,8 @@ interface LearnCourse {
     id: number;
     title: string;
     slug: string;
+    thumbnail: string | null;
+    description: string | null;
     modules: SidebarModule[];
 }
 
@@ -87,6 +89,8 @@ interface Props {
     initialResourceId: number;
     resources: EnrichedResource[];
     enrollment: Enrollment | null;
+    ogUrl: string;
+    isPreview?: boolean;
 }
 
 // ─── Status icon ──────────────────────────────────────────────────────────────
@@ -550,8 +554,8 @@ function ResourceBlock({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function Learn({ course, initialResourceId, resources, enrollment }: Props) {
-    const { locale, auth } = usePage().props;
+export default function Learn({ course, initialResourceId, resources, enrollment, ogUrl, isPreview = false }: Props) {
+    const { locale, auth, name } = usePage().props;
     const l = String(locale);
     const isGuest = !auth?.user;
 
@@ -684,7 +688,13 @@ export default function Learn({ course, initialResourceId, resources, enrollment
     ];
 
     const inner = (
-        <div className="flex min-h-svh flex-col md:flex-row">
+        <div className="flex min-h-svh flex-col">
+            {isPreview && (
+                <div className="flex items-center justify-center gap-2 bg-amber-400 px-4 py-2 text-sm font-semibold text-amber-950 dark:bg-amber-500 dark:text-amber-950">
+                    <span>👁 Preview mode — this course is not published yet</span>
+                </div>
+            )}
+        <div className="flex flex-1 flex-col md:flex-row">
             {/* ── Sidebar ── */}
             <aside
                 ref={sidebarRef}
@@ -835,12 +845,33 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                 ))}
             </main>
         </div>
+        </div>
+    );
+
+    const ogDescription = course.description
+        ? course.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
+        : '';
+    const ogImage = course.thumbnail ?? '/logo.png';
+    const ogHead = (
+        <Head title={`${course.title} — Learn`}>
+            <meta name="description" content={ogDescription} />
+            <meta property="og:title" content={`${course.title} | ${String(name)}`} />
+            <meta property="og:description" content={ogDescription} />
+            <meta property="og:image" content={ogImage} />
+            <meta property="og:url" content={ogUrl} />
+            <meta property="og:type" content="article" />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content={`${course.title} | ${String(name)}`} />
+            <meta name="twitter:description" content={ogDescription} />
+            <meta name="twitter:image" content={ogImage} />
+            <link rel="canonical" href={ogUrl} />
+        </Head>
     );
 
     if (isGuest) {
         return (
             <PublicLayout hidePlatformChat>
-                <Head title={`${course.title} — Learn`} />
+                {ogHead}
                 {inner}
                 <FloatingChatButton context={chatContext} />
             </PublicLayout>
@@ -849,7 +880,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} hidePlatformChat>
-            <Head title={`${course.title} — Learn`} />
+            {ogHead}
             {inner}
             <FloatingChatButton context={chatContext} />
         </AppLayout>

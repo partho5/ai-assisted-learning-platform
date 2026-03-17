@@ -29,6 +29,7 @@ class Course extends Model
         'estimated_duration',
         'thumbnail',
         'status',
+        'rejection_reason',
         'language',
         'subtitle',
         'is_featured',
@@ -148,6 +149,11 @@ class Course extends Model
         return $this->status === CourseStatus::Draft;
     }
 
+    public function isPendingReview(): bool
+    {
+        return $this->status === CourseStatus::PendingReview;
+    }
+
     /** @param Builder<Course> $query */
     public function scopePublished(Builder $query): void
     {
@@ -158,6 +164,12 @@ class Course extends Model
     public function scopeDraft(Builder $query): void
     {
         $query->where('status', CourseStatus::Draft->value);
+    }
+
+    /** @param Builder<Course> $query */
+    public function scopePendingReview(Builder $query): void
+    {
+        $query->where('status', CourseStatus::PendingReview->value);
     }
 
     /** @param Builder<Course> $query */

@@ -21,10 +21,11 @@ interface Props {
     categories: Category[];
     difficulties: SelectOption[];
     filters: Filters;
+    ogUrl: string;
 }
 
-export default function CourseCatalog({ courses, categories, difficulties, filters }: Props) {
-    const { locale } = usePage().props;
+export default function CourseCatalog({ courses, categories, difficulties, filters, ogUrl }: Props) {
+    const { locale, name } = usePage().props;
     const l = String(locale);
 
     const searchRef = useRef<HTMLInputElement>(null);
@@ -120,10 +121,17 @@ export default function CourseCatalog({ courses, categories, difficulties, filte
     return (
         <PublicLayout hidePlatformChat>
             <Head title="Courses">
-                <meta
-                    name="description"
-                    content="Browse curated learning courses built by expert mentors."
-                />
+                <meta name="description" content="Browse curated learning courses built by expert mentors." />
+                <meta property="og:title" content={`Courses | ${String(name)}`} />
+                <meta property="og:description" content="Browse curated learning courses built by expert mentors." />
+                <meta property="og:image" content="/logo.png" />
+                <meta property="og:url" content={ogUrl} />
+                <meta property="og:type" content="website" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={`Courses | ${String(name)}`} />
+                <meta name="twitter:description" content="Browse curated learning courses built by expert mentors." />
+                <meta name="twitter:image" content="/logo.png" />
+                <link rel="canonical" href={ogUrl} />
             </Head>
 
             {/* Page header */}

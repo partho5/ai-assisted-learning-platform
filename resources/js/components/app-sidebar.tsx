@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, ClipboardList, LayoutGrid, Tag, Users, Zap } from 'lucide-react';
+import { BookOpen, ClipboardList, LayoutGrid, NotebookPen, Tag, Users, Zap } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -50,6 +50,10 @@ export function AppSidebar() {
           ]
         : [];
 
+    const personalNavItems: NavItem[] = [
+        { title: 'Personal Notes', href: `/${locale}/notes`, icon: NotebookPen },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -69,6 +73,7 @@ export function AppSidebar() {
                 {secondaryNavItems.length > 0 && (
                     <NavMain items={secondaryNavItems} label={isAdmin ? 'Management' : 'Mentor'} />
                 )}
+                <NavMain items={personalNavItems} label="Personal" />
             </SidebarContent>
 
             <SidebarFooter>

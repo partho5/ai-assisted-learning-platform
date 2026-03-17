@@ -1,4 +1,4 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import {
     DndContext,
@@ -15,8 +15,12 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
+    approve as courseApprove,
     destroy as courseDestroy,
     index as coursesIndex,
+    preview as coursePreview,
+    reject as courseReject,
+    submitForReview as courseSubmitForReview,
     update as courseUpdate,
 } from '@/actions/App/Http/Controllers/CourseController';
 import {
@@ -96,8 +100,7 @@ function CourseDetailsForm({
         form.submit(courseUpdate({ locale, course: course.slug }));
     }
 
-    function togglePublish() {
-        const newStatus = course.status === 'published' ? 'draft' : 'published';
+    function unpublish() {
         router.put(
             courseUpdate.url({ locale, course: course.slug }),
             {
@@ -111,10 +114,24 @@ function CourseDetailsForm({
                 estimated_duration: course.estimated_duration,
                 category_id: course.category_id,
                 thumbnail: course.thumbnail,
-                status: newStatus,
+                status: 'draft',
             },
             { preserveScroll: true },
         );
+    }
+
+    function submitForReview() {
+        router.post(courseSubmitForReview.url({ locale, course: course.slug }), {}, { preserveScroll: true });
+    }
+
+    function approve() {
+        router.post(courseApprove.url({ locale, course: course.slug }), {}, { preserveScroll: true });
+    }
+
+    function reject() {
+        const reason = prompt('Rejection reason (required):');
+        if (!reason?.trim()) { return; }
+        router.post(courseReject.url({ locale, course: course.slug }), { rejection_reason: reason }, { preserveScroll: true });
     }
 
     function deleteCourse() {
@@ -131,25 +148,41 @@ function CourseDetailsForm({
                 </div>
                 <div className="flex items-center gap-2">
                     <Badge
-                        variant={
-                            course.status === 'published'
-                                ? 'default'
-                                : 'secondary'
-                        }
-                        className="capitalize"
+                        variant={course.status === 'published' ? 'default' : 'secondary'}
+                        className={`capitalize ${course.status === 'pending_review' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : ''}`}
                     >
-                        {course.status}
+                        {course.status === 'pending_review' ? 'Pending Review' : course.status}
                     </Badge>
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        size="compact"
-                        onClick={togglePublish}
-                    >
-                        {course.status === 'published'
-                            ? 'Unpublish'
-                            : 'Publish'}
-                    </Button>
+                    <Link href={coursePreview.url({ locale, course: course.slug })}>
+                        <Button type="button" variant="utility" size="compact">
+                            Preview
+                        </Button>
+                    </Link>
+                    {course.status === 'published' && (
+                        <Button type="button" variant="secondary" size="compact" onClick={unpublish}>
+                            Unpublish
+                        </Button>
+                    )}
+                    {course.status === 'draft' && !isAdmin && (
+                        <Button type="button" variant="enroll" size="compact" onClick={submitForReview}>
+                            Submit for Review
+                        </Button>
+                    )}
+                    {course.status === 'draft' && isAdmin && (
+                        <Button type="button" variant="enroll" size="compact" onClick={approve}>
+                            Publish
+                        </Button>
+                    )}
+                    {course.status === 'pending_review' && isAdmin && (
+                        <>
+                            <Button type="button" variant="complete" size="compact" onClick={approve}>
+                                Approve
+                            </Button>
+                            <Button type="button" variant="danger" size="compact" onClick={reject}>
+                                Reject
+                            </Button>
+                        </>
+                    )}
                     <Button
                         type="button"
                         variant="danger"
@@ -161,6 +194,18 @@ function CourseDetailsForm({
                 </div>
             </div>
 
+            {course.rejection_reason && course.status === 'draft' && (
+                <div className="mx-5 mt-5 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800/50 dark:bg-red-950/30">
+                    <p className="mb-1 text-sm font-semibold text-red-700 dark:text-red-400">Rejected — revise and resubmit</p>
+                    <p className="text-sm text-red-600 dark:text-red-300">Message admin panel: {course.rejection_reason}</p>
+                </div>
+            )}
+            {course.status === 'pending_review' && (
+                <div className="mx-5 mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-950/30">
+                    <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Under review — editing is locked</p>
+                    <p className="text-sm text-amber-600 dark:text-amber-300">An admin will review and approve or provide feedback.</p>
+                </div>
+            )}
             <form onSubmit={submit} className="flex flex-col gap-5 p-5">
                 {/* ── Basic Info ─────────────────────────────────────── */}
                 <div className="flex flex-col gap-4 rounded-lg border border-sky-200 bg-sky-50/60 p-4 dark:border-sky-800/50 dark:bg-sky-950/25">
@@ -445,7 +490,7 @@ function CourseDetailsForm({
                     <Button
                         type="submit"
                         variant="progress"
-                        disabled={form.processing}
+                        disabled={form.processing || course.status === 'pending_review'}
                     >
                         {form.processing ? 'Saving...' : 'Save Changes'}
                     </Button>
@@ -626,19 +671,19 @@ function ResourceForm({
 
     return (
         <form onSubmit={submit} className="flex flex-col gap-3 overflow-hidden rounded-lg border border-violet-200 bg-card dark:border-violet-800/50">
-            {/* Resource form header */}
+            {/* Lesson form header */}
             <div className="border-b border-violet-200 bg-violet-50/60 px-4 py-2.5 dark:border-violet-800/50 dark:bg-violet-950/30">
                 <p className="text-[11px] font-semibold tracking-widest text-violet-600 dark:text-violet-400">
-                    {existing ? 'Edit Resource' : 'New Resource'}
+                    {existing ? 'Edit Lesson' : 'New Lesson'}
                 </p>
             </div>
 
             <div className="flex flex-col gap-3 p-4">
                 {/* ── Resource Info ── */}
                 <div className="flex flex-col gap-3 rounded-lg border border-sky-200 bg-sky-50/50 p-3 dark:border-sky-800/40 dark:bg-sky-950/20">
-                    <p className="text-[14px] font-semibold tracking-widest text-sky-600 dark:text-sky-400">Resource Info</p>
+                    <p className="text-[14px] font-semibold tracking-widest text-sky-600 dark:text-sky-400">Lesson Info</p>
                     <div className="grid grid-cols-2 gap-3">
-                        <Field label="Title" error={form.errors.title} required>
+                        <Field label="Lesson Title" error={form.errors.title} required>
                             <Input
                                 value={form.data.title}
                                 onChange={(e) => form.setData('title', e.target.value)}
@@ -646,7 +691,7 @@ function ResourceForm({
                                 placeholder="Example: Creating Acount / Security Best Practices / Tricks to Do ...."
                             />
                         </Field>
-                        <Field label="Type" error={form.errors.type} required>
+                        <Field label="Resource Type" error={form.errors.type} required>
                             <Select
                                 value={form.data.type}
                                 onChange={(e) => form.setData('type', e.target.value as ResourceType)}
@@ -709,12 +754,12 @@ function ResourceForm({
                 {/* ── Guidance ── */}
                 <div className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
                     <p className="text-[14px] font-semibold tracking-widest text-emerald-600 dark:text-emerald-400">Guidance for Learners</p>
-                    <Field label="Importance of this resource" error={form.errors.why_this_resource} required>
+                    <Field label="Importance of this lesson" error={form.errors.why_this_resource} required>
                         <RichTextEditor
                             value={form.data.why_this_resource}
                             onChange={(content) => form.setData('why_this_resource', content)}
                             disabled={form.processing}
-                            placeholder="Why did you choose this specific resource?"
+                            placeholder="Why did you choose this specific lesson?"
                         />
                     </Field>
                     <Field label="Mentor note (optional)" error={form.errors.mentor_note}>
@@ -745,7 +790,7 @@ function ResourceForm({
                         Cancel
                     </Button>
                     <Button type="submit" variant="progress" size="compact" disabled={form.processing}>
-                        {form.processing ? 'Saving...' : existing ? 'Update Resource' : 'Add Resource'}
+                        {form.processing ? 'Saving...' : existing ? 'Update Lesson' : 'Add Lesson'}
                     </Button>
                 </div>
             </div>
@@ -804,12 +849,12 @@ function ModulePanel({
     }
 
     function deleteModule() {
-        if (!confirm('Delete this module and all its resources?')) { return; }
+        if (!confirm('Delete this module and all its lessons?')) { return; }
         router.delete(moduleDestroy.url({ locale, course: courseSlug, module: module.id }), { preserveScroll: true });
     }
 
     function deleteResource(resourceId: number) {
-        if (!confirm('Delete this resource?')) { return; }
+        if (!confirm('Delete this lesson?')) { return; }
         router.delete(resourceDestroy.url({ locale, course: courseSlug, module: module.id, resource: resourceId }), {
             preserveScroll: true,
         });
@@ -908,7 +953,7 @@ function ModulePanel({
                         onClick={() => setAddingResource(true)}
                         className="mt-1 justify-start text-violet-600 hover:text-violet-700 dark:text-violet-400"
                     >
-                        + Add Resource
+                        + Add Lesson
                     </Button>
                 )}
             </div>
@@ -947,13 +992,13 @@ function AddModuleForm({ courseSlug, locale }: { courseSlug: string; locale: str
                 <h3 className="text-[11px] font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">New Module</h3>
             </div>
             <div className="flex flex-col gap-3 p-4">
-                <Field label="Title" error={form.errors.title} required>
+                <Field label="Module Title" error={form.errors.title} required>
                     <Input
                         value={form.data.title}
                         onChange={(e) => form.setData('title', e.target.value)}
                         disabled={form.processing}
                         autoFocus
-                        placeholder="Module title"
+                        placeholder="Example: Understanding Customer Psychology"
                     />
                 </Field>
                 <Field label="Description (optional)" error={form.errors.description}>
@@ -1100,7 +1145,7 @@ function SortableResourceRow({
                 <button
                     type="button"
                     className="shrink-0 cursor-grab touch-none text-muted-foreground hover:text-foreground active:cursor-grabbing"
-                    aria-label="Drag to reorder resource"
+                    aria-label="Drag to reorder lesson"
                     {...attributes}
                     {...listeners}
                 >

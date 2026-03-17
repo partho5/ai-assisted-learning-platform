@@ -16,6 +16,8 @@ import type { Course, Enrollment } from '@/types';
 interface Props {
     course: Course;
     enrollment: Enrollment | null;
+    ogUrl: string;
+    isPreview?: boolean;
 }
 
 const RESOURCE_TYPE_LABELS: Record<string, string> = {
@@ -28,8 +30,8 @@ const RESOURCE_TYPE_LABELS: Record<string, string> = {
     assignment: 'Assignment',
 };
 
-export default function CourseShow({ course, enrollment }: Props) {
-    const { auth, locale } = usePage().props;
+export default function CourseShow({ course, enrollment, ogUrl, isPreview = false }: Props) {
+    const { auth, locale, name } = usePage().props;
     const l = String(locale);
     const totalResources = course.resources_count ?? course.modules.reduce((sum, m) => sum + m.resources.length, 0);
     const durationText = course.estimated_duration
@@ -52,10 +54,30 @@ export default function CourseShow({ course, enrollment }: Props) {
         autoTrigger: !!enrollment,
     };
 
+    const ogDescription = course.description
+        ? course.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
+        : '';
+    const ogImage = course.thumbnail ?? '/logo.png';
+
     return (
         <PublicLayout hidePlatformChat>
+            {isPreview && (
+                <div className="sticky top-0 z-50 flex items-center justify-center gap-2 bg-amber-400 px-4 py-2 text-sm font-semibold text-amber-950 dark:bg-amber-500 dark:text-amber-950">
+                    <span>👁 Preview mode — this course is not published yet</span>
+                </div>
+            )}
             <Head title={course.title}>
-                <meta name="description" content={course.description} />
+                <meta name="description" content={ogDescription} />
+                <meta property="og:title" content={`${course.title} | ${String(name)}`} />
+                <meta property="og:description" content={ogDescription} />
+                <meta property="og:image" content={ogImage} />
+                <meta property="og:url" content={ogUrl} />
+                <meta property="og:type" content="article" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={`${course.title} | ${String(name)}`} />
+                <meta name="twitter:description" content={ogDescription} />
+                <meta name="twitter:image" content={ogImage} />
+                <link rel="canonical" href={ogUrl} />
             </Head>
 
             <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12">
@@ -323,6 +345,7 @@ export default function CourseShow({ course, enrollment }: Props) {
                                     user={auth?.user ?? null}
                                     locale={l}
                                     onEnroll={handleEnroll}
+                                    isPreview={isPreview}
                                 />
                             </div>
                         </div>
@@ -344,13 +367,32 @@ function EnrollmentCTA({
     user,
     locale,
     onEnroll,
+    isPreview = false,
 }: {
     course: Course;
     enrollment: Enrollment | null;
     user: { id: number } | null;
     locale: string;
     onEnroll: () => void;
+    isPreview?: boolean;
 }) {
+    if (isPreview) {
+        const firstResource = course.modules?.flatMap((m) => m.resources)[0];
+        return (
+            <div className="flex flex-col gap-3">
+                <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                    <span className="font-medium">Preview mode.</span> Learners will see enrollment options here.
+                </div>
+                {firstResource && (
+                    <Button variant="secondary" className="w-full" asChild>
+                        <Link href={`/${locale}/courses/${course.slug}/learn/${firstResource.id}?preview=1`}>
+                            Preview learning experience →
+                        </Link>
+                    </Button>
+                )}
+            </div>
+        );
+    }
     const isPaid = course.price !== null && parseFloat(course.price) > 0;
     const price = isPaid ? parseFloat(course.price!) : 0;
     const isSubscription = course.billing_type === 'subscription';

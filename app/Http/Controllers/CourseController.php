@@ -84,6 +84,7 @@ class CourseController extends Controller
             'categories' => Category::orderBy('name')->get(['id', 'name', 'slug']),
             'difficulties' => collect(CourseDifficulty::cases())->map(fn ($c) => ['value' => $c->value, 'label' => ucfirst($c->value)]),
             'filters' => $request->only(['category', 'difficulty', 'search', 'course_lang']),
+            'ogUrl' => url()->current(),
         ]);
     }
 
@@ -112,6 +113,28 @@ class CourseController extends Controller
         return Inertia::render('courses/show', [
             'course' => $course,
             'enrollment' => $enrollment,
+            'ogUrl' => url()->current(),
+        ]);
+    }
+
+    public function preview(Request $request, Course $course): Response
+    {
+        $this->authorizeOwner($course);
+
+        $course->load([
+            'mentor:id,name,username,avatar,headline,bio',
+            'category',
+            'modules' => fn ($q) => $q->orderBy('order'),
+            'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at'),
+        ]);
+
+        $course->loadCount(['modules', 'resources', 'enrollments']);
+
+        return Inertia::render('courses/show', [
+            'course' => $course,
+            'enrollment' => null,
+            'ogUrl' => route('courses.show', ['locale' => app()->getLocale(), 'course' => $course->slug]),
+            'isPreview' => true,
         ]);
     }
 
@@ -191,6 +214,54 @@ class CourseController extends Controller
         return redirect()
             ->route('courses.index', ['locale' => app()->getLocale()])
             ->with('success', 'Course deleted.');
+    }
+
+    public function submitForReview(Course $course): RedirectResponse
+    {
+        $this->authorizeOwner($course);
+
+        $course->update([
+            'status' => \App\Enums\CourseStatus::PendingReview,
+            'rejection_reason' => null,
+        ]);
+
+        return back()->with('success', 'Course submitted for review.');
+    }
+
+    public function approve(Course $course): RedirectResponse
+    {
+        $user = auth()->user();
+
+        if (! $user->isAdmin()) {
+            abort(403);
+        }
+
+        $course->update([
+            'status' => \App\Enums\CourseStatus::Published,
+            'rejection_reason' => null,
+        ]);
+
+        return back()->with('success', 'Course approved and published.');
+    }
+
+    public function reject(Request $request, Course $course): RedirectResponse
+    {
+        $user = auth()->user();
+
+        if (! $user->isAdmin()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'rejection_reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $course->update([
+            'status' => \App\Enums\CourseStatus::Draft,
+            'rejection_reason' => $request->input('rejection_reason'),
+        ]);
+
+        return back()->with('success', 'Course rejected and returned to draft.');
     }
 
     private function authorizeOwner(Course $course): void

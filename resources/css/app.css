@@ -196,6 +196,9 @@
     .selectedCell { background-color: color-mix(in oklch, var(--primary) 15%, transparent); }
 }
 
+.notes-editor .tiptap-editor { border: 2px solid var(--primary); border-radius: 8px; }
+.notes-editor .ProseMirror { min-height: 60vh; }
+
 .rich-html table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
 .rich-html td, .rich-html th { border: 1px solid var(--border); padding: 0.4rem 0.6rem; vertical-align: top; }
 .rich-html th { background-color: var(--muted); font-weight: 600; }

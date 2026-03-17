@@ -17,6 +17,7 @@ use App\Http\Controllers\Mentor\CategoryController as MentorCategoryController;
 use App\Http\Controllers\Mentor\DashboardController as MentorDashboardController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PersonalNotesController;
 use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\ResourceCompletionController;
@@ -68,6 +69,12 @@ Route::prefix('{locale}')
             ->middleware(['auth', 'verified'])
             ->name('dashboard');
 
+        // Personal notes — every authenticated user
+        Route::middleware(['auth', 'verified'])->group(function () {
+            Route::get('notes', [PersonalNotesController::class, 'edit'])->name('notes.edit');
+            Route::patch('notes', [PersonalNotesController::class, 'update'])->name('notes.update');
+        });
+
         // Mentor dashboard
         Route::get('mentor/dashboard', [MentorDashboardController::class, 'index'])
             ->middleware(['auth', 'verified', 'role:mentor,admin'])
@@ -83,6 +90,8 @@ Route::prefix('{locale}')
             Route::get('admin/chats/{chatSession}', [AdminChatSessionController::class, 'show'])->name('admin.chats.show');
             Route::get('admin/submissions', [AdminSubmissionController::class, 'index'])->name('admin.submissions.index');
             Route::get('admin/ai-stats', [AiStatsController::class, 'index'])->name('admin.ai-stats');
+            Route::post('courses/{course}/approve', [CourseController::class, 'approve'])->name('courses.approve');
+            Route::post('courses/{course}/reject', [CourseController::class, 'reject'])->name('courses.reject');
         });
 
         // Mentor category management (create & edit, no delete)
@@ -147,6 +156,10 @@ Route::prefix('{locale}')
         Route::middleware(['auth', 'verified', 'role:mentor,admin'])->group(function () {
             Route::get('courses/create', [CourseController::class, 'create'])
                 ->name('courses.create');
+            Route::get('courses/{course}/preview', [CourseController::class, 'preview'])
+                ->name('courses.preview');
+            Route::post('courses/{course}/submit-review', [CourseController::class, 'submitForReview'])
+                ->name('courses.submit-review');
             Route::post('courses', [CourseController::class, 'store'])
                 ->name('courses.store');
             Route::get('courses/{course}/edit', [CourseController::class, 'edit'])
