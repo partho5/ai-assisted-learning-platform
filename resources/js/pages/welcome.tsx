@@ -199,6 +199,7 @@ function CourseSkeleton() {
 export default function Welcome({ canRegister, featuredCourses }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
+    console.log('locale', l);
     const appName = import.meta.env.VITE_APP_NAME ?? 'SkillEvidence';
     const appUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
@@ -217,7 +218,8 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 />
                 <link rel="canonical" href={`${appUrl}/${l}/`} />
                 <link rel="alternate" hrefLang="en" href={`${appUrl}/en/`} />
-                <link rel="alternate" hrefLang="bn" href={`${appUrl}/bn/`} />
+                <link rel="alternate" hrefLang="bn" href={`${appUrl}/en?course_lang=bn`} />
+
                 <link
                     rel="alternate"
                     hrefLang="x-default"

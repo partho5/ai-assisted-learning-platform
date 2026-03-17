@@ -21,7 +21,7 @@ export function RotatingText({ words, interval = 2500, initialDelay = 0, classNa
     wordsRef.current = words;
 
     useEffect(() => {
-        const intervalRef = { id: 0 as ReturnType<typeof setInterval> };
+        const intervalRef = { id: undefined as ReturnType<typeof setInterval> | undefined };
 
         const tick = () => {
             setPhase('out');
@@ -48,26 +48,32 @@ export function RotatingText({ words, interval = 2500, initialDelay = 0, classNa
     const isTransitioning = phase !== 'in';
 
     return (
-        <span
-            className={cn('relative inline-block overflow-hidden align-bottom', className)}
-        >
-            <span
-                style={{
-                    display: 'inline-block',
-                    transition: isTransitioning
-                        ? 'transform 350ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease'
-                        : 'none',
-                    transform:
-                        phase === 'out'
-                            ? 'translateY(-120%)'
-                            : phase === 'in'
-                              ? 'translateY(120%)'
-                              : 'translateY(0)',
-                    opacity: phase === 'idle' ? 1 : 0,
-                }}
-            >
-                {words[index]}
-            </span>
+        <span className={cn('relative inline-grid justify-items-center overflow-hidden align-bottom', className)}>
+            {words.map((word, i) => (
+                <span
+                    key={word}
+                    aria-hidden={i !== index}
+                    style={{
+                        gridArea: '1 / 1',
+                        transition:
+                            i === index && isTransitioning
+                                ? 'transform 350ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease'
+                                : 'none',
+                        transform:
+                            i !== index
+                                ? 'translateY(0)'
+                                : phase === 'out'
+                                  ? 'translateY(-120%)'
+                                  : phase === 'in'
+                                    ? 'translateY(120%)'
+                                    : 'translateY(0)',
+                        opacity: i === index ? (phase === 'idle' ? 1 : 0) : 0,
+                        visibility: i === index ? 'visible' : 'hidden',
+                    }}
+                >
+                    {word}
+                </span>
+            ))}
         </span>
     );
 }
