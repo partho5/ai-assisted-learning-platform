@@ -22,6 +22,7 @@ use App\Http\Controllers\PortfolioController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\ResourceCompletionController;
 use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\TestAttemptController;
@@ -32,7 +33,8 @@ use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Sitemap — outside locale prefix
+// Robots & Sitemap — outside locale prefix
+Route::get('/robots.txt', [RobotsController::class, 'index'])->name('robots');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Redirect bare root to default locale

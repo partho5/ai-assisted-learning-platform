@@ -12,15 +12,16 @@
 
 ### SSR (Server-Side Rendering)
 - ✅ **Confirmed working** — verified via `wget`, full HTML content returned (not blank div)
+- ✅ **Documented** — `README.md` created with PM2 setup, verification command, env var notes
 - `ssr.tsx` configured, Node.js SSR process is running in production
-- ❌ **Not documented** — deployment process must be written in `README.md`
 - **Rule:** If the SSR process ever goes down, Googlebot sees `<div id="app"></div>` — monitor it
 
 ### robots.txt
-- ✅ Exists at `public/robots.txt`
-- Blocks: `/en/dashboard`, `/bn/dashboard`, `/en/admin/`, `/bn/admin/`, `/en/mentor/`, `/bn/mentor/`, `/settings/`
-- ⚠️ Sitemap line uses relative path `/sitemap.xml` — must be full URL `https://domain.com/sitemap.xml`
-- ❌ `/login` and `/register` not blocked — no SEO value, should be disallowed
+- ✅ Now served dynamically via `RobotsController` — Sitemap URL built from `config('app.url')`
+- ✅ `.htaccess` updated — `RewriteRule ^robots\.txt$` before `!-f` check forces PHP handling
+- ✅ Blocks: dashboard, admin, mentor, settings, login, register (all locales)
+- ✅ `Sitemap:` line uses full dynamic URL from `APP_URL`
+- **Nginx note:** documented in README — needs `try_files` override for `/robots.txt`
 - Learn pages intentionally NOT blocked — decision: index all lesson pages
 
 ### Sitemap
@@ -59,18 +60,18 @@
 | Tag | Status | Notes |
 |-----|--------|-------|
 | `<title>` | ✅ | `course.title \| AppName` |
-| `meta description` | ⚠️ | Uses stripped `course.description` — should use `course.subtitle` (tagline, already in `<p>` on page) |
+| `meta description` | ✅ | Uses `course.subtitle`, falls back to stripped `description` |
 | `canonical` | ✅ | `ogUrl` passed from controller |
 | `og:title` | ✅ | |
-| `og:description` | ⚠️ | Same issue as meta description — change to `course.subtitle` |
-| `og:image` | ✅ | `course.thumbnail ?? '/logo.png'` — confirmed correct |
-| `og:type` | ⚠️ | `"article"` — should be `"website"` |
+| `og:description` | ✅ | Uses `course.subtitle` (same as meta description) |
+| `og:image` | ✅ | `course.thumbnail ?? '/logo.png'` |
+| `og:type` | ✅ | `"website"` |
 | `twitter:card` | ✅ | `summary_large_image` |
-| JSON-LD Course schema | ❌ | **MISSING** — required for Google Course rich results (`hasCourseInstance` mandatory since 2023) |
-| JSON-LD BreadcrumbList | ❌ | Missing — breadcrumb display in SERP snippets |
-| Thumbnail `width`/`height` | ❌ | Both main and sidebar `<img>` missing dimensions — CLS |
-| `<article>` wrapper | ❌ | Main content column is `<div>` — should be `<article>` (compatible with Course JSON-LD, they are independent layers) |
-| Breadcrumb HTML | ❌ | `<div><span>` structure — should be `<nav aria-label="Breadcrumb"><ol><li>` |
+| JSON-LD Course schema | ✅ | Implemented with `hasCourseInstance`, `instructor`, `offers` |
+| JSON-LD BreadcrumbList | ✅ | Implemented — Courses → Course title |
+| Thumbnail `width`/`height` | ✅ | Main `1280×720`, sidebar `320×180` |
+| `<article>` wrapper | ✅ | Main content column is `<article>` |
+| Breadcrumb HTML | ✅ | `<nav aria-label="Breadcrumb"><ol><li>` with real `<Link>` href |
 
 ### Learn Page (`learn.tsx`) — `/en/courses/{slug}/learn/{id}`
 | Tag | Status | Notes |
@@ -91,20 +92,23 @@
 ### Day 1 — Before Launch
 
 #### `README.md` (create)
-- [ ] Document SSR Node process: how to start, what breaks if it's down, production deployment steps
+- [x] Document SSR Node process: how to start, what breaks if it's down, production deployment steps
 
-#### `public/robots.txt`
-- [ ] Fix sitemap line: `Sitemap: /sitemap.xml` → `Sitemap: https://{{APP_URL}}/sitemap.xml`
-- [ ] Add `Disallow: /login` and `Disallow: /register`
+#### `robots.txt` (now dynamic via controller)
+- [x] `RobotsController` created — Sitemap URL from `config('app.url')`
+- [x] Route registered in `web.php`
+- [x] `.htaccess` updated to force `/robots.txt` through PHP
+- [x] Add `Disallow: /login` and `Disallow: /register`
+- [ ] **Nginx only:** add `try_files` override (documented in README)
 
 #### `resources/js/pages/courses/show.tsx`
-- [ ] Meta description + `og:description`: change source from `course.description` → `course.subtitle`
-- [ ] `og:type`: `"article"` → `"website"`
-- [ ] Add Course JSON-LD schema with `hasCourseInstance` (required for Google rich results)
-- [ ] Add BreadcrumbList JSON-LD schema
-- [ ] Add `width` and `height` to both `<img>` thumbnail tags (main + sidebar)
-- [ ] Change main content `<div className="min-w-0 flex-1">` → `<article>`
-- [ ] Change breadcrumb from `<div><span>` → `<nav aria-label="Breadcrumb"><ol><li>`
+- [x] Meta description + `og:description`: `course.subtitle` with `description` fallback
+- [x] `og:type`: `"website"`
+- [x] Course JSON-LD schema with `hasCourseInstance`, `instructor`, `offers`
+- [x] BreadcrumbList JSON-LD schema
+- [x] `width`/`height` on both thumbnail images
+- [x] `<article>` wrapper on main content column
+- [x] Semantic `<nav aria-label="Breadcrumb"><ol><li>` breadcrumb with real link
 
 #### Verify manually
 - [ ] `public/og-image.png` exists and is 1200×630px

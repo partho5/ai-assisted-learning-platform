@@ -31,7 +31,7 @@ const RESOURCE_TYPE_LABELS: Record<string, string> = {
 };
 
 export default function CourseShow({ course, enrollment, ogUrl, isPreview = false }: Props) {
-    const { auth, locale, name } = usePage().props;
+    const { auth, locale, name, appUrl } = usePage().props as Record<string, any>;
     const l = String(locale);
     const totalResources = course.resources_count ?? course.modules.reduce((sum, m) => sum + m.resources.length, 0);
     const durationText = course.estimated_duration
@@ -54,9 +54,11 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
         autoTrigger: !!enrollment,
     };
 
-    const ogDescription = course.description
-        ? course.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
-        : '';
+    const ogDescription = course.subtitle
+        ? course.subtitle.trim().slice(0, 160)
+        : course.description
+          ? course.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
+          : '';
     const ogImage = course.thumbnail ?? '/logo.png';
 
     return (
@@ -72,31 +74,81 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                 <meta property="og:description" content={ogDescription} />
                 <meta property="og:image" content={ogImage} />
                 <meta property="og:url" content={ogUrl} />
-                <meta property="og:type" content="article" />
+                <meta property="og:type" content="website" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`${course.title} | ${String(name)}`} />
                 <meta name="twitter:description" content={ogDescription} />
                 <meta name="twitter:image" content={ogImage} />
                 <link rel="canonical" href={ogUrl} />
+                <script type="application/ld+json">{JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'Course',
+                    name: course.title,
+                    description: ogDescription,
+                    url: ogUrl,
+                    image: ogImage,
+                    provider: {
+                        '@type': 'Organization',
+                        name: String(name),
+                        url: appUrl,
+                    },
+                    ...(course.mentor && {
+                        hasCourseInstance: {
+                            '@type': 'CourseInstance',
+                            courseMode: 'online',
+                            instructor: {
+                                '@type': 'Person',
+                                name: course.mentor.name,
+                            },
+                        },
+                    }),
+                    ...(course.price != null && {
+                        offers: {
+                            '@type': 'Offer',
+                            price: parseFloat(String(course.price)) > 0 ? String(course.price) : '0',
+                            priceCurrency: course.currency ?? 'USD',
+                            availability: 'https://schema.org/InStock',
+                        },
+                    }),
+                })}</script>
+                <script type="application/ld+json">{JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                        {
+                            '@type': 'ListItem',
+                            position: 1,
+                            name: 'Courses',
+                            item: `${appUrl}/${l}/courses`,
+                        },
+                        {
+                            '@type': 'ListItem',
+                            position: 2,
+                            name: course.title,
+                            item: ogUrl,
+                        },
+                    ],
+                })}</script>
             </Head>
 
             <div className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12">
                 <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
                     {/* Main content */}
-                    <div className="min-w-0 flex-1">
+                    <article className="min-w-0 flex-1">
                         {/* Breadcrumb */}
-                        <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                            <span
-                                className="cursor-pointer transition-colors hover:text-foreground"
-                                onClick={() => window.history.back()}
-                            >
-                                Courses
-                            </span>
-                            <span>/</span>
-                            <span className="truncate text-foreground">
-                                {course.title}
-                            </span>
-                        </div>
+                        <nav aria-label="Breadcrumb" className="mb-4">
+                            <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <li>
+                                    <Link href={`/${l}/courses`} className="transition-colors hover:text-foreground">
+                                        Courses
+                                    </Link>
+                                </li>
+                                <li aria-hidden="true">/</li>
+                                <li className="truncate text-foreground" aria-current="page">
+                                    {course.title}
+                                </li>
+                            </ol>
+                        </nav>
 
                         {/* Hero */}
                         <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -152,6 +204,8 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                             <img
                                 src={course.thumbnail}
                                 alt={course.title}
+                                width={1280}
+                                height={720}
                                 className="mb-8 aspect-video w-full rounded-xl object-cover"
                             />
                         )}
@@ -304,7 +358,7 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                         {course.mentor && (
                             <MentorCard mentor={course.mentor} locale={l} />
                         )}
-                    </div>
+                    </article>
 
                     {/* Enrollment card — sticky sidebar on desktop */}
                     <aside className="lg:sticky lg:top-20 lg:w-80 lg:shrink-0">
@@ -320,6 +374,8 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                                     <img
                                         src={course.thumbnail}
                                         alt={course.title}
+                                        width={320}
+                                        height={180}
                                         className="mb-4 hidden aspect-video w-full rounded-lg object-cover lg:block"
                                     />
                                 )}
