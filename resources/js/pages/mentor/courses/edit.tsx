@@ -142,7 +142,7 @@ function CourseDetailsForm({
     return (
         <section className="overflow-hidden rounded-xl border border-sidebar-border/70 bg-card dark:border-sidebar-border">
             {/* Section header */}
-            <div className="flex items-center justify-between border-b border-sidebar-border/70 bg-muted/40 px-5 py-3 dark:border-sidebar-border">
+            <div className="flex items-center justify-between border-b border-sidebar-border/70 bg-muted/40 px-2 md:px-5 py-3 dark:border-sidebar-border">
                 <div>
                     <h2 className="font-semibold">Course Details</h2>
                 </div>
@@ -206,9 +206,9 @@ function CourseDetailsForm({
                     <p className="text-sm text-amber-600 dark:text-amber-300">An admin will review and approve or provide feedback.</p>
                 </div>
             )}
-            <form onSubmit={submit} className="flex flex-col gap-5 p-5">
+            <form onSubmit={submit} className="flex flex-col gap-5 p-0 md:p-5">
                 {/* ── Basic Info ─────────────────────────────────────── */}
-                <div className="flex flex-col gap-4 rounded-lg border border-sky-200 bg-sky-50/60 p-4 dark:border-sky-800/50 dark:bg-sky-950/25">
+                <div className="flex flex-col gap-4 md:rounded-lg border border-sky-200 bg-sky-50/60 p-4 dark:border-sky-800/50 dark:bg-sky-950/25">
                     <p className="text-[14px] font-semibold tracking-widest text-sky-600 dark:text-sky-400">
                         Basic Info
                     </p>
@@ -528,7 +528,7 @@ function CouponCodeManager({ course, locale }: { course: Course; locale: string 
 
     return (
         <section className="overflow-hidden rounded-xl border border-sidebar-border/70 bg-card dark:border-sidebar-border">
-            <div className="flex items-center justify-between border-b border-sidebar-border/70 bg-muted/40 px-5 py-3 dark:border-sidebar-border">
+            <div className="flex items-center justify-between border-b border-sidebar-border/70 bg-muted/40 px-2 md:px-5 py-3 dark:border-sidebar-border">
                 <div>
                     <h2 className="font-semibold">Coupon Codes</h2>
                     <p className="text-xs text-muted-foreground">Affiliate & discount codes for this course</p>
@@ -543,7 +543,7 @@ function CouponCodeManager({ course, locale }: { course: Course; locale: string 
             <div className="p-5 flex flex-col gap-4">
                 {open && (
                     <form onSubmit={submit} className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-800/50 dark:bg-emerald-950/25">
-                        <p className="text-[11px] font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">New Coupon</p>
+                        <p className="text-[11px] font-semibold tracking-widest text-emerald-700 dark:text-emerald-400">New Coupon</p>
                         <div className="grid grid-cols-2 gap-3">
                             <Field label="Code (auto-generated if blank)" error={form.errors.code}>
                                 <Input
@@ -780,7 +780,7 @@ function ResourceForm({
                             disabled={form.processing}
                         />
                         <Label htmlFor="is_free" className="cursor-pointer text-sm">
-                            Free preview (visible without subscription)
+                            Free preview (accessible without subscription)
                         </Label>
                     </div>
                 </div>
@@ -1058,7 +1058,7 @@ export default function CourseEdit({ course, categories, difficulties, languages
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit: ${course.title}`} />
 
-            <div className="flex flex-col gap-6 p-4 md:p-6 mb-48">
+            <div className="flex flex-col gap-6 p-2 md:p-6 mb-48">
                 <CourseDetailsForm
                     course={course}
                     categories={categories}
