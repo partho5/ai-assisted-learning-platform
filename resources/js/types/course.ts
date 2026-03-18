@@ -67,6 +67,10 @@ export type CourseMentor = {
     bio?: string | null;
 };
 
+export type CourseMentorWithRole = CourseMentor & {
+    pivot?: { role: 'lead' | 'co_author' };
+};
+
 export type Course = {
     id: number;
     user_id: number;
@@ -91,6 +95,7 @@ export type Course = {
     subscription_duration_months: number | null;
     category: Category | null;
     mentor?: CourseMentor;
+    authors?: CourseMentorWithRole[];
     modules: CourseModule[];
     modules_count?: number;
     resources_count?: number;

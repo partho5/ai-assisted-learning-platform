@@ -17,7 +17,7 @@ class LearnController extends Controller
     public function show(Request $request, Course $course, Resource $resource): Response|RedirectResponse
     {
         $user = $request->user();
-        $isPreview = $request->boolean('preview') && $user && ($user->isAdmin() || $course->user_id === $user->id);
+        $isPreview = $request->boolean('preview') && $user && ($user->isAdmin() || $course->isAuthor($user));
 
         if (! $course->isPublished() && ! $isPreview) {
             abort(404);

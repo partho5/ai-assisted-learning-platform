@@ -92,16 +92,15 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                         name: String(name),
                         url: appUrl,
                     },
-                    ...(course.mentor && {
+                    ...((course.authors && course.authors.length > 0) || course.mentor ? {
                         hasCourseInstance: {
                             '@type': 'CourseInstance',
                             courseMode: 'online',
-                            instructor: {
-                                '@type': 'Person',
-                                name: course.mentor.name,
-                            },
+                            instructor: course.authors && course.authors.length > 0
+                                ? course.authors.map((a) => ({ '@type': 'Person', name: a.name }))
+                                : { '@type': 'Person', name: course.mentor!.name },
                         },
-                    }),
+                    } : {}),
                     ...(course.price != null && {
                         offers: {
                             '@type': 'Offer',
@@ -354,10 +353,23 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                             </div>
                         </section>
 
-                        {/* Mentor */}
-                        {course.mentor && (
+                        {/* Mentor(s) */}
+                        {course.authors && course.authors.length > 0 ? (
+                            <section className="overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800/60">
+                                <div className="border-b border-emerald-200 bg-emerald-50/80 px-5 py-3 dark:border-emerald-800/60 dark:bg-emerald-950/40">
+                                    <h2 className="font-semibold text-emerald-900 dark:text-emerald-100">
+                                        About the mentor{course.authors.length > 1 ? 's' : ''}
+                                    </h2>
+                                </div>
+                                <div className="divide-y divide-emerald-200 bg-emerald-50/20 dark:divide-emerald-800/60 dark:bg-emerald-950/10">
+                                    {course.authors.map((author) => (
+                                        <MentorCard key={author.id} mentor={author} locale={l} standalone={false} />
+                                    ))}
+                                </div>
+                            </section>
+                        ) : course.mentor ? (
                             <MentorCard mentor={course.mentor} locale={l} />
-                        )}
+                        ) : null}
                     </article>
 
                     {/* Enrollment card — sticky sidebar on desktop */}

@@ -28,6 +28,10 @@ import {
     destroy as couponDestroy,
 } from '@/actions/App/Http/Controllers/CouponCodeController';
 import {
+    store as authorStore,
+    destroy as authorDestroy,
+} from '@/actions/App/Http/Controllers/CourseAuthorController';
+import {
     destroy as moduleDestroy,
     reorder as moduleReorder,
     store as moduleStore,
@@ -48,7 +52,7 @@ import { Label } from '@/components/ui/label';
 import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
 import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
-import type { BillingType, BreadcrumbItem, Category, Course, CourseDifficulty, CouponCode, CourseModule, CourseResource, ResourceType, SelectOption } from '@/types';
+import type { BillingType, BreadcrumbItem, Category, Course, CourseDifficulty, CourseMentorWithRole, CouponCode, CourseModule, CourseResource, ResourceType, SelectOption } from '@/types';
 
 interface Props {
     course: Course;
@@ -57,6 +61,7 @@ interface Props {
     languages: SelectOption[];
     resourceTypes: SelectOption[];
     isAdmin: boolean;
+    isLeadAuthor: boolean;
 }
 
 // ─── Course Details Form ─────────────────────────────────────────────────────
@@ -496,6 +501,117 @@ function CourseDetailsForm({
                     </Button>
                 </div>
             </form>
+        </section>
+    );
+}
+
+// ─── Co-Author Manager ────────────────────────────────────────────────────────
+
+function CoAuthorManager({
+    course,
+    locale,
+    isLeadAuthor,
+}: {
+    course: Course;
+    locale: string;
+    isLeadAuthor: boolean;
+}) {
+    const authors: CourseMentorWithRole[] = course.authors ?? [];
+    const [identifier, setIdentifier] = useState('');
+    const [adding, setAdding] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    function handleAdd(e: React.FormEvent) {
+        e.preventDefault();
+        if (!identifier.trim()) return;
+
+        setAdding(true);
+        setError(null);
+
+        router.post(
+            authorStore.url({ locale, course: course.slug }),
+            { identifier: identifier.trim() },
+            {
+                preserveScroll: true,
+                onError: (errors) => {
+                    setError(errors.identifier ?? errors.error ?? 'Something went wrong.');
+                },
+                onSuccess: () => setIdentifier(''),
+                onFinish: () => setAdding(false),
+            },
+        );
+    }
+
+    function handleRemove(author: CourseMentorWithRole) {
+        router.delete(
+            authorDestroy.url({ locale, course: course.slug, author: author.id! }),
+            { preserveScroll: true },
+        );
+    }
+
+    return (
+        <section className="overflow-hidden rounded-xl border border-border bg-card">
+            <div className="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-3">
+                <h2 className="font-semibold">Co-authors</h2>
+            </div>
+            <div className="p-5">
+                {/* Current authors list */}
+                <div className="mb-4 flex flex-col gap-2">
+                    {authors.map((author) => (
+                        <div
+                            key={author.id}
+                            className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-4 py-2.5"
+                        >
+                            <div className="flex items-center gap-3">
+                                {author.avatar ? (
+                                    <img
+                                        src={author.avatar}
+                                        alt={author.name}
+                                        className="size-8 rounded-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex size-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                                        {author.name.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                                <div>
+                                    <span className="text-sm font-medium">{author.name}</span>
+                                    <span className="ml-2 text-xs text-muted-foreground">@{author.username}</span>
+                                </div>
+                                {author.pivot?.role === 'lead' && (
+                                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                                        Lead
+                                    </span>
+                                )}
+                            </div>
+                            {isLeadAuthor && author.pivot?.role !== 'lead' && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive"
+                                    onClick={() => handleRemove(author)}
+                                >
+                                    Remove
+                                </Button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Add co-author form */}
+                <form onSubmit={handleAdd} className="flex gap-2">
+                    <Input
+                        placeholder="Email or username"
+                        value={identifier}
+                        onChange={(e) => { setIdentifier(e.target.value); setError(null); }}
+                        className="flex-1"
+                    />
+                    <Button type="submit" variant="secondary" disabled={adding}>
+                        {adding ? 'Adding…' : 'Add'}
+                    </Button>
+                </form>
+                {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
+            </div>
         </section>
     );
 }
@@ -1024,7 +1140,7 @@ function AddModuleForm({ courseSlug, locale }: { courseSlug: string; locale: str
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-export default function CourseEdit({ course, categories, difficulties, languages, resourceTypes, isAdmin }: Props) {
+export default function CourseEdit({ course, categories, difficulties, languages, resourceTypes, isAdmin, isLeadAuthor }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
 
@@ -1067,6 +1183,8 @@ export default function CourseEdit({ course, categories, difficulties, languages
                     locale={l}
                     isAdmin={isAdmin}
                 />
+
+                <CoAuthorManager course={course} locale={l} isLeadAuthor={isLeadAuthor} />
 
                 <CouponCodeManager course={course} locale={l} />
 

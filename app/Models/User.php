@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\UserRole;
 use App\Enums\UserTier;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -89,6 +90,15 @@ class User extends Authenticatable
     public function courses(): HasMany
     {
         return $this->hasMany(Course::class);
+    }
+
+    /** Courses this user is an author of (via course_authors pivot). */
+    /** @return BelongsToMany<Course, $this> */
+    public function authoredCourses(): BelongsToMany
+    {
+        return $this->belongsToMany(Course::class, 'course_authors')
+            ->withPivot('role', 'added_by')
+            ->withTimestamps();
     }
 
     /** @return HasMany<Enrollment, $this> */

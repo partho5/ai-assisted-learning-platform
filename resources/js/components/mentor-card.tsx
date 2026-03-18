@@ -19,11 +19,17 @@ interface MentorCardProps {
      * hero   — large profile header (portfolio page)
      */
     variant?: 'card' | 'inline' | 'hero';
+    /**
+     * card variant only. When false, renders just the inner content without
+     * the outer section wrapper — use when embedding multiple mentors inside
+     * a shared wrapper section.
+     */
+    standalone?: boolean;
     /** Extra content rendered below the bio (hero variant only) */
     children?: ReactNode;
 }
 
-export default function MentorCard({ mentor, locale, variant = 'card', children }: MentorCardProps) {
+export default function MentorCard({ mentor, locale, variant = 'card', standalone = true, children }: MentorCardProps) {
     const profileUrl = `/${locale}/u/${mentor.username}`;
 
     if (variant === 'inline') {
@@ -82,24 +88,32 @@ export default function MentorCard({ mentor, locale, variant = 'card', children 
         </div>
     );
 
+    const cardContent = (
+        <div className="flex items-start gap-4">
+            <Link href={profileUrl} className="shrink-0">{avatar}</Link>
+            <div>
+                <Link href={profileUrl} className="font-semibold hover:underline">{mentor.name}</Link>
+                {mentor.headline && (
+                    <p className="text-sm text-muted-foreground">{mentor.headline}</p>
+                )}
+                {mentor.bio && (
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">{mentor.bio}</p>
+                )}
+            </div>
+        </div>
+    );
+
+    if (!standalone) {
+        return <div className="p-5">{cardContent}</div>;
+    }
+
     return (
         <section className="overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800/60">
             <div className="border-b border-emerald-200 bg-emerald-50/80 px-5 py-3 dark:border-emerald-800/60 dark:bg-emerald-950/40">
                 <h2 className="font-semibold text-emerald-900 dark:text-emerald-100">About the mentor</h2>
             </div>
             <div className="bg-emerald-50/20 p-5 dark:bg-emerald-950/10">
-                <div className="flex items-start gap-4">
-                    <Link href={profileUrl} className="shrink-0">{avatar}</Link>
-                    <div>
-                        <Link href={profileUrl} className="font-semibold hover:underline">{mentor.name}</Link>
-                        {mentor.headline && (
-                            <p className="text-sm text-muted-foreground">{mentor.headline}</p>
-                        )}
-                        {mentor.bio && (
-                            <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">{mentor.bio}</p>
-                        )}
-                    </div>
-                </div>
+                {cardContent}
             </div>
         </section>
     );

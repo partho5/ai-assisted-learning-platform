@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
@@ -58,6 +59,30 @@ class Course extends Model
     public function mentor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** @return BelongsToMany<User, $this> */
+    public function authors(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'course_authors')
+            ->withPivot('role', 'added_by')
+            ->withTimestamps()
+            ->orderByRaw("CASE WHEN course_authors.role = 'lead' THEN 0 ELSE 1 END");
+    }
+
+    /** Returns true if the given user is in the course_authors pivot. */
+    public function isAuthor(User $user): bool
+    {
+        return $this->authors()->wherePivot('user_id', $user->id)->exists();
+    }
+
+    /** Returns true if the given user is the lead author in the pivot. */
+    public function isLeadAuthor(User $user): bool
+    {
+        return $this->authors()
+            ->wherePivot('user_id', $user->id)
+            ->wherePivot('role', 'lead')
+            ->exists();
     }
 
     /** @return BelongsTo<Category, $this> */

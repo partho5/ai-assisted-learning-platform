@@ -64,7 +64,7 @@ class ModuleController extends Controller
     {
         $user = auth()->user();
 
-        if (! $user->isAdmin() && $course->user_id !== $user->id) {
+        if (! $user->isAdmin() && ! $course->isAuthor($user)) {
             abort(403);
         }
     }

@@ -9,6 +9,7 @@ use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AiHelpController;
 use App\Http\Controllers\ChatHistoryController;
 use App\Http\Controllers\CouponCodeController;
+use App\Http\Controllers\CourseAuthorController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
@@ -170,6 +171,11 @@ Route::prefix('{locale}')
                 ->name('courses.update');
             Route::delete('courses/{course}', [CourseController::class, 'destroy'])
                 ->name('courses.destroy');
+
+            Route::post('courses/{course}/authors', [CourseAuthorController::class, 'store'])
+                ->name('courses.authors.store');
+            Route::delete('courses/{course}/authors/{author}', [CourseAuthorController::class, 'destroy'])
+                ->name('courses.authors.destroy');
 
             Route::post('courses/{course}/modules', [ModuleController::class, 'store'])
                 ->name('modules.store');

@@ -37,7 +37,7 @@ class CourseController extends Controller
     {
         $query = $user->isAdmin()
             ? Course::query()->with(['category', 'mentor:id,name,username'])
-            : $user->courses()->with('category');
+            : $user->authoredCourses()->with('category');
 
         $courses = $query
             ->withCount('modules')
@@ -95,7 +95,7 @@ class CourseController extends Controller
         }
 
         $course->load([
-            'mentor:id,name,username,avatar,headline,bio',
+            'authors:id,name,username,avatar,headline,bio',
             'category',
             'modules' => fn ($q) => $q->orderBy('order'),
             'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at'),
@@ -122,7 +122,7 @@ class CourseController extends Controller
         $this->authorizeOwner($course);
 
         $course->load([
-            'mentor:id,name,username,avatar,headline,bio',
+            'authors:id,name,username,avatar,headline,bio',
             'category',
             'modules' => fn ($q) => $q->orderBy('order'),
             'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at'),
@@ -160,6 +160,11 @@ class CourseController extends Controller
 
         $course = Course::create($data);
 
+        $course->authors()->attach(auth()->id(), [
+            'role'     => 'lead',
+            'added_by' => auth()->id(),
+        ]);
+
         return redirect()
             ->route('courses.edit', ['locale' => app()->getLocale(), 'course' => $course->slug])
             ->with('success', 'Course created. Add modules and resources below.');
@@ -171,10 +176,13 @@ class CourseController extends Controller
 
         $course->load([
             'category',
+            'authors:id,name,username,avatar,headline',
             'modules' => fn ($q) => $q->orderBy('order'),
             'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at'),
             'couponCodes' => fn ($q) => $q->orderByDesc('created_at'),
         ]);
+
+        $isLeadAuthor = auth()->user()->isAdmin() || $course->isLeadAuthor(auth()->user());
 
         return Inertia::render('mentor/courses/edit', [
             'course' => $course,
@@ -183,6 +191,7 @@ class CourseController extends Controller
             'languages' => collect(CourseLanguage::cases())->map(fn ($c) => ['value' => $c->value, 'label' => strtoupper($c->value)]),
             'resourceTypes' => collect(ResourceType::cases())->map(fn ($c) => ['value' => $c->value, 'label' => ucfirst($c->value)]),
             'isAdmin' => auth()->user()->isAdmin(),
+            'isLeadAuthor' => $isLeadAuthor,
         ]);
     }
 
@@ -268,7 +277,7 @@ class CourseController extends Controller
     {
         $user = auth()->user();
 
-        if (! $user->isAdmin() && $course->user_id !== $user->id) {
+        if (! $user->isAdmin() && ! $course->isAuthor($user)) {
             abort(403);
         }
     }
