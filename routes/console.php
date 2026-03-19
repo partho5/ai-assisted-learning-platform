@@ -12,6 +12,9 @@ Artisan::command('inspire', function () {
 // Only embeds chunks whose content_hash differs — zero cost for unchanged content.
 Schedule::command('rag:index')->dailyAt('03:00');
 
+// Check for unanswered forum threads and dispatch AI replies every 30 minutes.
+Schedule::command('forum:trigger-unanswered')->everyThirtyMinutes()->withoutOverlapping();
+
 // Back up the PostgreSQL database and upload to Dropbox every N hours (DB_BACKUP_INTERVAL_HOURS).
 // Keeps only the last 2 copies on Dropbox; local dump is deleted after upload.
 Schedule::command('backup:database')

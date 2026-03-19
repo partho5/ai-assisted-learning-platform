@@ -71,6 +71,14 @@ interface EnrichedResource {
         questions: TestQuestion[];
     } | null;
     completion: ResourceCompletion | null;
+    forumThread: {
+        id: number;
+        slug: string;
+        title: string;
+        replies_count: number;
+        last_activity_at: string | null;
+        category: { id: number; slug: string } | null;
+    } | null;
     activeAttempt: (TestAttempt & {
         answers: Array<{ test_question_id: number; answer_value: string | null }>;
     }) | null;
@@ -548,6 +556,31 @@ function ResourceBlock({
                     {resource.mentor_note}
                 </div>
             )}
+
+            {/* Per-resource forum link */}
+            <div className="mt-6 pt-4 border-t">
+                {resource.forumThread && resource.forumThread.category ? (
+                    <Link
+                        href={`/${locale}/forum/${resource.forumThread.category.slug}/${resource.forumThread.slug}`}
+                        className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                    >
+                        <span>💬</span>
+                        <span>
+                            {resource.forumThread.replies_count > 0
+                                ? `${resource.forumThread.replies_count} ${resource.forumThread.replies_count === 1 ? 'person' : 'people'} discussing this`
+                                : 'Discuss this resource'}
+                        </span>
+                    </Link>
+                ) : (
+                    <Link
+                        href={`/${locale}/forum/create?resource_id=${resource.id}&title=${encodeURIComponent('Discussion: ' + resource.title)}`}
+                        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary hover:underline"
+                    >
+                        <span>💬</span>
+                        <span>Start a discussion</span>
+                    </Link>
+                )}
+            </div>
         </div>
     );
 }
@@ -555,7 +588,8 @@ function ResourceBlock({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function Learn({ course, initialResourceId, resources, enrollment, ogUrl, isPreview = false }: Props) {
-    const { locale, auth, name } = usePage().props;
+    const { locale, auth, name, appUrl: serverAppUrl } = usePage().props;
+    const appUrl = String(serverAppUrl ?? '');
     const l = String(locale);
     const isGuest = !auth?.user;
 
@@ -848,23 +882,57 @@ export default function Learn({ course, initialResourceId, resources, enrollment
         </div>
     );
 
+    const activeTitle = activeResource?.title ?? course.title;
     const ogDescription = course.description
         ? course.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
         : '';
     const ogImage = course.thumbnail ?? '/logo.png';
+    const absoluteOgImage = ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`;
     const ogHead = (
-        <Head title={`${course.title} — Learn`}>
-            <meta name="description" content={ogDescription} />
-            <meta property="og:title" content={`${course.title} | ${String(name)}`} />
+        <Head title={`${activeTitle} — ${course.title}`}>
+            <meta name="description" content={`${activeTitle} — ${ogDescription}`} />
+            <link rel="canonical" href={ogUrl} />
+            <link rel="alternate" hrefLang="en" href={`${appUrl}/en/courses/${course.slug}/learn/${initialResourceId}`} />
+            <link rel="alternate" hrefLang="bn" href={`${appUrl}/bn/courses/${course.slug}/learn/${initialResourceId}`} />
+            <link rel="alternate" hrefLang="x-default" href={`${appUrl}/en/courses/${course.slug}/learn/${initialResourceId}`} />
+            <meta property="og:site_name" content={String(name)} />
+            <meta property="og:title" content={`${activeTitle} — ${course.title} | ${String(name)}`} />
             <meta property="og:description" content={ogDescription} />
-            <meta property="og:image" content={ogImage} />
+            <meta property="og:image" content={absoluteOgImage} />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:alt" content={`${activeTitle} — ${course.title}`} />
             <meta property="og:url" content={ogUrl} />
             <meta property="og:type" content="article" />
+            <meta property="og:locale" content="en_US" />
+            <meta property="og:locale:alternate" content="bn_BD" />
             <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" content={`${course.title} | ${String(name)}`} />
+            <meta name="twitter:title" content={`${activeTitle} — ${course.title} | ${String(name)}`} />
             <meta name="twitter:description" content={ogDescription} />
-            <meta name="twitter:image" content={ogImage} />
-            <link rel="canonical" href={ogUrl} />
+            <meta name="twitter:image" content={absoluteOgImage} />
+            <script type="application/ld+json">{JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'LearningResource',
+                name: activeTitle,
+                description: ogDescription,
+                url: ogUrl,
+                image: absoluteOgImage,
+                isPartOf: {
+                    '@type': 'Course',
+                    name: course.title,
+                    url: `${appUrl}/${l}/courses/${course.slug}`,
+                },
+                provider: { '@type': 'Organization', name: String(name), url: appUrl },
+            })}</script>
+            <script type="application/ld+json">{JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                    { '@type': 'ListItem', position: 1, name: 'Courses', item: `${appUrl}/${l}/courses` },
+                    { '@type': 'ListItem', position: 2, name: course.title, item: `${appUrl}/${l}/courses/${course.slug}` },
+                    { '@type': 'ListItem', position: 3, name: activeTitle, item: ogUrl },
+                ],
+            })}</script>
         </Head>
     );
 

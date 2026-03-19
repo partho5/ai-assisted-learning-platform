@@ -24,6 +24,12 @@ interface AiProvider
     public function streamChat(string $systemPrompt, array $history, callable $onChunk, string $model = 'gpt-4o-mini'): void;
 
     /**
+     * Generate a single text completion given a system prompt and user message.
+     * Returns the assistant's reply as a plain string.
+     */
+    public function complete(string $systemPrompt, string $userMessage, string $model = 'gpt-4o-mini'): string;
+
+    /**
      * Generate a 512-dimension embedding vector for the given text.
      * Results are cached by content hash + model name (TTL 24h) to avoid redundant API calls.
      *

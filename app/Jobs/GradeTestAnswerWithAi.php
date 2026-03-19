@@ -7,6 +7,7 @@ use App\Enums\AiGradingStatus;
 use App\Enums\AttemptStatus;
 use App\Models\TestAttempt;
 use App\Models\TestAttemptAnswer;
+use App\Services\ForumNotificationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
@@ -16,6 +17,7 @@ class GradeTestAnswerWithAi implements ShouldQueue
     use Queueable;
 
     public int $tries = 3;
+
     public int $backoff = 30;
 
     public function __construct(public readonly TestAttemptAnswer $answer) {}
@@ -73,6 +75,13 @@ class GradeTestAnswerWithAi implements ShouldQueue
                         ->toArray(),
                 ],
             ]);
+
+            $attempt->loadMissing(['user', 'test']);
+            app(ForumNotificationService::class)->notifyTestGraded(
+                $attempt->user,
+                $attempt->test->title ?? 'Your test',
+                $score,
+            );
         }
     }
 }

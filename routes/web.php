@@ -4,6 +4,9 @@ use App\Http\Controllers\Admin\AiStatsController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ChatSessionController as AdminChatSessionController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\Forum\ForumAiMemberAdminController;
+use App\Http\Controllers\Admin\Forum\ForumCategoryAdminController;
+use App\Http\Controllers\Admin\Forum\ForumModerationController;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmissionController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AiHelpController;
@@ -13,7 +16,19 @@ use App\Http\Controllers\CourseAuthorController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
+use App\Http\Controllers\Forum\ForumBookmarkController;
+use App\Http\Controllers\Forum\ForumCategoryController;
+use App\Http\Controllers\Forum\ForumController;
+use App\Http\Controllers\Forum\ForumPushSubscriptionController;
+use App\Http\Controllers\Forum\ForumReplyController;
+use App\Http\Controllers\Forum\ForumReportController;
+use App\Http\Controllers\Forum\ForumSearchController;
+use App\Http\Controllers\Forum\ForumThreadController;
+use App\Http\Controllers\Forum\ForumThreadFollowController;
+use App\Http\Controllers\Forum\ForumThreadModerationController;
+use App\Http\Controllers\Forum\ForumVoteController;
 use App\Http\Controllers\LearnController;
+use App\Http\Controllers\LlmsTxtController;
 use App\Http\Controllers\Mentor\CategoryController as MentorCategoryController;
 use App\Http\Controllers\Mentor\DashboardController as MentorDashboardController;
 use App\Http\Controllers\ModuleController;
@@ -34,9 +49,10 @@ use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Robots & Sitemap — outside locale prefix
+// Robots, Sitemap & LLMs — outside locale prefix
 Route::get('/robots.txt', [RobotsController::class, 'index'])->name('robots');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/llms.txt', [LlmsTxtController::class, 'index'])->name('llms');
 
 // Redirect bare root to default locale
 Route::redirect('/', '/en');
@@ -281,6 +297,98 @@ Route::prefix('{locale}')
         Route::post('portfolio/attempts/{attempt}/showcase', [PortfolioController::class, 'toggleShowcase'])
             ->middleware(['auth', 'verified'])
             ->name('portfolio.showcase');
+
+        // -----------------------------------------------------------------------
+        // Forum — public reading; auth required for writes
+        // NOTE: Specific static paths (create, search, threads/*, replies/*)
+        //       must be registered BEFORE wildcard slug routes.
+        // -----------------------------------------------------------------------
+
+        // Forum home & search (public) — static paths first
+        Route::get('forum', [ForumController::class, 'index'])->name('forum.index');
+        Route::get('forum/search', [ForumSearchController::class, 'index'])->name('forum.search');
+
+        // Thread create form (auth) — must be before {forumCategory:slug} wildcard
+        Route::get('forum/create', [ForumThreadController::class, 'create'])
+            ->middleware(['auth', 'verified'])
+            ->name('forum.threads.create');
+
+        // Thread store (auth) — uses /forum/threads prefix to avoid wildcard clash
+        Route::post('forum/threads', [ForumThreadController::class, 'store'])
+            ->middleware(['auth', 'verified'])
+            ->name('forum.threads.store');
+
+        // Auth-only JSON endpoints with explicit prefixes (before wildcard routes)
+        Route::middleware(['auth', 'verified'])->group(function () {
+            // Votes (JSON responses) — bind by ID since these routes have no slug context
+            Route::post('forum/threads/{forumThread:id}/vote', [ForumVoteController::class, 'thread'])->name('forum.votes.thread');
+            Route::post('forum/replies/{forumReply:id}/vote', [ForumVoteController::class, 'reply'])->name('forum.votes.reply');
+
+            // Bookmarks & Follows (JSON responses)
+            Route::post('forum/threads/{forumThread:id}/bookmark', [ForumBookmarkController::class, 'toggle'])->name('forum.bookmarks.toggle');
+            Route::post('forum/threads/{forumThread:id}/follow', [ForumThreadFollowController::class, 'toggle'])->name('forum.follows.toggle');
+
+            // Reports (JSON responses)
+            Route::post('forum/threads/{forumThread:id}/report', [ForumReportController::class, 'thread'])->name('forum.reports.thread');
+            Route::post('forum/replies/{forumReply:id}/report', [ForumReportController::class, 'reply'])->name('forum.reports.reply');
+
+            // Push notification subscription
+            Route::post('forum/push-subscription', [ForumPushSubscriptionController::class, 'store'])->name('forum.push-subscription.store');
+        });
+
+        // Category page (public) — wildcard after static paths
+        Route::get('forum/{forumCategory:slug}', [ForumCategoryController::class, 'show'])->name('forum.category.show');
+
+        // Thread show (public)
+        Route::get('forum/{forumCategory:slug}/{forumThread:slug}', [ForumThreadController::class, 'show'])->name('forum.threads.show');
+
+        // Auth-required thread & reply actions (use slug wildcards, registered after show routes)
+        Route::middleware(['auth', 'verified'])->group(function () {
+            Route::get('forum/{forumCategory:slug}/{forumThread:slug}/edit', [ForumThreadController::class, 'edit'])->name('forum.threads.edit');
+            Route::put('forum/{forumCategory:slug}/{forumThread:slug}', [ForumThreadController::class, 'update'])->name('forum.threads.update');
+            Route::delete('forum/{forumCategory:slug}/{forumThread:slug}', [ForumThreadController::class, 'destroy'])->name('forum.threads.destroy');
+
+            // Replies
+            Route::post('forum/{forumCategory:slug}/{forumThread:slug}/replies', [ForumReplyController::class, 'store'])->name('forum.replies.store');
+            Route::put('forum/{forumCategory:slug}/{forumThread:slug}/replies/{forumReply}', [ForumReplyController::class, 'update'])->name('forum.replies.update');
+            Route::delete('forum/{forumCategory:slug}/{forumThread:slug}/replies/{forumReply}', [ForumReplyController::class, 'destroy'])->name('forum.replies.destroy');
+            Route::post('forum/{forumCategory:slug}/{forumThread:slug}/replies/{forumReply}/accept', [ForumReplyController::class, 'accept'])->name('forum.replies.accept');
+        });
+
+        // Moderator actions (admin + mentor)
+        Route::middleware(['auth', 'verified', 'role:mentor,admin'])->group(function () {
+            Route::post(
+                'forum/{forumCategory:slug}/{forumThread:slug}/pin',
+                [ForumThreadModerationController::class, 'pin']
+            )->name('forum.moderation.pin');
+
+            Route::post(
+                'forum/{forumCategory:slug}/{forumThread:slug}/lock',
+                [ForumThreadModerationController::class, 'lock']
+            )->name('forum.moderation.lock');
+
+            Route::post(
+                'forum/{forumCategory:slug}/{forumThread:slug}/move',
+                [ForumThreadModerationController::class, 'move']
+            )->name('forum.moderation.move');
+        });
+
+        // Admin forum management
+        Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin/forum')->group(function () {
+            Route::get('categories', [ForumCategoryAdminController::class, 'index'])->name('admin.forum.categories.index');
+            Route::post('categories', [ForumCategoryAdminController::class, 'store'])->name('admin.forum.categories.store');
+            Route::put('categories/{forumCategory}', [ForumCategoryAdminController::class, 'update'])->name('admin.forum.categories.update');
+            Route::delete('categories/{forumCategory}', [ForumCategoryAdminController::class, 'destroy'])->name('admin.forum.categories.destroy');
+
+            Route::get('ai-members', [ForumAiMemberAdminController::class, 'index'])->name('admin.forum.ai-members.index');
+            Route::post('ai-members', [ForumAiMemberAdminController::class, 'store'])->name('admin.forum.ai-members.store');
+            Route::put('ai-members/{aiMember}', [ForumAiMemberAdminController::class, 'update'])->name('admin.forum.ai-members.update');
+            Route::delete('ai-members/{aiMember}', [ForumAiMemberAdminController::class, 'destroy'])->name('admin.forum.ai-members.destroy');
+
+            Route::get('moderation', [ForumModerationController::class, 'index'])->name('admin.forum.moderation.index');
+            Route::post('moderation/{forumReport}/resolve', [ForumModerationController::class, 'resolve'])->name('admin.forum.moderation.resolve');
+            Route::delete('moderation/{forumReport}/content', [ForumModerationController::class, 'deleteContent'])->name('admin.forum.moderation.delete-content');
+        });
     });
 
 // PayPal webhook — outside locale prefix, CSRF excluded in bootstrap/app.php

@@ -36,7 +36,7 @@ export default function CategoriesIndex({ categories }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Categories" />
 
-            <div className="mx-auto max-w-3xl p-4 md:p-6">
+            <div className="md:mx-2 p-4 md:p-6">
                 {flash?.error && (
                     <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                         {flash.error}

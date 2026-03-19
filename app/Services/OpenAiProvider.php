@@ -182,6 +182,29 @@ PROMPT;
         }
     }
 
+    public function complete(string $systemPrompt, string $userMessage, string $model = 'gpt-4o-mini'): string
+    {
+        $response = Http::withToken($this->apiKey)
+            ->timeout(60)
+            ->post($this->endpoint, [
+                'model' => $model,
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user', 'content' => $userMessage],
+                ],
+            ]);
+
+        if (! $response->successful()) {
+            throw new RuntimeException('AI complete failed: '.$response->body());
+        }
+
+        $inputTokens = $response->json('usage.prompt_tokens', 0);
+        $outputTokens = $response->json('usage.completion_tokens', 0);
+        $this->logTokens('forum_ai_reply', $inputTokens, $outputTokens);
+
+        return (string) $response->json('choices.0.message.content', '');
+    }
+
     /**
      * Generate a 512-dimension embedding vector for the given text.
      *

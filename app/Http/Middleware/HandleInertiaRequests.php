@@ -38,8 +38,9 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'appUrl' => config('app.url'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => fn () => $request->user()?->load('reputation'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             // Read from route param directly — web middleware runs before setlocale middleware
@@ -53,6 +54,7 @@ class HandleInertiaRequests extends Middleware
                 'chat_merged' => fn () => $request->session()->get('chat_merged'),
             ],
             'paypalClientId' => config('services.paypal.client_id'),
+            'onesignalAppId' => config('services.onesignal.app_id'),
         ];
     }
 }

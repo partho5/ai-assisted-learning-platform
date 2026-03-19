@@ -316,6 +316,11 @@ class ChatHistoryTest extends TestCase
                 $onChunk($this->reply);
             }
 
+            public function complete(string $systemPrompt, string $userMessage, string $model = 'gpt-4o-mini'): string
+            {
+                return 'Mock response';
+            }
+
             /** @return float[] */
             public function embed(string $text): array
             {

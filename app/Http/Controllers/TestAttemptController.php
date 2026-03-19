@@ -14,6 +14,7 @@ use App\Models\Resource;
 use App\Models\ResourceCompletion;
 use App\Models\TestAttempt;
 use App\Models\TestAttemptAnswer;
+use App\Services\ForumNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -155,6 +156,19 @@ class TestAttemptController extends Controller
             }
         }
 
+        // Notify mentor when learner submits an assignment (needs manual endorsement)
+        if (! $attempt->test->isFormative()) {
+            $attempt->loadMissing(['test.resource.course.mentor', 'user']);
+            $mentor = $attempt->test->resource?->course?->mentor;
+            if ($mentor) {
+                app(ForumNotificationService::class)->notifySubmissionPendingReview(
+                    $mentor,
+                    $attempt->user->name,
+                    $attempt->test->title ?? 'Assignment',
+                );
+            }
+        }
+
         return redirect()->route('learn.attempts.result', [
             'locale' => app()->getLocale(),
             'attempt' => $attempt->id,
@@ -241,6 +255,12 @@ class TestAttemptController extends Controller
                 'completed_at' => now(),
             ]);
         }
+
+        $attempt->loadMissing(['user', 'test']);
+        app(ForumNotificationService::class)->notifyEndorsed(
+            $attempt->user,
+            $attempt->test->title ?? 'Your submission',
+        );
 
         return back()->with('success', 'Submission endorsed.');
     }

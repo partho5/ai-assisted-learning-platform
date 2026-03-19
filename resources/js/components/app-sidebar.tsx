@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, ClipboardList, LayoutGrid, NotebookPen, Tag, Users, Zap } from 'lucide-react';
+import { BookOpen, Bot, ClipboardList, LayoutGrid, MessagesSquare, NotebookPen, ShieldAlert, Tag, Users, Zap } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -50,6 +50,14 @@ export function AppSidebar() {
           ]
         : [];
 
+    const forumAdminNavItems: NavItem[] = isAdmin
+        ? [
+            { title: 'Categories', href: `/${locale}/admin/forum/categories`, icon: MessagesSquare },
+            { title: 'AI Members', href: `/${locale}/admin/forum/ai-members`, icon: Bot },
+            { title: 'Moderation', href: `/${locale}/admin/forum/moderation`, icon: ShieldAlert },
+          ]
+        : [];
+
     const personalNavItems: NavItem[] = [
         { title: 'Personal Notes', href: `/${locale}/notes`, icon: NotebookPen },
     ];
@@ -72,6 +80,9 @@ export function AppSidebar() {
                 <NavMain items={mainNavItems} />
                 {secondaryNavItems.length > 0 && (
                     <NavMain items={secondaryNavItems} label={isAdmin ? 'Management' : 'Mentor'} />
+                )}
+                {forumAdminNavItems.length > 0 && (
+                    <NavMain items={forumAdminNavItems} label="Forum" />
                 )}
                 <NavMain items={personalNavItems} label="Personal" />
             </SidebarContent>

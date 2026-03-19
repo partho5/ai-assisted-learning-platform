@@ -25,7 +25,7 @@ interface Props {
 }
 
 export default function CourseCatalog({ courses, categories, difficulties, filters, ogUrl }: Props) {
-    const { locale, name } = usePage().props;
+    const { locale, name, appUrl: serverAppUrl } = usePage().props;
     const l = String(locale);
 
     const searchRef = useRef<HTMLInputElement>(null);
@@ -122,16 +122,50 @@ export default function CourseCatalog({ courses, categories, difficulties, filte
         <PublicLayout hidePlatformChat>
             <Head title="Courses">
                 <meta name="description" content="Browse curated learning courses built by expert mentors." />
+                <link rel="canonical" href={ogUrl} />
+                <link rel="alternate" hrefLang="en" href={`${String(serverAppUrl)}/en/courses`} />
+                <link rel="alternate" hrefLang="bn" href={`${String(serverAppUrl)}/bn/courses`} />
+                <link rel="alternate" hrefLang="x-default" href={`${String(serverAppUrl)}/en/courses`} />
+                <meta property="og:site_name" content={String(name)} />
                 <meta property="og:title" content={`Courses | ${String(name)}`} />
                 <meta property="og:description" content="Browse curated learning courses built by expert mentors." />
-                <meta property="og:image" content="/logo.png" />
+                <meta property="og:image" content={`${String(serverAppUrl)}/og-image.png`} />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
+                <meta property="og:image:alt" content={`Courses — ${String(name)}`} />
                 <meta property="og:url" content={ogUrl} />
                 <meta property="og:type" content="website" />
+                <meta property="og:locale" content="en_US" />
+                <meta property="og:locale:alternate" content="bn_BD" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`Courses | ${String(name)}`} />
                 <meta name="twitter:description" content="Browse curated learning courses built by expert mentors." />
-                <meta name="twitter:image" content="/logo.png" />
-                <link rel="canonical" href={ogUrl} />
+                <meta name="twitter:image" content={`${String(serverAppUrl)}/og-image.png`} />
+                <script type="application/ld+json">{JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'CollectionPage',
+                    name: `Courses — ${String(name)}`,
+                    description: 'Browse curated learning courses built by expert mentors.',
+                    url: ogUrl,
+                    provider: { '@type': 'Organization', name: String(name), url: String(serverAppUrl) },
+                    mainEntity: {
+                        '@type': 'ItemList',
+                        itemListElement: courses.data.map((c, i) => ({
+                            '@type': 'ListItem',
+                            position: i + 1,
+                            url: `${String(serverAppUrl)}/${l}/courses/${c.slug}`,
+                            name: c.title,
+                        })),
+                    },
+                })}</script>
+                <script type="application/ld+json">{JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                        { '@type': 'ListItem', position: 1, name: String(name), item: `${String(serverAppUrl)}/${l}/` },
+                        { '@type': 'ListItem', position: 2, name: 'Courses', item: ogUrl },
+                    ],
+                })}</script>
             </Head>
 
             {/* Page header */}

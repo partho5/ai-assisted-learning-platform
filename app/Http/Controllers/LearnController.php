@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\ForumThread;
 use App\Models\Resource;
 use App\Models\ResourceCompletion;
 use App\Models\TestAttempt;
@@ -89,8 +90,15 @@ class LearnController extends Controller
 
         $hasFullAccess = $isPreview || ($enrollment?->isFull() ?? false);
 
+        // Batch-load forum threads for all resources in this course
+        $forumThreadsByResourceId = ForumThread::whereIn('resource_id', $allResourceIds)
+            ->with('category:id,slug')
+            ->get(['id', 'resource_id', 'slug', 'title', 'replies_count', 'last_activity_at', 'category_id'])
+            ->groupBy('resource_id')
+            ->map(fn ($threads) => $threads->first()); // one canonical thread per resource
+
         // Build enriched resources (flat array, one entry per resource)
-        $resources = $allResources->map(function ($r) use ($completions, $activeAttempts, $pastAttempts, $hasFullAccess) {
+        $resources = $allResources->map(function ($r) use ($completions, $activeAttempts, $pastAttempts, $hasFullAccess, $forumThreadsByResourceId) {
             $testId = $r->test?->id;
             $canAccess = $r->is_free || $hasFullAccess;
 
@@ -106,6 +114,7 @@ class LearnController extends Controller
                     'previousAttempts' => $testId
                         ? ($pastAttempts->get($testId)?->values()->toArray() ?? [])
                         : [],
+                    'forumThread' => $forumThreadsByResourceId->get($r->id),
                 ]
             );
         })->values();
@@ -130,7 +139,7 @@ class LearnController extends Controller
             'initialResourceId' => $resource->id,
             'resources' => $resources,
             'enrollment' => $enrollment,
-            'ogUrl' => url()->route('courses.show', ['locale' => app()->getLocale(), 'course' => $course->slug]),
+            'ogUrl' => url()->route('learn.show', ['locale' => app()->getLocale(), 'course' => $course->slug, 'resource' => $resource->id]),
             'isPreview' => $isPreview,
         ]);
     }

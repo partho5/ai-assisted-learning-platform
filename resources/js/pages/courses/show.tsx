@@ -31,7 +31,8 @@ const RESOURCE_TYPE_LABELS: Record<string, string> = {
 };
 
 export default function CourseShow({ course, enrollment, ogUrl, isPreview = false }: Props) {
-    const { auth, locale, name, appUrl } = usePage().props as Record<string, any>;
+    const { auth, locale, name, appUrl: serverAppUrl } = usePage().props as Record<string, any>;
+    const appUrl = String(serverAppUrl ?? '');
     const l = String(locale);
     const totalResources = course.resources_count ?? course.modules.reduce((sum, m) => sum + m.resources.length, 0);
     const durationText = course.estimated_duration
@@ -70,23 +71,32 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
             )}
             <Head title={course.title}>
                 <meta name="description" content={ogDescription} />
+                <link rel="canonical" href={ogUrl} />
+                <link rel="alternate" hrefLang="en" href={`${appUrl}/en/courses/${course.slug}`} />
+                <link rel="alternate" hrefLang="bn" href={`${appUrl}/bn/courses/${course.slug}`} />
+                <link rel="alternate" hrefLang="x-default" href={`${appUrl}/en/courses/${course.slug}`} />
+                <meta property="og:site_name" content={String(name)} />
                 <meta property="og:title" content={`${course.title} | ${String(name)}`} />
                 <meta property="og:description" content={ogDescription} />
-                <meta property="og:image" content={ogImage} />
+                <meta property="og:image" content={ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`} />
+                <meta property="og:image:width" content="1200" />
+                <meta property="og:image:height" content="630" />
+                <meta property="og:image:alt" content={course.title} />
                 <meta property="og:url" content={ogUrl} />
                 <meta property="og:type" content="website" />
+                <meta property="og:locale" content="en_US" />
+                <meta property="og:locale:alternate" content="bn_BD" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`${course.title} | ${String(name)}`} />
                 <meta name="twitter:description" content={ogDescription} />
-                <meta name="twitter:image" content={ogImage} />
-                <link rel="canonical" href={ogUrl} />
+                <meta name="twitter:image" content={ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`} />
                 <script type="application/ld+json">{JSON.stringify({
                     '@context': 'https://schema.org',
                     '@type': 'Course',
                     name: course.title,
                     description: ogDescription,
                     url: ogUrl,
-                    image: ogImage,
+                    image: ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`,
                     provider: {
                         '@type': 'Organization',
                         name: String(name),
@@ -114,18 +124,8 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                     '@context': 'https://schema.org',
                     '@type': 'BreadcrumbList',
                     itemListElement: [
-                        {
-                            '@type': 'ListItem',
-                            position: 1,
-                            name: 'Courses',
-                            item: `${appUrl}/${l}/courses`,
-                        },
-                        {
-                            '@type': 'ListItem',
-                            position: 2,
-                            name: course.title,
-                            item: ogUrl,
-                        },
+                        { '@type': 'ListItem', position: 1, name: 'Courses', item: `${appUrl}/${l}/courses` },
+                        { '@type': 'ListItem', position: 2, name: course.title, item: ogUrl },
                     ],
                 })}</script>
             </Head>

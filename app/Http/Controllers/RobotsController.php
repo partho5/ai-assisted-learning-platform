@@ -23,6 +23,9 @@ class RobotsController extends Controller
             'Disallow: /settings/',
             'Disallow: /login',
             'Disallow: /register',
+            'Disallow: /password-reset',
+            'Disallow: /email/verify',
+            'Disallow: /_boost/',
             '',
             "Sitemap: {$sitemapUrl}",
         ];

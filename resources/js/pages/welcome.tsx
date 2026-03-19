@@ -98,7 +98,7 @@ function SchemaOrg({ courses, appUrl, appName }: { courses: FeaturedCourse[]; ap
         url: appUrl,
         potentialAction: {
             '@type': 'SearchAction',
-            target: `${appUrl}/en/courses?q={search_term_string}`,
+            target: `${appUrl}/en/courses?search={search_term_string}`,
             'query-input': 'required name=search_term_string',
         },
     };
@@ -199,15 +199,14 @@ function CourseSkeleton() {
 export default function Welcome({ canRegister, featuredCourses }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
-    console.log('locale', l);
-    const appName = import.meta.env.VITE_APP_NAME ?? 'SkillEvidence';
-    const appUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const { name: appName, appUrl: serverAppUrl } = usePage().props as Record<string, any>;
+    const appUrl = String(serverAppUrl ?? '');
 
     const courses = featuredCourses ?? [];
 
     return (
         <PublicLayout isLandingPage hideFooter hidePlatformChat={false}>
-            <Head title={`${appName} — Learn, Prove, Get Hired`}>
+            <Head title={`${String(appName)} — Learn, Prove, Get Hired`}>
                 <meta
                     name="description"
                     content="Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers actually trust. Free to start."
@@ -218,17 +217,13 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 />
                 <link rel="canonical" href={`${appUrl}/${l}/`} />
                 <link rel="alternate" hrefLang="en" href={`${appUrl}/en/`} />
-                <link rel="alternate" hrefLang="bn" href={`${appUrl}/en?course_lang=bn`} />
-
-                <link
-                    rel="alternate"
-                    hrefLang="x-default"
-                    href={`${appUrl}/en/`}
-                />
+                <link rel="alternate" hrefLang="bn" href={`${appUrl}/bn/`} />
+                <link rel="alternate" hrefLang="x-default" href={`${appUrl}/en/`} />
+                <meta property="og:site_name" content={String(appName)} />
                 <meta property="og:type" content="website" />
                 <meta
                     property="og:title"
-                    content={`${appName} — Learn, Prove, Get Hired`}
+                    content={`${String(appName)} — Learn, Prove, Get Hired`}
                 />
                 <meta
                     property="og:description"
@@ -238,12 +233,13 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <meta property="og:image" content={`${appUrl}/og-image.png`} />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
+                <meta property="og:image:alt" content={`${String(appName)} — Learn, Prove, Get Hired`} />
                 <meta property="og:locale" content="en_US" />
                 <meta property="og:locale:alternate" content="bn_BD" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta
                     name="twitter:title"
-                    content={`${appName} — Learn, Prove, Get Hired`}
+                    content={`${String(appName)} — Learn, Prove, Get Hired`}
                 />
                 <meta
                     name="twitter:description"
@@ -253,7 +249,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <SchemaOrg
                     courses={courses}
                     appUrl={appUrl}
-                    appName={appName}
+                    appName={String(appName)}
                 />
             </Head>
 
