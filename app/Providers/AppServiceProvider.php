@@ -11,6 +11,7 @@ use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -30,12 +31,26 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureMailReplyTo();
 
         RedirectIfAuthenticated::redirectUsing(
             fn ($request) => route('dashboard', ['locale' => $request->route('locale', config('app.locale', 'en'))]),
         );
 
         Event::listen(Registered::class, MergeGuestChatHistory::class);
+    }
+
+    /**
+     * Set a global reply-to address for all outgoing mail if configured.
+     */
+    protected function configureMailReplyTo(): void
+    {
+        $address = config('mail.reply_to.address');
+        $name = config('mail.reply_to.name');
+
+        if ($address) {
+            Mail::alwaysReplyTo($address, $name);
+        }
     }
 
     /**

@@ -2,15 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\PaymentConfirmedMail;
+use App\Mail\PaymentRefundedMail;
+use App\Mail\SubscriptionActivatedMail;
+use App\Mail\SubscriptionCancelledMail;
 use App\Models\CouponCode;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Payment;
+use App\Models\User;
 use App\Services\PayPalClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class PaymentController extends Controller
 {
@@ -110,6 +116,8 @@ class PaymentController extends Controller
             $this->upsertFullEnrollment($request->user()->id, $course->id);
         });
 
+        Mail::queue(new PaymentConfirmedMail($request->user(), $course, $payment->fresh()));
+
         return response()->json(['success' => true]);
     }
 
@@ -169,7 +177,9 @@ class PaymentController extends Controller
             return response()->json(['error' => 'Subscription is not active.'], 422);
         }
 
-        DB::transaction(function () use ($payment, $request, $course) {
+        $expiresAt = null;
+
+        DB::transaction(function () use ($payment, $request, $course, &$expiresAt) {
             $payment->update(['status' => 'active']);
 
             if ($payment->coupon_code_id) {
@@ -177,10 +187,17 @@ class PaymentController extends Controller
             }
 
             $months = $course->subscription_duration_months ?? 1;
-            $expires = now()->addMonths($months);
+            $expiresAt = now()->addMonths($months);
 
-            $this->upsertFullEnrollment($request->user()->id, $course->id, $expires);
+            $this->upsertFullEnrollment($request->user()->id, $course->id, $expiresAt);
         });
+
+        Mail::queue(new SubscriptionActivatedMail(
+            $request->user(),
+            $course,
+            $payment->fresh(),
+            $expiresAt->format('d M Y'),
+        ));
 
         return response()->json(['success' => true]);
     }
@@ -258,13 +275,15 @@ class PaymentController extends Controller
      * @param  array{original: float, discount: float, final: float}  $amounts
      */
     private function grantFreeAccess(
-        \App\Models\User $user,
+        User $user,
         Course $course,
         ?CouponCode $coupon,
         array $amounts,
     ): JsonResponse {
-        DB::transaction(function () use ($user, $course, $coupon, $amounts) {
-            Payment::create([
+        $payment = null;
+
+        DB::transaction(function () use ($user, $course, $coupon, $amounts, &$payment) {
+            $payment = Payment::create([
                 'user_id' => $user->id,
                 'course_id' => $course->id,
                 'coupon_code_id' => $coupon?->id,
@@ -282,6 +301,8 @@ class PaymentController extends Controller
 
             $this->upsertFullEnrollment($user->id, $course->id);
         });
+
+        Mail::queue(new PaymentConfirmedMail($user, $course, $payment));
 
         return response()->json(['success' => true, 'free' => true]);
     }
@@ -347,6 +368,15 @@ class PaymentController extends Controller
             $payment->update(['status' => 'active']);
             $this->upsertFullEnrollment($payment->user_id, $payment->course_id, $expires);
         });
+
+        if ($course && $payment->user) {
+            Mail::queue(new SubscriptionActivatedMail(
+                $payment->user,
+                $course,
+                $payment->fresh(),
+                $expires->format('d M Y'),
+            ));
+        }
     }
 
     /** @param array<string, mixed> $event */
@@ -358,8 +388,19 @@ class PaymentController extends Controller
             return;
         }
 
-        Payment::where('paypal_subscription_id', $subscriptionId)
-            ->update(['status' => 'cancelled']);
+        $payment = Payment::with(['user', 'course'])
+            ->where('paypal_subscription_id', $subscriptionId)
+            ->first();
+
+        if (! $payment) {
+            return;
+        }
+
+        $payment->update(['status' => 'cancelled']);
+
+        if ($payment->user && $payment->course) {
+            Mail::queue(new SubscriptionCancelledMail($payment->user, $payment->course));
+        }
     }
 
     /** @param array<string, mixed> $event */
@@ -371,7 +412,18 @@ class PaymentController extends Controller
             return;
         }
 
-        Payment::where('paypal_order_id', $orderId)
-            ->update(['status' => 'refunded']);
+        $payment = Payment::with(['user', 'course'])
+            ->where('paypal_order_id', $orderId)
+            ->first();
+
+        if (! $payment) {
+            return;
+        }
+
+        $payment->update(['status' => 'refunded']);
+
+        if ($payment->user && $payment->course) {
+            Mail::queue(new PaymentRefundedMail($payment->user, $payment->course, $payment));
+        }
     }
 }

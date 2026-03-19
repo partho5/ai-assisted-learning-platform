@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronUp, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CookieBanner } from '@/components/cookie-banner';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { platform } from '@/actions/App/Http/Controllers/AiChatController';
 import { index as chatHistory } from '@/routes/chat/history';
@@ -234,6 +235,8 @@ export default function PublicLayout({
                     context={{ type: 'platform', key: 'platform', endpoint: platform.url(l), historyEndpoint: chatHistory.url(l), locale: l }}
                 />
             )}
+
+            <CookieBanner />
 
             {/* Back to top */}
             <button

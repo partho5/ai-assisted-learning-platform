@@ -115,4 +115,9 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    'reply_to' => [
+        'address' => env('MAIL_REPLY_TO', null),
+        'name' => env('MAIL_REPLY_TO_NAME', null),
+    ],
+
 ];

@@ -6,6 +6,7 @@ use App\Models\Course;
 use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 
 class SitemapController extends Controller
 {
@@ -26,8 +27,8 @@ class SitemapController extends Controller
                 'priority' => '1.0',
             ];
             $urls[] = [
-                'loc' => "{$baseUrl}/{$locale}/courses",
-                'lastmod' => Course::query()->published()->max('updated_at')?->toAtomString() ?? $staticLastmod,
+                'loc' => "{$baseUrl}/{$locale}/courses?course_lang=all",
+                'lastmod' => ($latestCourse = Course::query()->published()->max('updated_at')) ? Carbon::parse($latestCourse)->toAtomString() : $staticLastmod,
                 'changefreq' => 'daily',
                 'priority' => '0.9',
             ];

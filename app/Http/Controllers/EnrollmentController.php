@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CourseEnrolledMail;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Services\ForumNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class EnrollmentController extends Controller
 {
@@ -30,12 +32,17 @@ class EnrollmentController extends Controller
 
         if ($enrollment->wasRecentlyCreated) {
             $course->loadMissing('mentor');
+
             if ($course->mentor) {
                 app(ForumNotificationService::class)->notifyNewEnrollment(
                     $course->mentor,
                     $course->title,
                     $request->user()->name,
                 );
+            }
+
+            if (! $course->isPaid()) {
+                Mail::queue(new CourseEnrolledMail($request->user(), $course));
             }
         }
 
