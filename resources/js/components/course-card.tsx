@@ -61,7 +61,7 @@ export default function CourseCard({ course, locale, 'data-course-id': dataCours
 
                 {/* Mentor */}
                 {course.mentor && (
-                    <MentorCard mentor={course.mentor} locale={locale} variant="inline" />
+                    <MentorCard mentor={course.mentor} locale={locale} variant="inline" linked={false} />
                 )}
 
                 {/* Stats + Price */}

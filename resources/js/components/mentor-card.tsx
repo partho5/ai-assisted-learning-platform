@@ -20,6 +20,11 @@ interface MentorCardProps {
      */
     variant?: 'card' | 'inline' | 'hero';
     /**
+     * inline variant only. When false, renders as a <span> instead of <Link>.
+     * Use when the inline mentor card is already inside a clickable ancestor.
+     */
+    linked?: boolean;
+    /**
      * card variant only. When false, renders just the inner content without
      * the outer section wrapper — use when embedding multiple mentors inside
      * a shared wrapper section.
@@ -29,7 +34,7 @@ interface MentorCardProps {
     children?: ReactNode;
 }
 
-export default function MentorCard({ mentor, locale, variant = 'card', standalone = true, children }: MentorCardProps) {
+export default function MentorCard({ mentor, locale, variant = 'card', linked = true, standalone = true, children }: MentorCardProps) {
     const profileUrl = `/${locale}/u/${mentor.username}`;
 
     if (variant === 'inline') {
@@ -41,11 +46,22 @@ export default function MentorCard({ mentor, locale, variant = 'card', standalon
             </div>
         );
 
+        const className = "mt-0.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground";
+
+        if (!linked) {
+            return (
+                <span className={className}>
+                    {avatar}
+                    <span>{mentor.name}</span>
+                </span>
+            );
+        }
+
         return (
             <Link
                 href={profileUrl}
                 onClick={(e) => e.stopPropagation()}
-                className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                className={className}
             >
                 {avatar}
                 <span>{mentor.name}</span>

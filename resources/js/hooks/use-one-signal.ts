@@ -15,14 +15,22 @@ export function useOneSignal(appId: string | null | undefined, locale: string): 
         if (!appId || initialized.current) { return; }
         initialized.current = true;
 
+        console.log('[useOneSignal] Initializing with appId:', appId);
         OneSignal.init({
             appId,
             allowLocalhostAsSecureOrigin: true,
             autoResubscribe: true,
             notifyButton: { enable: false }, // we use our own prompt
         }).then(() => {
+            console.log('[useOneSignal] Init SUCCESS');
+            console.log('[useOneSignal] PushSubscription.id:', OneSignal.User.PushSubscription.id);
+            console.log('[useOneSignal] PushSubscription.optedIn:', OneSignal.User.PushSubscription.optedIn);
+            console.log('[useOneSignal] window.OneSignal:', window.OneSignal);
+            console.log('[useOneSignal] window.OneSignal?.Notifications:', window.OneSignal?.Notifications);
+
             // When permission is granted and we have a player ID, register it
             OneSignal.User.PushSubscription.addEventListener('change', (event) => {
+                console.log('[useOneSignal] PushSubscription change event:', event.current);
                 const playerId = event.current.id;
                 if (playerId && event.current.optedIn) {
                     registerPlayerId(playerId, locale);
@@ -35,8 +43,8 @@ export function useOneSignal(appId: string | null | undefined, locale: string): 
             if (playerId && optedIn) {
                 registerPlayerId(playerId, locale);
             }
-        }).catch(() => {
-            // OneSignal unavailable (e.g. ad blocker) — fail silently
+        }).catch((err) => {
+            console.error('[useOneSignal] Init FAILED:', err);
         });
     }, [appId, locale]);
 }

@@ -547,12 +547,9 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 }}
                                 className="mb-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                             >
-                                Live courses
+                                Recent courses
                             </h2>
-                            <p className="text-muted-foreground">
-                                Each one built to produce work — not just
-                                completions.
-                            </p>
+                            
                         </div>
                         <Button
                             asChild
