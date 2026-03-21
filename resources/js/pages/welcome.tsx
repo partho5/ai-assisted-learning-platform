@@ -216,9 +216,6 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     content="skill evidence, online courses, verified learning, skill portfolio, mentor courses, learn online"
                 />
                 <link rel="canonical" href={`${appUrl}/${l}/`} />
-                <link rel="alternate" hrefLang="en" href={`${appUrl}/en/`} />
-                <link rel="alternate" hrefLang="bn" href={`${appUrl}/bn/`} />
-                <link rel="alternate" hrefLang="x-default" href={`${appUrl}/en/`} />
                 <meta property="og:site_name" content={String(appName)} />
                 <meta property="og:type" content="website" />
                 <meta
@@ -235,7 +232,6 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <meta property="og:image:height" content="630" />
                 <meta property="og:image:alt" content={`${String(appName)} — Learn, Prove, Get Hired`} />
                 <meta property="og:locale" content="en_US" />
-                <meta property="og:locale:alternate" content="bn_BD" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta
                     name="twitter:title"

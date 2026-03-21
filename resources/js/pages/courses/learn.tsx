@@ -892,9 +892,6 @@ export default function Learn({ course, initialResourceId, resources, enrollment
         <Head title={`${activeTitle} — ${course.title}`}>
             <meta name="description" content={`${activeTitle} — ${ogDescription}`} />
             <link rel="canonical" href={ogUrl} />
-            <link rel="alternate" hrefLang="en" href={`${appUrl}/en/courses/${course.slug}/learn/${initialResourceId}`} />
-            <link rel="alternate" hrefLang="bn" href={`${appUrl}/bn/courses/${course.slug}/learn/${initialResourceId}`} />
-            <link rel="alternate" hrefLang="x-default" href={`${appUrl}/en/courses/${course.slug}/learn/${initialResourceId}`} />
             <meta property="og:site_name" content={String(name)} />
             <meta property="og:title" content={`${activeTitle} — ${course.title} | ${String(name)}`} />
             <meta property="og:description" content={ogDescription} />
@@ -905,7 +902,6 @@ export default function Learn({ course, initialResourceId, resources, enrollment
             <meta property="og:url" content={ogUrl} />
             <meta property="og:type" content="article" />
             <meta property="og:locale" content="en_US" />
-            <meta property="og:locale:alternate" content="bn_BD" />
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" content={`${activeTitle} — ${course.title} | ${String(name)}`} />
             <meta name="twitter:description" content={ogDescription} />

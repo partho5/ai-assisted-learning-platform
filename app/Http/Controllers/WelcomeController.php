@@ -11,13 +11,11 @@ class WelcomeController extends Controller
 {
     public function index(\Illuminate\Http\Request $request): Response
     {
-        $courseLang = $request->input('course_lang', 'en');
-
         return Inertia::render('welcome', [
             'canRegister' => Features::enabled(Features::registration()),
             'featuredCourses' => Inertia::defer(fn () => Course::query()
                 ->published()
-                ->when($courseLang !== 'all', fn ($q) => $q->byLanguage($courseLang))
+                ->byLanguage(app()->getLocale())
                 ->with('mentor:id,name,username')
                 ->withCount('resources')
                 ->select(['id', 'user_id', 'title', 'subtitle', 'slug', 'description', 'thumbnail', 'difficulty', 'price', 'currency', 'billing_type', 'estimated_duration', 'is_featured'])

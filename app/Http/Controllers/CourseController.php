@@ -74,7 +74,7 @@ class CourseController extends Controller
             );
         }
 
-        $courseLang = $request->input('course_lang', 'en');
+        $courseLang = $request->input('course_lang', app()->getLocale());
         if ($courseLang !== 'all') {
             $query->byLanguage($courseLang);
         }
@@ -161,7 +161,7 @@ class CourseController extends Controller
         $course = Course::create($data);
 
         $course->authors()->attach(auth()->id(), [
-            'role'     => 'lead',
+            'role' => 'lead',
             'added_by' => auth()->id(),
         ]);
 

@@ -13,7 +13,7 @@ class SitemapController extends Controller
     public function index(): Response
     {
         $baseUrl = rtrim(config('app.url'), '/');
-        $locales = ['en'];
+        $locales = ['en', 'bn'];
 
         $urls = [];
 
@@ -27,7 +27,7 @@ class SitemapController extends Controller
                 'priority' => '1.0',
             ];
             $urls[] = [
-                'loc' => "{$baseUrl}/{$locale}/courses?course_lang=all",
+                'loc' => "{$baseUrl}/{$locale}/courses",
                 'lastmod' => ($latestCourse = Course::query()->published()->max('updated_at')) ? Carbon::parse($latestCourse)->toAtomString() : $staticLastmod,
                 'changefreq' => 'daily',
                 'priority' => '0.9',
@@ -64,38 +64,36 @@ class SitemapController extends Controller
             ];
         }
 
-        // Published courses + their learn page entry points
+        // Published courses — each course under its own language locale only
         $courses = Course::query()
             ->published()
-            ->select(['id', 'slug', 'updated_at'])
+            ->select(['id', 'slug', 'language', 'updated_at'])
             ->get();
 
         foreach ($courses as $course) {
-            foreach ($locales as $locale) {
-                $urls[] = [
-                    'loc' => "{$baseUrl}/{$locale}/courses/{$course->slug}",
-                    'lastmod' => $course->updated_at->toAtomString(),
-                    'changefreq' => 'weekly',
-                    'priority' => '0.8',
-                ];
-            }
+            $locale = $course->language->value;
+            $urls[] = [
+                'loc' => "{$baseUrl}/{$locale}/courses/{$course->slug}",
+                'lastmod' => $course->updated_at->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.8',
+            ];
 
-            // Add learn page URLs for free resources (publicly accessible)
-            $freeResources = Resource::query()
+            // One learn entry point per course (first free resource only — the rest are scroll positions)
+            $firstFreeResource = Resource::query()
                 ->whereHas('module', fn ($q) => $q->where('course_id', $course->id))
                 ->where('is_free', true)
+                ->orderBy('id')
                 ->select(['id', 'updated_at'])
-                ->get();
+                ->first();
 
-            foreach ($freeResources as $resource) {
-                foreach ($locales as $locale) {
-                    $urls[] = [
-                        'loc' => "{$baseUrl}/{$locale}/courses/{$course->slug}/learn/{$resource->id}",
-                        'lastmod' => $resource->updated_at->toAtomString(),
-                        'changefreq' => 'weekly',
-                        'priority' => '0.6',
-                    ];
-                }
+            if ($firstFreeResource) {
+                $urls[] = [
+                    'loc' => "{$baseUrl}/{$locale}/courses/{$course->slug}/learn/{$firstFreeResource->id}",
+                    'lastmod' => $firstFreeResource->updated_at->toAtomString(),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.6',
+                ];
             }
         }
 

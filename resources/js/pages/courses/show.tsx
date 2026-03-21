@@ -72,9 +72,6 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
             <Head title={course.title}>
                 <meta name="description" content={ogDescription} />
                 <link rel="canonical" href={ogUrl} />
-                <link rel="alternate" hrefLang="en" href={`${appUrl}/en/courses/${course.slug}`} />
-                <link rel="alternate" hrefLang="bn" href={`${appUrl}/bn/courses/${course.slug}`} />
-                <link rel="alternate" hrefLang="x-default" href={`${appUrl}/en/courses/${course.slug}`} />
                 <meta property="og:site_name" content={String(name)} />
                 <meta property="og:title" content={`${course.title} | ${String(name)}`} />
                 <meta property="og:description" content={ogDescription} />
@@ -85,7 +82,6 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                 <meta property="og:url" content={ogUrl} />
                 <meta property="og:type" content="website" />
                 <meta property="og:locale" content="en_US" />
-                <meta property="og:locale:alternate" content="bn_BD" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`${course.title} | ${String(name)}`} />
                 <meta name="twitter:description" content={ogDescription} />

@@ -16,13 +16,21 @@ php artisan key:generate
 # Fill in .env — DB, APP_URL, Stripe/PayPal keys, etc.
 
 php artisan migrate --seed
-npm run dev
-php artisan serve
+
+# Start dev server (runs Laravel + Vite + queue together)
+composer run dev
+# or use the convenience script:
+bash dev-start.sh
 ```
 
 ---
 
 ## Production Deployment
+
+**One-command deploy** (pull, migrate, build assets, restart queue worker):
+```bash
+bash deploy.sh
+```
 
 ### Required Services
 

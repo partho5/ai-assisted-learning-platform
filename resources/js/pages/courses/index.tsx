@@ -123,9 +123,6 @@ export default function CourseCatalog({ courses, categories, difficulties, filte
             <Head title="Courses">
                 <meta name="description" content="Browse curated learning courses built by expert mentors." />
                 <link rel="canonical" href={ogUrl} />
-                <link rel="alternate" hrefLang="en" href={`${String(serverAppUrl)}/en/courses`} />
-                <link rel="alternate" hrefLang="bn" href={`${String(serverAppUrl)}/bn/courses`} />
-                <link rel="alternate" hrefLang="x-default" href={`${String(serverAppUrl)}/en/courses`} />
                 <meta property="og:site_name" content={String(name)} />
                 <meta property="og:title" content={`Courses | ${String(name)}`} />
                 <meta property="og:description" content="Browse curated learning courses built by expert mentors." />
@@ -136,7 +133,6 @@ export default function CourseCatalog({ courses, categories, difficulties, filte
                 <meta property="og:url" content={ogUrl} />
                 <meta property="og:type" content="website" />
                 <meta property="og:locale" content="en_US" />
-                <meta property="og:locale:alternate" content="bn_BD" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`Courses | ${String(name)}`} />
                 <meta name="twitter:description" content="Browse curated learning courses built by expert mentors." />
