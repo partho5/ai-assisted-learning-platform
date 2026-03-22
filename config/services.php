@@ -56,4 +56,10 @@ return [
         'webhook_id' => env('PAYPAL_WEBHOOK_ID'),        // optional, for signature verification
     ],
 
+    'cloudinary' => [
+        'cloud_name' => env('VITE_CLOUDINARY_CLOUD_NAME'),
+        'api_key' => env('CLOUDINARY_API_KEY'),
+        'api_secret' => env('CLOUDINARY_API_SECRET'),
+    ],
+
 ];

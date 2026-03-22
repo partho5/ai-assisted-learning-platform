@@ -4,6 +4,12 @@ namespace App\Providers;
 
 use App\Contracts\AiProvider;
 use App\Listeners\MergeGuestChatHistory;
+use App\Models\Course;
+use App\Models\Resource;
+use App\Models\User;
+use App\Observers\CourseObserver;
+use App\Observers\ResourceObserver;
+use App\Observers\UserObserver;
 use App\Services\OpenAiProvider;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Registered;
@@ -32,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureMailReplyTo();
+
+        Course::observe(CourseObserver::class);
+        User::observe(UserObserver::class);
+        Resource::observe(ResourceObserver::class);
 
         RedirectIfAuthenticated::redirectUsing(
             fn ($request) => route('dashboard', ['locale' => $request->route('locale', config('app.locale', 'en'))]),

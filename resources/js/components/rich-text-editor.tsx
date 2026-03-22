@@ -46,8 +46,8 @@ function Sep() {
 // ─── Toolbar ──────────────────────────────────────────────────────────────────
 
 const FONT_SIZES = ['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px'];
-const TEXT_COLORS = ['#000000', '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];
-const HIGHLIGHT_COLORS = ['#fef08a', '#bbf7d0', '#bfdbfe', '#e9d5ff', '#fecaca', '#fed7aa'];
+const TEXT_COLORS = ['#000000', '#ff0000', '#cc5500', '#aa8800', '#008800', '#003399', '#6600cc', '#cc0066', '#006666', '#555555'];
+const HIGHLIGHT_COLORS = ['#ffff00', '#ff0000', '#00ff00', '#00ffff', '#ff8c00', '#ff69b4'];
 
 function Toolbar({ editor }: { editor: Editor }) {
     const colorRef = useRef<HTMLInputElement>(null);
