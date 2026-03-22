@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\Forum\ForumModerationController;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmissionController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AiHelpController;
+use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ChatHistoryController;
 use App\Http\Controllers\CouponCodeController;
 use App\Http\Controllers\CourseAuthorController;
@@ -289,6 +290,25 @@ Route::prefix('{locale}')
             Route::delete('courses/{course}/coupons/{couponCode}', [CouponCodeController::class, 'destroy'])
                 ->name('coupons.destroy');
         });
+
+        // -----------------------------------------------------------------------
+        // Articles — public URL is /resources (model is Article, no collision with
+        // course Resource model). Mentor/admin write; policy gates edit/delete.
+        // -----------------------------------------------------------------------
+
+        // Auth-required write actions (create must be before {article:slug} wildcard)
+        Route::middleware(['auth', 'verified'])->group(function () {
+            Route::get('resources/create', [ArticleController::class, 'create'])->name('articles.create');
+            Route::get('resources/api/tags', [ArticleController::class, 'tags'])->name('articles.tags');
+            Route::post('resources', [ArticleController::class, 'store'])->name('articles.store');
+            Route::get('resources/{article:slug}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
+            Route::put('resources/{article:slug}', [ArticleController::class, 'update'])->name('articles.update');
+            Route::delete('resources/{article:slug}', [ArticleController::class, 'destroy'])->name('articles.destroy');
+        });
+
+        // Public index + detail (after static paths to avoid slug collision)
+        Route::get('resources', [ArticleController::class, 'index'])->name('articles.index');
+        Route::get('resources/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
 
         // Public evidence portfolio
         Route::get('u/{username}', [PublicProfileController::class, 'show'])->name('portfolio.show');

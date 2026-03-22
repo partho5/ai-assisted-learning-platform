@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Article;
 use App\Models\Course;
 use App\Models\Resource;
 use App\Models\User;
@@ -32,6 +33,15 @@ class SitemapController extends Controller
                 'changefreq' => 'daily',
                 'priority' => '0.9',
             ];
+            // Resources index (articles) — listed under /en/ only since all content is English
+            if ($locale === 'en') {
+                $urls[] = [
+                    'loc' => "{$baseUrl}/en/resources",
+                    'lastmod' => ($latestArticle = Article::query()->published()->max('updated_at')) ? Carbon::parse($latestArticle)->toAtomString() : $staticLastmod,
+                    'changefreq' => 'daily',
+                    'priority' => '0.8',
+                ];
+            }
             $urls[] = [
                 'loc' => "{$baseUrl}/{$locale}/about-us",
                 'lastmod' => $staticLastmod,
@@ -95,6 +105,21 @@ class SitemapController extends Controller
                     'priority' => '0.6',
                 ];
             }
+        }
+
+        // Published articles — canonical URL always under /en/ (all content is English)
+        $articles = Article::query()
+            ->published()
+            ->select(['id', 'slug', 'updated_at'])
+            ->get();
+
+        foreach ($articles as $article) {
+            $urls[] = [
+                'loc' => "{$baseUrl}/en/resources/{$article->slug}",
+                'lastmod' => $article->updated_at->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
+            ];
         }
 
         // Public portfolios

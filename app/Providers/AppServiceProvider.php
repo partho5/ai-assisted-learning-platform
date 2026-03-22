@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Contracts\AiProvider;
 use App\Listeners\MergeGuestChatHistory;
+use App\Models\Article;
 use App\Models\Course;
 use App\Models\Resource;
 use App\Models\User;
+use App\Observers\ArticleObserver;
 use App\Observers\CourseObserver;
 use App\Observers\ResourceObserver;
 use App\Observers\UserObserver;
@@ -39,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureMailReplyTo();
 
+        Article::observe(ArticleObserver::class);
         Course::observe(CourseObserver::class);
         User::observe(UserObserver::class);
         Resource::observe(ResourceObserver::class);

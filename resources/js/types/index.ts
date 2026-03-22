@@ -1,3 +1,4 @@
+export type * from './article';
 export type * from './auth';
 export type * from './course';
 export type * from './forum';

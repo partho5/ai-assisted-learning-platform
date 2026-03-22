@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { RotatingText } from '@/components/rotating-text';
 import PublicLayout from '@/layouts/public-layout';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
-import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
 import { register } from '@/routes';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -206,7 +205,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
     const courses = featuredCourses ?? [];
 
     return (
-        <PublicLayout isLandingPage hideFooter hidePlatformChat={false}>
+        <PublicLayout isLandingPage hidePlatformChat={false}>
             <Head title={`${String(appName)} — Learn, Prove, Get Hired`}>
                 <meta
                     name="description"
@@ -1013,64 +1012,6 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 </FadeIn>
             </section>
 
-            {/* ── FOOTER ───────────────────────────────────────────────── */}
-            <footer role="contentinfo" className="mb-48 border-t border-border bg-background">
-                <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
-                    {/* Top: brand + columns */}
-                    <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
-                        {/* Brand */}
-                        <div className="col-span-2 md:col-span-1">
-                            <div className="mb-3 flex items-center gap-2">
-                                <img src="/logo.png" alt={appName} width={24} height={24} className="h-6 w-6" />
-                                <span className="text-sm font-semibold text-foreground">{appName}</span>
-                            </div>
-                            <p className="max-w-[200px] text-xs leading-relaxed text-muted-foreground">
-                                Skill-based learning with verified portfolios and AI-powered feedback.
-                            </p>
-                        </div>
-
-                        {/* Platform */}
-                        <div>
-                            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Platform</p>
-                            <ul className="space-y-3">
-                                <li><Link href={coursesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Courses</Link></li>
-                                <li><Link href={forumIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Forum</Link></li>
-                                <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground hover:text-primary">About</Link></li>
-                                {/*<li>*/}
-                                {/*    <Link href={`/${l === 'en' ? 'bn' : 'en'}/`} className="text-sm text-muted-foreground hover:text-primary">*/}
-                                {/*        {l === 'en' ? 'বাংলা' : 'English'}*/}
-                                {/*    </Link>*/}
-                                {/*</li>*/}
-                            </ul>
-                        </div>
-
-                        {/* Support */}
-                        <div>
-                            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Support</p>
-                            <ul className="space-y-3">
-                                <li><Link href={`/${l}/contact`} className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link></li>
-                                <li><Link href={`/${l}/refund-policy`} className="text-sm text-muted-foreground hover:text-primary">Refund Policy</Link></li>
-                            </ul>
-                        </div>
-
-                        {/* Legal */}
-                        <div>
-                            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Legal</p>
-                            <ul className="space-y-3">
-                                <li><Link href={`/${l}/privacy-policy`} className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
-                                <li><Link href={`/${l}/terms`} className="text-sm text-muted-foreground hover:text-primary">Terms &amp; Conditions</Link></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* Bottom: copyright */}
-                    <div className="mt-12 border-t border-border pt-6">
-                        <p className="text-xs text-muted-foreground">
-                            © {new Date().getFullYear()} {appName}. All rights reserved.
-                        </p>
-                    </div>
-                </div>
-            </footer>
         </PublicLayout>
     );
 }

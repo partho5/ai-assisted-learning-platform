@@ -7,6 +7,8 @@ import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { platform } from '@/actions/App/Http/Controllers/AiChatController';
 import { index as chatHistory } from '@/routes/chat/history';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
+import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
+import { index as articlesIndex } from '@/actions/App/Http/Controllers/ArticleController';
 import { login, register } from '@/routes';
 
 interface NavLinkProps {
@@ -177,14 +179,14 @@ export default function PublicLayout({
 
             {/* Site footer */}
             {!hideFooter && (
-                <footer className="mb-48 border-t border-border bg-muted/20">
+                <footer role="contentinfo" className="mb-48 border-t border-border bg-background">
                     <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
                         <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
                             {/* Brand */}
                             <div className="col-span-2 md:col-span-1">
                                 <Link href={`/${l}/`} className="mb-3 flex items-center gap-2">
-                                    <img src="/logo.png" alt="SkillEvidence" width={22} height={22} className="h-[22px] w-[22px]" />
-                                    <span className="text-sm font-semibold tracking-tight text-foreground">
+                                    <img src="/logo.png" alt={import.meta.env.VITE_APP_NAME} width={24} height={24} className="h-6 w-6" />
+                                    <span className="text-sm font-semibold text-foreground">
                                         {import.meta.env.VITE_APP_NAME}
                                     </span>
                                 </Link>
@@ -197,8 +199,10 @@ export default function PublicLayout({
                             <div>
                                 <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Platform</p>
                                 <ul className="space-y-3">
-                                    <li><Link href={`/${l}/`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Home</Link></li>
-                                    <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground transition-colors hover:text-primary">About</Link></li>
+                                    <li><Link href={coursesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Courses</Link></li>
+                                    <li><Link href={forumIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Forum</Link></li>
+                                    <li><Link href={articlesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Resources</Link></li>
+                                    <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground hover:text-primary">About</Link></li>
                                 </ul>
                             </div>
 
@@ -206,8 +210,8 @@ export default function PublicLayout({
                             <div>
                                 <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Support</p>
                                 <ul className="space-y-3">
-                                    <li><Link href={`/${l}/contact`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Contact Us</Link></li>
-                                    <li><Link href={`/${l}/refund-policy`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Refund Policy</Link></li>
+                                    <li><Link href={`/${l}/contact`} className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link></li>
+                                    <li><Link href={`/${l}/refund-policy`} className="text-sm text-muted-foreground hover:text-primary">Refund Policy</Link></li>
                                 </ul>
                             </div>
 
@@ -215,15 +219,15 @@ export default function PublicLayout({
                             <div>
                                 <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Legal</p>
                                 <ul className="space-y-3">
-                                    <li><Link href={`/${l}/privacy-policy`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Privacy Policy</Link></li>
-                                    <li><Link href={`/${l}/terms`} className="text-sm text-muted-foreground transition-colors hover:text-primary">Terms &amp; Conditions</Link></li>
+                                    <li><Link href={`/${l}/privacy-policy`} className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
+                                    <li><Link href={`/${l}/terms`} className="text-sm text-muted-foreground hover:text-primary">Terms &amp; Conditions</Link></li>
                                 </ul>
                             </div>
                         </div>
 
                         <div className="mt-12 border-t border-border pt-6">
                             <p className="text-xs text-muted-foreground">
-                                &copy; {new Date().getFullYear()} SkillEvidence. All rights reserved.
+                                &copy; {new Date().getFullYear()} {import.meta.env.VITE_APP_NAME}. All rights reserved.
                             </p>
                         </div>
                     </div>

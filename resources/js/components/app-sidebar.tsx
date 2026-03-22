@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Bot, ClipboardList, LayoutGrid, MessagesSquare, NotebookPen, ShieldAlert, Tag, Users, Zap } from 'lucide-react';
+import { BookOpen, Bot, ClipboardList, LayoutGrid, MessagesSquare, Newspaper, NotebookPen, ShieldAlert, Tag, Users, Zap } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -41,11 +41,13 @@ export function AppSidebar() {
           : [
             { title: ui.nav.dashboard, href: `/${locale}/dashboard`, icon: LayoutGrid },
             { title: ui.nav.courses, href: `/${locale}/courses`, icon: BookOpen },
+            { title: 'Resources', href: `/${locale}/resources`, icon: Newspaper },
           ];
 
     const secondaryNavItems: NavItem[] = isMentorOrAdmin
         ? [
             { title: ui.nav.my_courses, href: `/${locale}/courses`, icon: BookOpen },
+            { title: 'My Articles', href: `/${locale}/resources`, icon: Newspaper },
             ...(isMentor ? [{ title: ui.nav.categories, href: `/${locale}/mentor/categories`, icon: Tag }] : []),
           ]
         : [];
