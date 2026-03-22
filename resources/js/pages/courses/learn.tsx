@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import PublicLayout from '@/layouts/public-layout';
 import type {
@@ -712,7 +713,11 @@ export default function Learn({ course, initialResourceId, resources, enrollment
     function scrollToResource(id: number) {
         suppressSidebarSync.current = true;
         setActiveResourceId(id);
-        document.getElementById(`r-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const el = document.getElementById(`r-${id}`);
+        if (el) {
+            const top = el.getBoundingClientRect().top + window.scrollY - 80; // minus some pixels to avoid hiding under top nav menu.
+            window.scrollTo({ top, behavior: 'smooth' });
+        }
     }
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -768,6 +773,8 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                                         !r.is_free && (!enrollment || enrollment.access_level === 'observer');
                                     return (
                                         <li key={r.id}>
+                                            <Tooltip>
+                                            <TooltipTrigger asChild>
                                             <button
                                                 data-resource-id={r.id}
                                                 onClick={() =>
@@ -818,6 +825,9 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                                                     </Badge>
                                                 )}
                                             </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="right">{r.title}</TooltipContent>
+                                            </Tooltip>
                                         </li>
                                     );
                                 })}
@@ -858,7 +868,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
             </aside>
 
             {/* ── Main content — continuous scroll ── */}
-            <main ref={mainRef} className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
+            <main ref={mainRef} className="flex-1 overflow-y-auto max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-8">
                 {resources.map((resource) => (
                     <section
                         key={resource.id}
