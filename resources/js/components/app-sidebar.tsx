@@ -52,16 +52,15 @@ export function AppSidebar() {
           ]
         : [];
 
-    const forumAdminNavItems: NavItem[] = isAdmin
-        ? [
-            { title: 'Categories', href: `/${locale}/admin/forum/categories`, icon: MessagesSquare },
-            { title: 'AI Members', href: `/${locale}/admin/forum/ai-members`, icon: Bot },
-            { title: 'Moderation', href: `/${locale}/admin/forum/moderation`, icon: ShieldAlert },
-          ]
-        : [];
-
-    const communityNavItems: NavItem[] = [
+    const forumNavItems: NavItem[] = [
         { title: 'Forum', href: `/${locale}/forum`, icon: MessagesSquare },
+        ...(isAdmin
+            ? [
+                { title: 'Categories', href: `/${locale}/admin/forum/categories`, icon: Tag },
+                { title: 'AI Members', href: `/${locale}/admin/forum/ai-members`, icon: Bot },
+                { title: 'Moderation', href: `/${locale}/admin/forum/moderation`, icon: ShieldAlert },
+              ]
+            : []),
     ];
 
     const personalNavItems: NavItem[] = [
@@ -87,10 +86,7 @@ export function AppSidebar() {
                 {secondaryNavItems.length > 0 && (
                     <NavMain items={secondaryNavItems} label={isAdmin ? 'Management' : 'Mentor'} />
                 )}
-                <NavMain items={communityNavItems} label="Community" />
-                {forumAdminNavItems.length > 0 && (
-                    <NavMain items={forumAdminNavItems} label="Forum Admin" />
-                )}
+                <NavMain items={forumNavItems} label="Forum" />
                 <NavMain items={personalNavItems} label="Personal" />
             </SidebarContent>
 
