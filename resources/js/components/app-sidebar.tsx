@@ -58,6 +58,10 @@ export function AppSidebar() {
           ]
         : [];
 
+    const communityNavItems: NavItem[] = [
+        { title: 'Forum', href: `/${locale}/forum`, icon: MessagesSquare },
+    ];
+
     const personalNavItems: NavItem[] = [
         { title: 'Personal Notes', href: `/${locale}/notes`, icon: NotebookPen },
     ];
@@ -81,8 +85,9 @@ export function AppSidebar() {
                 {secondaryNavItems.length > 0 && (
                     <NavMain items={secondaryNavItems} label={isAdmin ? 'Management' : 'Mentor'} />
                 )}
+                <NavMain items={communityNavItems} label="Community" />
                 {forumAdminNavItems.length > 0 && (
-                    <NavMain items={forumAdminNavItems} label="Forum" />
+                    <NavMain items={forumAdminNavItems} label="Forum Admin" />
                 )}
                 <NavMain items={personalNavItems} label="Personal" />
             </SidebarContent>

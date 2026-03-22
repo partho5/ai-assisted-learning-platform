@@ -27,25 +27,13 @@ export default function PushPermissionPrompt({ appId, isSubscribed }: Props) {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        console.log('[PushPrompt] useEffect fired — appId:', appId, 'isSubscribed:', isSubscribed, 'Notification.permission:', Notification.permission);
+        if (!appId || isSubscribed) { return; }
 
-        if (!appId || isSubscribed) {
-            console.log('[PushPrompt] Skipping: no appId or already subscribed');
-            return;
-        }
-
-        if (Notification.permission === 'granted' || Notification.permission === 'denied') {
-            console.log('[PushPrompt] Skipping: permission already', Notification.permission);
-            return;
-        }
+        if (Notification.permission === 'granted' || Notification.permission === 'denied') { return; }
 
         const snoozedUntil = localStorage.getItem(STORAGE_KEY);
-        if (snoozedUntil && Date.now() < Number(snoozedUntil)) {
-            console.log('[PushPrompt] Skipping: snoozed until', new Date(Number(snoozedUntil)));
-            return;
-        }
+        if (snoozedUntil && Date.now() < Number(snoozedUntil)) { return; }
 
-        console.log('[PushPrompt] Will show custom prompt in 3s');
         const timer = setTimeout(() => setVisible(true), 3000);
         return () => clearTimeout(timer);
     }, [appId, isSubscribed]);
@@ -53,28 +41,16 @@ export default function PushPermissionPrompt({ appId, isSubscribed }: Props) {
     if (!visible) { return null; }
 
     async function handleAllow() {
-        console.log('[PushPrompt] Allow clicked');
-        console.log('[PushPrompt] Notification.permission:', Notification.permission);
-        console.log('[PushPrompt] window.OneSignal exists:', !!window.OneSignal);
-        console.log('[PushPrompt] window.OneSignal?.Notifications:', window.OneSignal?.Notifications);
-        console.log('[PushPrompt] requestPermission fn:', window.OneSignal?.Notifications?.requestPermission);
-
         setVisible(false);
 
         try {
-            // Try OneSignal first (production)
             if (window.OneSignal?.Notifications?.requestPermission) {
-                console.log('[PushPrompt] Calling OneSignal.Notifications.requestPermission()...');
                 await window.OneSignal.Notifications.requestPermission();
-                console.log('[PushPrompt] OneSignal requestPermission resolved. permission now:', Notification.permission);
             } else {
-                // Fallback: native Notification API (works on localhost + production)
-                console.log('[PushPrompt] OneSignal not available, falling back to Notification.requestPermission()...');
-                const result = await Notification.requestPermission();
-                console.log('[PushPrompt] Native requestPermission result:', result);
+                await Notification.requestPermission();
             }
-        } catch (error) {
-            console.error('[PushPrompt] Notification permission request FAILED:', error);
+        } catch {
+            // Silent fail
         }
     }
 

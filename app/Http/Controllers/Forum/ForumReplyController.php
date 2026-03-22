@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreForumReplyRequest;
 use App\Http\Requests\UpdateForumReplyRequest;
 use App\Jobs\AutoFlagWithAi;
+use App\Jobs\SanitizeContentLinks;
 use App\Models\ForumCategory;
 use App\Models\ForumReply;
 use App\Models\ForumThread;
@@ -31,29 +32,55 @@ class ForumReplyController extends Controller
         /** @var \App\Models\User $user */
         $user = $request->user();
 
+        // Resolve parent reply for nesting
+        $parentReply = null;
+        $depth = 0;
+
+        if ($request->input('parent_id')) {
+            $parentReply = ForumReply::findOrFail($request->input('parent_id'));
+            abort_if($parentReply->thread_id !== $forumThread->id, 422, 'Parent reply does not belong to this thread.');
+            abort_if($parentReply->depth >= config('forum.max_reply_depth', 10), 422, 'Maximum reply depth reached.');
+            $depth = $parentReply->depth + 1;
+        }
+
         $reply = ForumReply::create([
             'thread_id' => $forumThread->id,
             'user_id' => $user->id,
             'body' => $request->input('body'),
             'quoted_reply_id' => $request->input('quoted_reply_id'),
+            'parent_id' => $parentReply?->id,
+            'depth' => $depth,
         ]);
+
+        SanitizeContentLinks::dispatch(ForumReply::class, $reply->id);
 
         $forumThread->increment('replies_count');
         $forumThread->update(['last_activity_at' => now()]);
         $forumThread->category()->update(['last_thread_id' => $forumThread->id]);
 
-        // Dispatch AI replies for @mention triggers (only for human replies)
         if (! $user->is_ai) {
+            // Dispatch AI replies for @mention triggers
             $this->triggerEvaluator->onMention($forumThread, $reply->body);
-        }
 
-        // Dispatch AI moderation check (human replies only)
-        if (! $user->is_ai) {
+            // Trigger AI conversational reply when replying to an AI member's reply
+            if ($parentReply) {
+                $parentReply->loadMissing('author');
+                if ($parentReply->author?->is_ai) {
+                    $this->triggerEvaluator->onReplyToAi($forumThread, $reply, $parentReply);
+                }
+            }
+
+            // Dispatch AI moderation check
             AutoFlagWithAi::dispatch(ForumReply::class, $reply->id);
         }
 
         // Push notifications
         $this->notifications->notifyThreadReply($forumThread, $reply);
+
+        // Notify parent reply author
+        if ($parentReply && $parentReply->user_id !== $user->id) {
+            $this->notifications->notifyParentReply($parentReply, $reply, $forumThread);
+        }
 
         if ($reply->quoted_reply_id) {
             $quotedReply = ForumReply::withTrashed()->find($reply->quoted_reply_id);
@@ -93,6 +120,8 @@ class ForumReplyController extends Controller
         $forumReply->update([
             'body' => $request->input('body'),
         ]);
+
+        SanitizeContentLinks::dispatch(ForumReply::class, $forumReply->id);
 
         $locale = $request->route('locale', 'en');
 

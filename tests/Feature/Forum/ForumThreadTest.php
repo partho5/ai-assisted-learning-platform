@@ -3,6 +3,7 @@
 namespace Tests\Feature\Forum;
 
 use App\Models\ForumCategory;
+use App\Models\ForumReply;
 use App\Models\ForumThread;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -194,5 +195,35 @@ class ForumThreadTest extends TestCase
             ->assertForbidden();
 
         $this->assertDatabaseHas('forum_threads', ['id' => $thread->id, 'deleted_at' => null]);
+    }
+
+    // ──────────────────────────────────────────────
+    // Show — nested reply props
+    // ──────────────────────────────────────────────
+
+    public function test_show_thread_returns_replies_with_nesting_fields(): void
+    {
+        $user = User::factory()->paid()->create();
+        $thread = ForumThread::factory()->create();
+
+        $root = ForumReply::factory()->for($thread, 'thread')->create(['depth' => 0]);
+        $child = ForumReply::factory()->for($thread, 'thread')->childOf($root)->create();
+
+        $this->actingAs($user)
+            ->get(route('forum.threads.show', [
+                'locale' => 'en',
+                'forumCategory' => $thread->category->slug,
+                'forumThread' => $thread->slug,
+            ]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('forum/show-thread')
+                ->has('replies', 2)
+                ->has('maxReplyDepth')
+                ->where('replies.0.parent_id', null)
+                ->where('replies.0.depth', 0)
+                ->where('replies.1.parent_id', $root->id)
+                ->where('replies.1.depth', 1)
+            );
     }
 }

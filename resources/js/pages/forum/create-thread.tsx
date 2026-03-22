@@ -66,7 +66,7 @@ export default function CreateThread({ categories, prefill }: Props) {
                     <span className="text-foreground font-medium">New Thread</span>
                 </nav>
 
-                <h1 className="text-2xl font-bold mb-6">Start a Discussion</h1>
+                <h1 className="text-2xl font-bold mb-6">Ask ! what you want to learn ?</h1>
 
                 <form onSubmit={submit} className="space-y-6">
                     {/* Category */}

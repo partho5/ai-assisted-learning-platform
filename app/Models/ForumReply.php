@@ -19,6 +19,8 @@ class ForumReply extends Model
         'user_id',
         'body',
         'quoted_reply_id',
+        'parent_id',
+        'depth',
         'is_accepted_answer',
         'upvotes_count',
     ];
@@ -29,6 +31,7 @@ class ForumReply extends Model
         return [
             'is_accepted_answer' => 'boolean',
             'upvotes_count' => 'integer',
+            'depth' => 'integer',
         ];
     }
 
@@ -42,6 +45,39 @@ class ForumReply extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /** @return BelongsTo<ForumReply, $this> */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(ForumReply::class, 'parent_id')->withTrashed();
+    }
+
+    /** @return HasMany<ForumReply, $this> */
+    public function children(): HasMany
+    {
+        return $this->hasMany(ForumReply::class, 'parent_id');
+    }
+
+    /**
+     * Walk the parent chain up to root, returning replies in chronological (root-first) order.
+     *
+     * @return \Illuminate\Support\Collection<int, ForumReply>
+     */
+    public function ancestorChain(): \Illuminate\Support\Collection
+    {
+        $chain = collect();
+        $current = $this;
+
+        while ($current->parent_id) {
+            $current = ForumReply::with('author:id,name,username,is_ai')->find($current->parent_id);
+            if (! $current) {
+                break;
+            }
+            $chain->prepend($current);
+        }
+
+        return $chain;
     }
 
     /** @return BelongsTo<ForumReply, $this> */

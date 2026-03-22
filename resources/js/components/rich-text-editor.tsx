@@ -222,10 +222,12 @@ interface RichTextEditorProps {
     onChange: (content: string) => void;
     disabled?: boolean;
     placeholder?: string;
+    autoFocus?: boolean;
 }
 
-export default function RichTextEditor({ value, onChange, disabled = false, placeholder }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, disabled = false, placeholder, autoFocus = false }: RichTextEditorProps) {
     const editor = useEditor({
+        autofocus: autoFocus ? 'end' : false,
         extensions: [
             StarterKit,
             Underline,

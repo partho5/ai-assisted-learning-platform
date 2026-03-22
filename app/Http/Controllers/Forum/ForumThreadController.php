@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreForumThreadRequest;
 use App\Http\Requests\UpdateForumThreadRequest;
 use App\Jobs\AutoFlagWithAi;
+use App\Jobs\SanitizeContentLinks;
 use App\Models\ForumCategory;
 use App\Models\ForumThread;
 use App\Services\TriggerEvaluator;
@@ -50,6 +51,8 @@ class ForumThreadController extends Controller
             'last_activity_at' => now(),
         ]);
 
+        SanitizeContentLinks::dispatch(ForumThread::class, $thread->id);
+
         // Update denormalized category stats
         $thread->category()->increment('thread_count');
         $thread->category()->update(['last_thread_id' => $thread->id]);
@@ -74,7 +77,6 @@ class ForumThreadController extends Controller
         abort_if($forumThread->category_id !== $forumCategory->id, 404);
 
         $user = $request->user();
-        $perPage = config('forum.replies_per_page', 30);
 
         $forumThread->load([
             'author:id,name,username,avatar,role,is_ai',
@@ -99,6 +101,7 @@ class ForumThreadController extends Controller
             ->withExists(['votes as has_voted' => fn ($q) => $q->where('user_id', $user?->id ?? 0)])
             ->first();
 
+        // Load all replies (flat) — tree is built client-side from parent_id
         $replies = $forumThread->replies()
             ->where('is_accepted_answer', false)
             ->with([
@@ -108,7 +111,7 @@ class ForumThreadController extends Controller
             ])
             ->withExists(['votes as has_voted' => fn ($q) => $q->where('user_id', $user?->id ?? 0)])
             ->oldest()
-            ->paginate($perPage);
+            ->get();
 
         return Inertia::render('forum/show-thread', [
             'thread' => $forumThread,
@@ -117,6 +120,7 @@ class ForumThreadController extends Controller
             'canModerate' => $user && ($user->isAdmin() || $user->isMentor()),
             'canReply' => $user !== null && ! $forumThread->is_locked,
             'isAuthor' => $user?->id === $forumThread->user_id,
+            'maxReplyDepth' => config('forum.max_reply_depth', 10),
         ]);
     }
 
@@ -153,6 +157,8 @@ class ForumThreadController extends Controller
             'category_id' => $newCategoryId,
             'tags' => $request->input('tags', []),
         ]);
+
+        SanitizeContentLinks::dispatch(ForumThread::class, $forumThread->id);
 
         // Update denormalized counts if category changed
         if ($oldCategoryId !== $newCategoryId) {

@@ -17,6 +17,7 @@ class StoreForumReplyRequest extends FormRequest
         return [
             'body' => ['required', 'string'],
             'quoted_reply_id' => ['nullable', 'integer', 'exists:forum_replies,id'],
+            'parent_id' => ['nullable', 'integer', 'exists:forum_replies,id'],
         ];
     }
 

@@ -15,22 +15,14 @@ export function useOneSignal(appId: string | null | undefined, locale: string): 
         if (!appId || initialized.current) { return; }
         initialized.current = true;
 
-        console.log('[useOneSignal] Initializing with appId:', appId);
         OneSignal.init({
             appId,
-            allowLocalhostAsSecureOrigin: true,
+            allowLocalhostAsSecureOrigin: import.meta.env.DEV,
             autoResubscribe: true,
             notifyButton: { enable: false }, // we use our own prompt
         }).then(() => {
-            console.log('[useOneSignal] Init SUCCESS');
-            console.log('[useOneSignal] PushSubscription.id:', OneSignal.User.PushSubscription.id);
-            console.log('[useOneSignal] PushSubscription.optedIn:', OneSignal.User.PushSubscription.optedIn);
-            console.log('[useOneSignal] window.OneSignal:', window.OneSignal);
-            console.log('[useOneSignal] window.OneSignal?.Notifications:', window.OneSignal?.Notifications);
-
             // When permission is granted and we have a player ID, register it
             OneSignal.User.PushSubscription.addEventListener('change', (event) => {
-                console.log('[useOneSignal] PushSubscription change event:', event.current);
                 const playerId = event.current.id;
                 if (playerId && event.current.optedIn) {
                     registerPlayerId(playerId, locale);
@@ -43,20 +35,25 @@ export function useOneSignal(appId: string | null | undefined, locale: string): 
             if (playerId && optedIn) {
                 registerPlayerId(playerId, locale);
             }
-        }).catch((err) => {
-            console.error('[useOneSignal] Init FAILED:', err);
+        }).catch(() => {
+            // Silent fail — OneSignal may reject non-matching origins
         });
     }, [appId, locale]);
 }
 
 function registerPlayerId(playerId: string, locale: string): void {
-    const csrfMeta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]');
+    const xsrfToken = document.cookie
+        .split('; ')
+        .find((c) => c.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+
     fetch(storePushSubscription.url(locale), {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'X-CSRF-TOKEN': csrfMeta?.content ?? '',
+            'X-XSRF-TOKEN': xsrfToken ? decodeURIComponent(xsrfToken) : '',
         },
         body: JSON.stringify({ player_id: playerId }),
     }).catch(() => {

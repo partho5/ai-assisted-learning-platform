@@ -37,4 +37,12 @@ return [
     'unanswered_ai_trigger_minutes' => 30,  // AI auto-reply if no human response after N minutes
     'max_tags_per_thread' => 5,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Reply Nesting
+    |--------------------------------------------------------------------------
+    */
+    'max_reply_depth' => 10,
+    'max_ai_replies_per_thread' => 5,
+
 ];

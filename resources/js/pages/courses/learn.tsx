@@ -577,7 +577,7 @@ function ResourceBlock({
                         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary hover:underline"
                     >
                         <span>💬</span>
-                        <span>Start a discussion</span>
+                        <span>Ask a mentor</span>
                     </Link>
                 )}
             </div>

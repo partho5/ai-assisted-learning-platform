@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Jobs\GenerateAiReply;
 use App\Models\AiMember;
+use App\Models\ForumReply;
 use App\Models\ForumThread;
 
 class TriggerEvaluator
@@ -42,6 +43,43 @@ class TriggerEvaluator
         foreach ($aiMembers as $aiMember) {
             GenerateAiReply::dispatch($aiMember->id, $thread->id, 'mention')->delay(now()->addSeconds(5));
         }
+    }
+
+    /**
+     * Dispatch a conversational AI follow-up when a human replies to an AI member's reply.
+     */
+    public function onReplyToAi(ForumThread $thread, ForumReply $humanReply, ForumReply $aiParentReply): void
+    {
+        $aiMember = AiMember::query()
+            ->where('user_id', $aiParentReply->user_id)
+            ->where('is_active', true)
+            ->first();
+
+        if (! $aiMember) {
+            return;
+        }
+
+        if (! $this->categoryAllowed($aiMember, $thread)) {
+            return;
+        }
+
+        // Enforce per-thread reply limit
+        $aiReplyCount = ForumReply::where('thread_id', $thread->id)
+            ->where('user_id', $aiMember->user_id)
+            ->count();
+
+        if ($aiReplyCount >= config('forum.max_ai_replies_per_thread', 5)) {
+            return;
+        }
+
+        $thread->update(['pending_ai_reply' => true]);
+
+        GenerateAiReply::dispatch(
+            $aiMember->id,
+            $thread->id,
+            'reply_to_ai',
+            $humanReply->id,
+        )->delay(now()->addSeconds(5));
     }
 
     /**

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { RotatingText } from '@/components/rotating-text';
 import PublicLayout from '@/layouts/public-layout';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
+import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
 import { register } from '@/routes';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -549,7 +550,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             >
                                 Recent courses
                             </h2>
-                            
+
                         </div>
                         <Button
                             asChild
@@ -1033,6 +1034,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Platform</p>
                             <ul className="space-y-3">
                                 <li><Link href={coursesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Courses</Link></li>
+                                <li><Link href={forumIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Forum</Link></li>
                                 <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground hover:text-primary">About</Link></li>
                                 {/*<li>*/}
                                 {/*    <Link href={`/${l === 'en' ? 'bn' : 'en'}/`} className="text-sm text-muted-foreground hover:text-primary">*/}

@@ -43,6 +43,7 @@ class ForumNotificationService
             $author,
             "{$name} replied to your thread",
             "\"{$thread->title}\"",
+            $this->threadUrl($thread, $reply),
         );
     }
 
@@ -62,10 +63,13 @@ class ForumNotificationService
         $replier = $newReply->author ?? $newReply->load('author')->author;
         $name = $replier?->name ?? 'Someone';
 
+        $thread = $quotedReply->thread ?? $quotedReply->load('thread.category')->thread;
+
         $this->send(
             $quotedAuthor,
             "{$name} replied to your reply",
             strip_tags((string) $quotedReply->body, limit: 80),
+            $thread ? $this->threadUrl($thread, $newReply) : null,
         );
     }
 
@@ -87,6 +91,31 @@ class ForumNotificationService
             $mentionedUser,
             "{$name} mentioned you in a thread",
             "\"{$thread->title}\"",
+            $this->threadUrl($thread, $reply),
+        );
+    }
+
+    /** Notify parent reply author that someone replied to their reply. */
+    public function notifyParentReply(ForumReply $parentReply, ForumReply $childReply, ForumThread $thread): void
+    {
+        $parentAuthor = $parentReply->author ?? $parentReply->load('author')->author;
+
+        if (! $this->shouldNotify($parentAuthor)) {
+            return;
+        }
+
+        if ($parentAuthor->id === $childReply->user_id) {
+            return;
+        }
+
+        $replier = $childReply->author ?? $childReply->load('author')->author;
+        $name = $replier?->name ?? 'Someone';
+
+        $this->send(
+            $parentAuthor,
+            "{$name} replied to your comment",
+            "\"{$thread->title}\"",
+            $this->threadUrl($thread, $childReply),
         );
     }
 
@@ -103,6 +132,7 @@ class ForumNotificationService
             $replyAuthor,
             'Your reply was accepted as the answer!',
             "\"{$thread->title}\"",
+            $this->threadUrl($thread, $reply),
         );
     }
 
@@ -178,33 +208,75 @@ class ForumNotificationService
             return false;
         }
 
-        // AI members never get push notifications
-        if ($user->is_ai) {
+        if (empty($this->appId) || empty($this->apiKey)) {
             return false;
         }
 
-        return ! empty($user->onesignal_player_id)
-            && ! empty($this->appId)
-            && ! empty($this->apiKey);
+        // Refresh from DB so partial selects never hide onesignal_player_id or is_ai
+        $fresh = User::query()
+            ->where('id', $user->id)
+            ->select('id', 'is_ai', 'onesignal_player_id')
+            ->first();
+
+        if (! $fresh || $fresh->is_ai || empty($fresh->onesignal_player_id)) {
+            return false;
+        }
+
+        // Populate the field on the original model so send() can use it
+        $user->onesignal_player_id = $fresh->onesignal_player_id;
+
+        return true;
     }
 
     /** Send a push notification to a single user via OneSignal REST API. */
-    private function send(User $user, string $heading, string $content): void
+    private function send(User $user, string $heading, string $content, ?string $url = null): void
     {
+        $payload = [
+            'app_id' => $this->appId,
+            'include_player_ids' => [$user->onesignal_player_id],
+            'headings' => ['en' => $heading],
+            'contents' => ['en' => $content],
+        ];
+
+        if ($url) {
+            $payload['url'] = $url;
+        }
+
         try {
-            Http::withToken($this->apiKey)
+            Http::withHeaders(['Authorization' => 'Key '.$this->apiKey])
                 ->timeout(10)
-                ->post($this->endpoint, [
-                    'app_id' => $this->appId,
-                    'include_player_ids' => [$user->onesignal_player_id],
-                    'headings' => ['en' => $heading],
-                    'contents' => ['en' => $content],
-                ]);
+                ->post($this->endpoint, $payload);
         } catch (\Throwable $e) {
             Log::warning('OneSignal notification failed', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
             ]);
+        }
+    }
+
+    /** Build the absolute URL to a forum thread, optionally anchored to a reply. */
+    private function threadUrl(ForumThread $thread, ?ForumReply $reply = null): ?string
+    {
+        try {
+            $thread->loadMissing('category');
+
+            if (! $thread->category) {
+                return null;
+            }
+
+            $url = route('forum.threads.show', [
+                'locale' => app()->getLocale() ?: 'en',
+                'forumCategory' => $thread->category->slug,
+                'forumThread' => $thread->slug,
+            ]);
+
+            if ($reply) {
+                $url .= "#reply-{$reply->id}";
+            }
+
+            return $url;
+        } catch (\Throwable) {
+            return null;
         }
     }
 }

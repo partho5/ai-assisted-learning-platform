@@ -60,12 +60,16 @@ export type ForumReply = {
     user_id: number;
     body: string;
     quoted_reply_id: number | null;
+    parent_id: number | null;
+    depth: number;
     is_accepted_answer: boolean;
     upvotes_count: number;
     // Eager-loaded
     author?: ForumAuthor;
     quoted_reply?: Pick<ForumReply, 'id' | 'body' | 'user_id'> | null;
     has_voted?: boolean;
+    // Client-side tree
+    children?: ForumReply[];
     deleted_at: string | null;
     created_at: string;
     updated_at: string;

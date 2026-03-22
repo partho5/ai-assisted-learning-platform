@@ -1,39 +1,72 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { store as storeReply, update as updateReply, destroy as destroyReply, accept as acceptReply } from '@/actions/App/Http/Controllers/Forum/ForumReplyController';
 import { destroy as destroyThread } from '@/actions/App/Http/Controllers/Forum/ForumThreadController';
 import { thread as voteThread, reply as voteReply } from '@/actions/App/Http/Controllers/Forum/ForumVoteController';
 import { toggle as toggleBookmark } from '@/actions/App/Http/Controllers/Forum/ForumBookmarkController';
 import { toggle as toggleFollow } from '@/actions/App/Http/Controllers/Forum/ForumThreadFollowController';
 import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
-import { Bookmark, CheckCircle, Edit, Lock, MessageSquare, Pin, ThumbsUp, Trash2 } from 'lucide-react';
+import { Bookmark, CheckCircle, ChevronDown, ChevronRight, Edit, Lock, MessageSquare, Pin, Reply, ThumbsUp, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import RichTextEditor from '@/components/rich-text-editor';
 import PostByline from '@/components/forum/post-byline';
 import AppLayout from '@/layouts/app-layout';
 import PublicLayout from '@/layouts/public-layout';
-import type { ForumReply, ForumThread, Paginated, User } from '@/types';
+import type { ForumReply, ForumThread, User } from '@/types';
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const MAX_VISUAL_DEPTH = 5;
+
+// ─── Tree builder ────────────────────────────────────────────────────────────
+
+function buildReplyTree(flatReplies: ForumReply[]): ForumReply[] {
+    const map = new Map<number, ForumReply>();
+    const roots: ForumReply[] = [];
+
+    for (const reply of flatReplies) {
+        map.set(reply.id, { ...reply, children: [] });
+    }
+
+    for (const reply of flatReplies) {
+        const node = map.get(reply.id)!;
+        if (reply.parent_id && map.has(reply.parent_id)) {
+            map.get(reply.parent_id)!.children!.push(node);
+        } else {
+            roots.push(node);
+        }
+    }
+
+    return roots;
+}
+
+// ─── Page component ──────────────────────────────────────────────────────────
 
 interface Props {
     thread: ForumThread;
     acceptedAnswer: ForumReply | null;
-    replies: Paginated<ForumReply>;
+    replies: ForumReply[];
     canModerate: boolean;
     canReply: boolean;
     isAuthor: boolean;
+    maxReplyDepth: number;
 }
 
-export default function ShowThread({ thread, acceptedAnswer, replies, canModerate, canReply, isAuthor }: Props) {
+export default function ShowThread({ thread, acceptedAnswer, replies, canModerate, canReply, isAuthor, maxReplyDepth }: Props) {
     const { auth, locale } = usePage().props as { auth: { user: User | null }; locale: string };
     const l = String(locale);
 
     const [replyBody, setReplyBody] = useState('');
     const [replyEditorKey, setReplyEditorKey] = useState(0);
     const [quotedReply, setQuotedReply] = useState<ForumReply | null>(null);
+    const [replyingTo, setReplyingTo] = useState<ForumReply | null>(null);
     const [upvotes, setUpvotes] = useState(thread.upvotes_count);
     const [hasVoted, setHasVoted] = useState(thread.has_voted ?? false);
     const [isBookmarked, setIsBookmarked] = useState(thread.is_bookmarked ?? false);
     const [isFollowing, setIsFollowing] = useState(thread.is_following ?? false);
+
+    const replyTree = useMemo(() => buildReplyTree(replies), [replies]);
+    const threadBodyRef = useRef<HTMLDivElement>(null);
 
     // Poll every 10 s while an AI reply is pending so the reply appears without manual refresh.
     useEffect(() => {
@@ -43,6 +76,22 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
         }, 10_000);
         return () => clearInterval(id);
     }, [thread.pending_ai_reply]);
+
+    // Open external links in new tab
+    useEffect(() => {
+        if (!threadBodyRef.current) { return; }
+        threadBodyRef.current.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
+            try {
+                const url = new URL(a.href, window.location.href);
+                if (url.origin !== window.location.origin) {
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                }
+            } catch {
+                // invalid href — leave as-is
+            }
+        });
+    }, [thread.body]);
 
     const Layout = auth?.user ? AppLayout : PublicLayout;
 
@@ -56,16 +105,28 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
         if (!replyBody.trim()) { return; }
         router.post(
             storeReply.url(threadArgs),
-            { body: replyBody, quoted_reply_id: quotedReply?.id ?? null },
+            {
+                body: replyBody,
+                quoted_reply_id: quotedReply?.id ?? null,
+                parent_id: replyingTo?.id ?? null,
+            },
             {
                 preserveScroll: true,
                 onSuccess: () => {
                     setReplyBody('');
                     setReplyEditorKey((k) => k + 1);
                     setQuotedReply(null);
+                    setReplyingTo(null);
                 },
             }
         );
+    }
+
+    function cancelReplyTo() {
+        setReplyingTo(null);
+        setQuotedReply(null);
+        setReplyBody('');
+        setReplyEditorKey((k) => k + 1);
     }
 
     function jsonPost(url: string): Promise<Record<string, unknown>> {
@@ -193,6 +254,7 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
                     )}
 
                     <div
+                        ref={threadBodyRef}
                         className="prose prose-sm dark:prose-invert max-w-none"
                         dangerouslySetInnerHTML={{ __html: thread.body }}
                     />
@@ -277,6 +339,8 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
                             threadArgs={threadArgs}
                             canModerate={canModerate}
                             isThreadAuthor={isAuthor}
+                            canNestReply={false}
+                            onReply={() => {}}
                             onQuote={() => setQuotedReply(acceptedAnswer)}
                             onAccept={() => handleAcceptReply(acceptedAnswer)}
                             onDelete={() => handleDeleteReply(acceptedAnswer)}
@@ -284,25 +348,37 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
                     </div>
                 )}
 
-                {/* Replies */}
-                {replies.data.length > 0 && (
-                    <div className="space-y-4 mb-8">
-                        <h2 className="font-semibold text-lg">{thread.replies_count} {thread.replies_count === 1 ? 'Reply' : 'Replies'}</h2>
-                        {replies.data.map((reply) => (
-                            <div key={reply.id} id={`reply-${reply.id}`} className="rounded-xl border bg-card p-5">
-                                <ReplyBody
+                {/* Replies tree */}
+                {replyTree.length > 0 && (
+                    <div className="mb-8">
+                        <h2 className="font-semibold text-lg mb-4">{thread.replies_count} {thread.replies_count === 1 ? 'Reply' : 'Replies'}</h2>
+                        <div className="space-y-4">
+                            {replyTree.map((reply) => (
+                                <ReplyNode
+                                    key={reply.id}
                                     reply={reply}
+                                    depth={0}
+                                    maxReplyDepth={maxReplyDepth}
                                     locale={l}
                                     auth={auth}
                                     threadArgs={threadArgs}
                                     canModerate={canModerate}
+                                    canReply={canReply}
                                     isThreadAuthor={isAuthor}
-                                    onQuote={() => setQuotedReply(reply)}
-                                    onAccept={() => handleAcceptReply(reply)}
-                                    onDelete={() => handleDeleteReply(reply)}
+                                    replyingTo={replyingTo}
+                                    replyBody={replyBody}
+                                    replyEditorKey={replyEditorKey}
+                                    quotedReply={quotedReply}
+                                    onSetReplyingTo={setReplyingTo}
+                                    onSetQuotedReply={setQuotedReply}
+                                    onSetReplyBody={setReplyBody}
+                                    onSubmitReply={submitReply}
+                                    onCancelReplyTo={cancelReplyTo}
+                                    onAccept={handleAcceptReply}
+                                    onDelete={handleDeleteReply}
                                 />
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 )}
 
@@ -313,31 +389,21 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
                     </div>
                 )}
 
-                {/* Pagination */}
-                {replies.last_page > 1 && (
-                    <div className="flex justify-center gap-2 mb-8">
-                        {replies.links.map((link, i) => (
-                            <Link
-                                key={i}
-                                href={link.url ?? '#'}
-                                preserveScroll
-                                className={`px-3 py-1.5 rounded text-sm border transition-colors ${
-                                    link.active
-                                        ? 'bg-primary text-primary-foreground border-primary'
-                                        : link.url
-                                          ? 'hover:bg-muted border-border'
-                                          : 'opacity-50 cursor-not-allowed border-border'
-                                }`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                {/* Reply composer */}
+                {/* Root-level reply composer */}
                 {canReply && (
                     <div className="rounded-xl border bg-card p-6">
-                        <h2 className="font-semibold mb-4">Leave a Reply</h2>
+                        <h2 className="font-semibold mb-4">
+                            {replyingTo ? (
+                                <span className="flex items-center gap-2">
+                                    Replying to {replyingTo.author?.name ?? 'reply'}
+                                    <button onClick={cancelReplyTo} className="text-sm font-normal text-muted-foreground hover:text-foreground">
+                                        (cancel)
+                                    </button>
+                                </span>
+                            ) : (
+                                'Leave a Reply'
+                            )}
+                        </h2>
 
                         {quotedReply && (
                             <div className="mb-3 flex items-start gap-2 rounded-lg bg-muted p-3 text-sm">
@@ -388,7 +454,153 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
     );
 }
 
-// ─── Reply sub-component ──────────────────────────────────────────────────────
+// ─── Recursive reply node ────────────────────────────────────────────────────
+
+interface ReplyNodeProps {
+    reply: ForumReply;
+    depth: number;
+    maxReplyDepth: number;
+    locale: string;
+    auth: { user: User | null };
+    threadArgs: { locale: string; forumCategory: string; forumThread: string };
+    canModerate: boolean;
+    canReply: boolean;
+    isThreadAuthor: boolean;
+    replyingTo: ForumReply | null;
+    replyBody: string;
+    replyEditorKey: number;
+    quotedReply: ForumReply | null;
+    onSetReplyingTo: (reply: ForumReply | null) => void;
+    onSetQuotedReply: (reply: ForumReply | null) => void;
+    onSetReplyBody: (body: string) => void;
+    onSubmitReply: () => void;
+    onCancelReplyTo: () => void;
+    onAccept: (reply: ForumReply) => void;
+    onDelete: (reply: ForumReply) => void;
+}
+
+function ReplyNode({
+    reply, depth, maxReplyDepth, locale, auth, threadArgs, canModerate, canReply,
+    isThreadAuthor, replyingTo, replyBody, replyEditorKey, quotedReply,
+    onSetReplyingTo, onSetQuotedReply, onSetReplyBody, onSubmitReply, onCancelReplyTo,
+    onAccept, onDelete,
+}: ReplyNodeProps) {
+    const [collapsed, setCollapsed] = useState(false);
+    const hasChildren = reply.children && reply.children.length > 0;
+    const canNestHere = depth < maxReplyDepth;
+    const visualDepth = Math.min(depth, MAX_VISUAL_DEPTH);
+    const isReplyTarget = replyingTo?.id === reply.id;
+
+    return (
+        <div id={`reply-${reply.id}`} className={depth > 0 ? 'mt-3' : ''}>
+            <div className={`${depth > 0 ? 'border-l-2 border-muted pl-4' : ''}`}>
+                <div className="rounded-xl border bg-card p-5">
+                    {/* Collapse toggle for threads with children */}
+                    {hasChildren && (
+                        <button
+                            onClick={() => setCollapsed(!collapsed)}
+                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-2"
+                        >
+                            {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                            {collapsed ? `${countDescendants(reply)} hidden replies` : 'Collapse'}
+                        </button>
+                    )}
+
+                    <ReplyBody
+                        reply={reply}
+                        locale={locale}
+                        auth={auth}
+                        threadArgs={threadArgs}
+                        canModerate={canModerate}
+                        isThreadAuthor={isThreadAuthor}
+                        canNestReply={canReply && canNestHere}
+                        onReply={() => {
+                            onSetReplyingTo(reply);
+                            onSetQuotedReply(null);
+                            onSetReplyBody('');
+                        }}
+                        onQuote={() => {
+                            onSetQuotedReply(reply);
+                            onSetReplyingTo(reply);
+                        }}
+                        onAccept={() => onAccept(reply)}
+                        onDelete={() => onDelete(reply)}
+                    />
+                </div>
+
+                {/* Inline composer when replying to this specific reply */}
+                {isReplyTarget && canReply && (
+                    <div className="mt-3 rounded-xl border bg-card p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm font-medium">Replying to {reply.author?.name ?? 'this reply'}</span>
+                            <button onClick={onCancelReplyTo} className="text-xs text-muted-foreground hover:text-foreground">Cancel</button>
+                        </div>
+
+                        {quotedReply && quotedReply.id === reply.id && (
+                            <div className="mb-3 flex items-start gap-2 rounded-lg bg-muted p-2 text-sm">
+                                <div className="flex-1 line-clamp-2 text-muted-foreground italic border-l-2 border-border pl-2 text-xs">
+                                    {quotedReply.body.replace(/<[^>]*>/g, ' ').trim().slice(0, 120)}
+                                </div>
+                                <button onClick={() => onSetQuotedReply(null)} className="text-muted-foreground hover:text-foreground shrink-0 text-xs">✕</button>
+                            </div>
+                        )}
+
+                        <RichTextEditor
+                            key={replyEditorKey}
+                            value={replyBody}
+                            onChange={onSetReplyBody}
+                            placeholder={`Reply to ${reply.author?.name ?? 'this reply'}...`}
+                            autoFocus
+                        />
+                        <div className="flex justify-end mt-3">
+                            <Button size="compact" onClick={onSubmitReply} disabled={!replyBody.trim()}>
+                                Reply
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Children */}
+                {!collapsed && hasChildren && (
+                    <div className="mt-1">
+                        {reply.children!.map((child) => (
+                            <ReplyNode
+                                key={child.id}
+                                reply={child}
+                                depth={depth + 1}
+                                maxReplyDepth={maxReplyDepth}
+                                locale={locale}
+                                auth={auth}
+                                threadArgs={threadArgs}
+                                canModerate={canModerate}
+                                canReply={canReply}
+                                isThreadAuthor={isThreadAuthor}
+                                replyingTo={replyingTo}
+                                replyBody={replyBody}
+                                replyEditorKey={replyEditorKey}
+                                quotedReply={quotedReply}
+                                onSetReplyingTo={onSetReplyingTo}
+                                onSetQuotedReply={onSetQuotedReply}
+                                onSetReplyBody={onSetReplyBody}
+                                onSubmitReply={onSubmitReply}
+                                onCancelReplyTo={onCancelReplyTo}
+                                onAccept={onAccept}
+                                onDelete={onDelete}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function countDescendants(reply: ForumReply): number {
+    if (!reply.children?.length) { return 0; }
+    return reply.children.reduce((sum, child) => sum + 1 + countDescendants(child), 0);
+}
+
+// ─── Reply body sub-component ────────────────────────────────────────────────
 
 interface ReplyBodyProps {
     reply: ForumReply;
@@ -397,17 +609,35 @@ interface ReplyBodyProps {
     threadArgs: { locale: string; forumCategory: string; forumThread: string };
     canModerate: boolean;
     isThreadAuthor: boolean;
+    canNestReply: boolean;
+    onReply: () => void;
     onQuote: () => void;
     onAccept: () => void;
     onDelete: () => void;
 }
 
-function ReplyBody({ reply, locale, auth, threadArgs, canModerate, isThreadAuthor, onQuote, onAccept, onDelete }: ReplyBodyProps) {
+function ReplyBody({ reply, locale, auth, threadArgs, canModerate, isThreadAuthor, canNestReply, onReply, onQuote, onAccept, onDelete }: ReplyBodyProps) {
     const isReplyAuthor = auth?.user?.id === reply.user_id;
     const [upvotes, setUpvotes] = useState(reply.upvotes_count);
     const [hasVoted, setHasVoted] = useState(reply.has_voted ?? false);
     const [editing, setEditing] = useState(false);
     const [editBody, setEditBody] = useState(reply.body);
+    const bodyRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!bodyRef.current) { return; }
+        bodyRef.current.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
+            try {
+                const url = new URL(a.href, window.location.href);
+                if (url.origin !== window.location.origin) {
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                }
+            } catch {
+                // invalid href — leave as-is
+            }
+        });
+    }, [reply.body]);
 
     function handleVote() {
         if (!auth?.user) { return; }
@@ -474,6 +704,7 @@ function ReplyBody({ reply, locale, auth, threadArgs, canModerate, isThreadAutho
                 </div>
             ) : (
                 <div
+                    ref={bodyRef}
                     className="prose prose-sm dark:prose-invert max-w-none"
                     dangerouslySetInnerHTML={{ __html: reply.body }}
                 />
@@ -492,12 +723,22 @@ function ReplyBody({ reply, locale, auth, threadArgs, canModerate, isThreadAutho
                     <span>{upvotes}</span>
                 </button>
 
+                {auth?.user && canNestReply && (
+                    <button
+                        onClick={onReply}
+                        className="flex items-center gap-1 text-sm text-blue-500 hover:text-foreground"
+                    >
+                        <Reply className="h-3.5 w-3.5" />
+                        Reply
+                    </button>
+                )}
+
                 {auth?.user && (
                     <button
                         onClick={onQuote}
                         className="text-sm text-muted-foreground hover:text-foreground"
                     >
-                        Reply
+                        Quote
                     </button>
                 )}
 
