@@ -193,7 +193,7 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
         <Layout>
             <Head title={`${thread.title} — ${thread.category?.name ?? 'Forum'} — SkillEvidence`} />
 
-            <div className="md:mx-2 px-4 py-8">
+            <div className="mx-0 max-w-7xl px-4 py-8 md:mx-auto">
                 {/* Breadcrumb */}
                 <nav className="text-sm text-muted-foreground mb-6 flex items-center gap-1.5 flex-wrap">
                     <Link href={forumIndex.url(l)} className="hover:underline">Forum</Link>

@@ -43,12 +43,15 @@ export default function ForumIndex({ categories }: Props) {
         <Layout>
             <Head title="Forum — SkillEvidence" />
 
-            <div className="md:mx-2 px-4 py-8">
+            <div className="mx-0 max-w-7xl px-4 py-8 md:mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="mb-8 flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold">Community Forum</h1>
-                        <p className="text-muted-foreground mt-1">Ask questions, share knowledge, connect with learners.</p>
+                        <p className="mt-1 text-muted-foreground">
+                            Ask questions, share knowledge, connect with
+                            learners.
+                        </p>
                     </div>
                     {auth?.user && (
                         <Link href={createThread.url(l)}>
@@ -60,30 +63,39 @@ export default function ForumIndex({ categories }: Props) {
                 {/* Category list */}
                 <div className="space-y-3">
                     {categories.map((category) => {
-                        const colors = CATEGORY_COLOR_CLASSES[category.color] ?? CATEGORY_COLOR_CLASSES.gray;
+                        const colors =
+                            CATEGORY_COLOR_CLASSES[category.color] ??
+                            CATEGORY_COLOR_CLASSES.gray;
                         const categoryUrl = `/${l}/forum/${category.slug}`;
 
                         return (
                             <div
                                 key={category.id}
-                                className="flex gap-4 rounded-lg border bg-card p-4 hover:border-primary/30 transition-colors"
+                                className="flex gap-4 rounded-lg border bg-card p-4 transition-colors hover:border-primary/30"
                             >
                                 {/* Color swatch */}
-                                <div className={`w-1.5 rounded-full shrink-0 ${colors.bg} ${colors.border} border`} />
+                                <div
+                                    className={`w-1.5 shrink-0 rounded-full ${colors.bg} ${colors.border} border`}
+                                />
 
                                 {/* Main content */}
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-start gap-3 mb-1">
-                                        <Link href={categoryUrl} className="font-semibold text-lg hover:text-primary transition-colors">
+                                <div className="min-w-0 flex-1">
+                                    <div className="mb-1 flex items-start gap-3">
+                                        <Link
+                                            href={categoryUrl}
+                                            className="text-lg font-semibold transition-colors hover:text-primary"
+                                        >
                                             {category.name}
                                         </Link>
-                                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium shrink-0 ${colors.bg} ${colors.text}`}>
+                                        <span
+                                            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${colors.bg} ${colors.text}`}
+                                        >
                                             {category.thread_count} threads
                                         </span>
                                     </div>
 
                                     {category.description && (
-                                        <p className="text-muted-foreground text-sm mb-2 line-clamp-2">
+                                        <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">
                                             {category.description}
                                         </p>
                                     )}
@@ -95,13 +107,18 @@ export default function ForumIndex({ categories }: Props) {
                                             <span>Last:</span>
                                             <Link
                                                 href={`/${l}/forum/${category.last_thread.category?.slug ?? category.slug}/${category.last_thread.slug}`}
-                                                className="hover:underline truncate max-w-[280px]"
+                                                className="max-w-[280px] truncate hover:underline"
                                             >
                                                 {category.last_thread.title}
                                             </Link>
-                                            {category.last_thread.last_activity_at && (
+                                            {category.last_thread
+                                                .last_activity_at && (
                                                 <span className="shrink-0">
-                                                    · {timeAgo(category.last_thread.last_activity_at)}
+                                                    ·{' '}
+                                                    {timeAgo(
+                                                        category.last_thread
+                                                            .last_activity_at,
+                                                    )}
                                                 </span>
                                             )}
                                         </div>
@@ -109,7 +126,7 @@ export default function ForumIndex({ categories }: Props) {
                                 </div>
 
                                 {/* Stats */}
-                                <div className="flex flex-col items-end gap-1 shrink-0 text-sm text-muted-foreground">
+                                <div className="flex shrink-0 flex-col items-end gap-1 text-sm text-muted-foreground">
                                     <div className="flex items-center gap-1">
                                         <MessageSquare className="h-3.5 w-3.5" />
                                         <span>{category.thread_count}</span>
@@ -117,7 +134,12 @@ export default function ForumIndex({ categories }: Props) {
                                     {category.unresolved_threads_count > 0 && (
                                         <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                                             <CheckCircle className="h-3.5 w-3.5" />
-                                            <span>{category.unresolved_threads_count} unanswered</span>
+                                            <span>
+                                                {
+                                                    category.unresolved_threads_count
+                                                }{' '}
+                                                unanswered
+                                            </span>
                                         </div>
                                     )}
                                 </div>
@@ -126,7 +148,7 @@ export default function ForumIndex({ categories }: Props) {
                     })}
 
                     {categories.length === 0 && (
-                        <div className="text-center py-12 text-muted-foreground">
+                        <div className="py-12 text-center text-muted-foreground">
                             No forum categories yet.
                         </div>
                     )}
