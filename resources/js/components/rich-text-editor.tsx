@@ -9,6 +9,7 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
+import { Callout } from '@/extensions/callout-extension';
 
 // ─── Toolbar button ───────────────────────────────────────────────────────────
 
@@ -48,6 +49,7 @@ function Sep() {
 const FONT_SIZES = ['12px', '14px', '16px', '18px', '20px', '24px', '28px', '32px'];
 const TEXT_COLORS = ['#000000', '#ff0000', '#cc5500', '#aa8800', '#008800', '#003399', '#6600cc', '#cc0066', '#006666', '#555555'];
 const HIGHLIGHT_COLORS = ['#ffff00', '#ff0000', '#00ff00', '#00ffff', '#ff8c00', '#ff69b4'];
+const CALLOUT_ACCENT_COLORS: Record<string, string> = { purple: '#7F77DD', amber: '#EF9F27', teal: '#1D9E75', green: '#639922' };
 
 function Toolbar({ editor }: { editor: Editor }) {
     const colorRef = useRef<HTMLInputElement>(null);
@@ -211,6 +213,22 @@ function Toolbar({ editor }: { editor: Editor }) {
                     <ToolbarBtn onClick={() => (editor.chain().focus() as any).deleteTable().run()} title="Delete table" >✕T</ToolbarBtn>
                 </>
             )}
+
+            <Sep />
+
+            {/* Callout */}
+            <div className="flex items-center gap-0.5">
+                {Object.entries(CALLOUT_ACCENT_COLORS).map(([v, color]) => (
+                    <button
+                        key={v}
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().insertCallout(v as any).run(); }}
+                        title={`Insert ${v} callout`}
+                        className="h-4 w-4 rounded-full border border-border shadow-sm"
+                        style={{ backgroundColor: color }}
+                    />
+                ))}
+            </div>
         </div>
     );
 }
@@ -240,6 +258,7 @@ export default function RichTextEditor({ value, onChange, disabled = false, plac
             TableRow,
             TableHeader,
             TableCell,
+            Callout,
         ],
         content: value,
         editable: !disabled,
