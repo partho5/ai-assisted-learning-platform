@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ChatPanel } from '@/components/chat/chat-panel';
 import type { ChatContext } from '@/hooks/use-chat';
@@ -76,9 +76,33 @@ interface Props {
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────
+const AI_CHAT_VISITED_KEY = 'ai-chat-visited';
+
 export function FloatingChatButton({ context, className }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
+    const [buttonVisible, setButtonVisible] = useState(() => {
+        try {
+            return localStorage.getItem(AI_CHAT_VISITED_KEY) === '1';
+        } catch {
+            return true;
+        }
+    });
+
+    useEffect(() => {
+        if (buttonVisible) return;
+
+        const timer = setTimeout(() => {
+            setButtonVisible(true);
+            try {
+                localStorage.setItem(AI_CHAT_VISITED_KEY, '1');
+            } catch {
+                // localStorage unavailable
+            }
+        }, 10_000);
+
+        return () => clearTimeout(timer);
+    }, [buttonVisible]);
 
     function handleClose() {
         setIsOpen(false);
@@ -90,6 +114,7 @@ export function FloatingChatButton({ context, className }: Props) {
     }
 
     function handleAutoTrigger() {
+        if (!buttonVisible) return;
         setIsOpen(true);
         setIsMinimized(false);
     }
@@ -98,13 +123,15 @@ export function FloatingChatButton({ context, className }: Props) {
         <>
             <style>{STYLES}</style>
 
-            <ChatPanel
-                context={{ ...context, onAutoTrigger: handleAutoTrigger }}
-                isOpen={isOpen}
-                isMinimized={isMinimized}
-                onClose={handleClose}
-                onToggleMinimize={handleToggleMinimize}
-            />
+            {buttonVisible && (
+                <ChatPanel
+                    context={{ ...context, onAutoTrigger: handleAutoTrigger }}
+                    isOpen={isOpen}
+                    isMinimized={isMinimized}
+                    onClose={handleClose}
+                    onToggleMinimize={handleToggleMinimize}
+                />
+            )}
 
             {/*
               Wrapper: fixed + overflow-hidden clips the oversized spinning
@@ -112,7 +139,7 @@ export function FloatingChatButton({ context, className }: Props) {
               p-[3px] = border thickness. box-shadow (ai-glow-pulse) is on the
               wrapper — not clipped by overflow-hidden, no scrollbar side effects.
             */}
-            {(!isOpen || isMinimized) && (
+            {buttonVisible && (!isOpen || isMinimized) && (
                 <div
                     className={cn(
                         'fixed bottom-6 right-6 z-50 rounded-full',
@@ -144,7 +171,7 @@ export function FloatingChatButton({ context, className }: Props) {
                             'text-sm font-semibold text-green-500',
                         )}
                     >
-                        <span className="ai-icon-wrap flex-shrink-0">
+                        <span className="ai-icon-wrap hidden flex-shrink-0 md:block">
                             <SignalMindIcon size={20} />
                         </span>
                         <span className="leading-none tracking-wide">Ask AI</span>

@@ -142,4 +142,38 @@ class ForumBrowsingTest extends TestCase
                 ->has('threads.data', 1)
             );
     }
+
+    // ──────────────────────────────────────────────
+    // Sitemap
+    // ──────────────────────────────────────────────
+
+    public function test_forum_threads_appear_in_sitemap(): void
+    {
+        $category = ForumCategory::factory()->create(['slug' => 'general']);
+        $thread = ForumThread::factory()->for($category, 'category')->create([
+            'slug' => 'my-thread',
+            'last_activity_at' => now(),
+        ]);
+
+        $response = $this->get(route('sitemap'));
+        $response->assertOk();
+        $response->assertSee('/en/forum');
+        $response->assertSee('/en/forum/general');
+        $response->assertSee('/en/forum/general/my-thread');
+        $response->assertDontSee('/bn/forum');
+    }
+
+    public function test_soft_deleted_threads_excluded_from_sitemap(): void
+    {
+        $category = ForumCategory::factory()->create(['slug' => 'bugs']);
+        $thread = ForumThread::factory()->for($category, 'category')->create([
+            'slug' => 'deleted-thread',
+            'last_activity_at' => now(),
+        ]);
+        $thread->delete();
+
+        $response = $this->get(route('sitemap'));
+        $response->assertOk();
+        $response->assertDontSee('/forum/bugs/deleted-thread');
+    }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Course;
+use App\Models\ForumCategory;
+use App\Models\ForumThread;
 use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Http\Response;
@@ -119,6 +121,44 @@ class SitemapController extends Controller
                 'lastmod' => $article->updated_at->toAtomString(),
                 'changefreq' => 'weekly',
                 'priority' => '0.7',
+            ];
+        }
+
+        // Forum index (en only)
+        $latestThreadDate = ForumThread::query()->max('last_activity_at');
+        $urls[] = [
+            'loc' => "{$baseUrl}/en/forum",
+            'lastmod' => $latestThreadDate ? Carbon::parse($latestThreadDate)->toAtomString() : $staticLastmod,
+            'changefreq' => 'daily',
+            'priority' => '0.8',
+        ];
+
+        // Forum categories (en only)
+        $categories = ForumCategory::query()
+            ->select(['id', 'slug', 'updated_at'])
+            ->get();
+
+        foreach ($categories as $category) {
+            $urls[] = [
+                'loc' => "{$baseUrl}/en/forum/{$category->slug}",
+                'lastmod' => $category->updated_at->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
+            ];
+        }
+
+        // Forum threads (en only) — most valuable forum content for SEO
+        $threads = ForumThread::query()
+            ->with('category:id,slug')
+            ->select(['id', 'slug', 'category_id', 'last_activity_at'])
+            ->get();
+
+        foreach ($threads as $thread) {
+            $urls[] = [
+                'loc' => "{$baseUrl}/en/forum/{$thread->category->slug}/{$thread->slug}",
+                'lastmod' => $thread->last_activity_at?->toAtomString() ?? $staticLastmod,
+                'changefreq' => 'daily',
+                'priority' => '0.9',
             ];
         }
 

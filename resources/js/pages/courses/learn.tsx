@@ -138,7 +138,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
 
     if (resource.type === 'article') {
         return (
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="rounded-lg border border-border bg-card p-2">
                 <div className="mb-3 flex items-center gap-2">
                     <Badge variant="secondary">Article</Badge>
                     {resource.source && <span className="text-sm text-muted-foreground">{resource.source}</span>}
@@ -155,7 +155,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
 
     if (resource.type === 'text') {
         return (
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="rounded-lg border border-border bg-card p-2">
                 <div
                     className="prose dark:prose-invert rich-html max-w-none text-base leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: resource.content || '' }}
@@ -166,7 +166,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
 
     if (resource.type === 'document' && resource.url) {
         return (
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="rounded-lg border border-border bg-card p-2">
                 <div className="mb-3">
                     <Badge variant="secondary">Document</Badge>
                 </div>
@@ -187,7 +187,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
 
     if (resource.type === 'audio' && resource.url) {
         return (
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="rounded-lg border border-border bg-card p-2">
                 <audio controls className="w-full">
                     <source src={resource.url} />
                     Your browser does not support audio.
@@ -198,7 +198,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
 
     if (resource.type === 'image' && resource.url) {
         return (
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="rounded-lg border border-border bg-card p-2">
                 <img
                     src={resource.url}
                     alt={resource.title}
@@ -214,7 +214,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
     }
 
     return (
-        <div className="rounded-lg border border-border bg-card p-5 text-muted-foreground">
+        <div className="rounded-lg border border-border bg-card p-2 text-muted-foreground">
             No preview available.
         </div>
     );
@@ -430,7 +430,7 @@ function ResourceBlock({
     return (
         <div>
             {/* Resource header */}
-            <div className="mb-4">
+            <div className="mb-4 px-2">
                 <h2 className="text-xl text-blue-600 font-bold">{resource.title}</h2>
                 {resource.estimated_time && (
                     <p className="mt-0.5 text-base text-muted-foreground">
@@ -440,13 +440,13 @@ function ResourceBlock({
             </div>
 
             {resource.why_this_resource && !isAssignment && (
-                <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-base text-muted-foreground">
+                <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-base">
                     <span className="mb-1 block font-medium">
-                        Importance of this resource:
+                        Importance of this lesson:
                     </span>
                     <RichHtml
                         content={resource.why_this_resource}
-                        className="text-base text-muted-foreground"
+                        className="text-base"
                     />
                 </div>
             )}
@@ -737,7 +737,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
             {/* ── Sidebar ── */}
             <aside
                 ref={sidebarRef}
-                className="w-full shrink-0 overflow-y-auto border-b border-border md:w-64 md:border-b-0 md:border-r md:sticky md:top-0 md:h-screen"
+                className="w-full shrink-0 overflow-y-auto border-b border-border md:w-80 md:border-b-0 md:border-r md:sticky md:top-0 md:h-screen"
             >
                 <div className="p-0">
                     {/* Progress bar — enrolled only */}
@@ -868,7 +868,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
             </aside>
 
             {/* ── Main content — continuous scroll ── */}
-            <main ref={mainRef} className="flex-1 overflow-y-auto max-w-7xl mx-auto px-4 py-6 md:px-8 md:py-8">
+            <main ref={mainRef} className="flex-1 overflow-y-auto max-w-6xl mx-auto px-1 py-6 md:py-8">
                 {resources.map((resource) => (
                     <section
                         key={resource.id}

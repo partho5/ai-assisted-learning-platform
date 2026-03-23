@@ -272,11 +272,11 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                                                     (resource, i) => (
                                                         <li
                                                             key={resource.id}
-                                                            className={`flex items-start justify-between gap-3 px-4 py-2.5 text-sm ${i !== 0 ? 'border-t border-border' : ''}`}
+                                                            className={`flex items-start justify-between gap-3 px-4 py-2.5 text-lg ${i !== 0 ? 'border-t border-border' : ''}`}
                                                         >
                                                             <div className="flex flex-col gap-0.5">
                                                                 <div className="flex items-center gap-2">
-                                                                    <Badge className="bg-sky-100 py-0 text-xs font-normal text-sky-700 hover:bg-sky-100 dark:bg-sky-900/40 dark:text-sky-300">
+                                                                    <Badge className="hidden bg-sky-100 py-0 text-xs font-normal text-sky-700 hover:bg-sky-100 dark:bg-sky-900/40 dark:text-sky-300">
                                                                         {RESOURCE_TYPE_LABELS[
                                                                             resource
                                                                                 .type
