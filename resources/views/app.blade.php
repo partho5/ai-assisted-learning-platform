@@ -42,6 +42,16 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
+        {{-- Server-side OG meta tags for social media crawlers (they don't execute JS) --}}
+        @php $meta = $page['props']['meta'] ?? []; @endphp
+        <meta name="description" content="{{ $meta['description'] ?? '' }}">
+        <meta property="og:title" content="{{ $meta['title'] ?? config('app.name') }}">
+        <meta property="og:description" content="{{ $meta['description'] ?? '' }}">
+        <meta property="og:image" content="{{ $meta['image'] ?? config('seo.og_image') }}">
+        <meta property="og:url" content="{{ $meta['url'] ?? url()->current() }}">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="{{ config('app.name') }}">
+
         <link rel="icon" href="/logo.png" type="image/png">
         <link rel="apple-touch-icon" href="/logo.png">
 

@@ -91,3 +91,60 @@ APP_URL=https://yourdomain.com      # used in robots.txt Sitemap line, JSON-LD, 
 APP_ENV=production
 APP_DEBUG=false
 ```
+
+---
+
+## OG / Social Media Meta Tags
+
+### How it works
+
+Facebook, LinkedIn, and other social crawlers **do not execute JavaScript**. Because Inertia renders pages client-side, OG tags set via React's `<Head>` component are invisible to crawlers unless SSR is running.
+
+To guarantee crawlers always see proper OG tags, this app renders them **server-side in `resources/views/app.blade.php`** using `$page['props']['meta']` — data that is always present in the initial HTML.
+
+### Architecture
+
+1. **`config/seo.php`** — stores the default OG image URL (full absolute URL):
+   ```php
+   'og_image' => 'https://your-cdn.com/og-image.png',
+   ```
+
+2. **`HandleInertiaRequests`** — shares a default `meta` array to every page (title, description, image, url).
+
+3. **Controllers** — override `meta` per page. Example — `CourseController::show` sets the course thumbnail as `og:image` and the subtitle as `og:description`.
+
+4. **`app.blade.php`** — renders static OG `<meta>` tags from `$page['props']['meta']` before `@inertiaHead`, so they're in the raw HTML regardless of SSR status.
+
+### Adding OG meta to a new page
+
+In the controller, pass a `meta` array to `Inertia::render()`:
+
+```php
+return Inertia::render('your/page', [
+    'meta' => [
+        'title' => 'Page Title | ' . config('app.name'),
+        'description' => 'Page description under 160 characters.',
+        'image' => config('seo.og_image'), // or a specific absolute URL
+        'url' => url()->current(),
+    ],
+    // ... other props
+]);
+```
+
+If `meta` is omitted, the defaults from `HandleInertiaRequests` are used automatically.
+
+### Updating the default OG image
+
+Edit `config/seo.php`:
+
+```php
+'og_image' => 'https://your-cdn.com/og-image.png',
+```
+
+The image should be **1200 × 630 px** for best results.
+
+### Verifying OG tags
+
+View the raw HTML source (`Ctrl+U`) and search for `og:image` — the tags should appear in `<head>` before any `<script>`, with full absolute URLs.
+
+Use [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) or [OpenGraph.xyz](https://www.opengraph.xyz) to preview how a URL appears when shared.

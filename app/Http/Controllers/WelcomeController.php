@@ -11,8 +11,16 @@ class WelcomeController extends Controller
 {
     public function index(\Illuminate\Http\Request $request): Response
     {
+        $appName = config('app.name');
+
         return Inertia::render('welcome', [
             'canRegister' => Features::enabled(Features::registration()),
+            'meta' => [
+                'title' => "{$appName} — Learn, Prove, Get Hired",
+                'description' => 'Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers actually trust. Free to start.',
+                'image' => config('seo.og_image'),
+                'url' => url()->current(),
+            ],
             'featuredCourses' => Inertia::defer(fn () => Course::query()
                 ->published()
                 ->byLanguage(app()->getLocale())

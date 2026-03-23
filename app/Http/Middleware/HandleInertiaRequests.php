@@ -55,6 +55,12 @@ class HandleInertiaRequests extends Middleware
             ],
             'paypalClientId' => config('services.paypal.client_id'),
             'onesignalAppId' => config('services.onesignal.app_id'),
+            'meta' => [
+                'title' => config('app.name'),
+                'description' => 'Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers actually trust.',
+                'image' => config('seo.og_image'),
+                'url' => url()->current(),
+            ],
         ];
     }
 }

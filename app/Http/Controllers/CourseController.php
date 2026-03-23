@@ -85,6 +85,12 @@ class CourseController extends Controller
             'difficulties' => collect(CourseDifficulty::cases())->map(fn ($c) => ['value' => $c->value, 'label' => ucfirst($c->value)]),
             'filters' => $request->only(['category', 'difficulty', 'search', 'course_lang']),
             'ogUrl' => url()->current(),
+            'meta' => [
+                'title' => 'Courses | '.config('app.name'),
+                'description' => 'Explore mentor-led courses with real tests, assignments, and verified skill. Find the right course and start learning free.',
+                'image' => config('seo.og_image'),
+                'url' => url()->current(),
+            ],
         ]);
     }
 
@@ -110,10 +116,20 @@ class CourseController extends Controller
                 ->first();
         }
 
+        $ogDescription = $course->subtitle
+            ? mb_substr(trim($course->subtitle), 0, 160)
+            : mb_substr(trim(strip_tags($course->description ?? '')), 0, 160);
+
         return Inertia::render('courses/show', [
             'course' => $course,
             'enrollment' => $enrollment,
             'ogUrl' => url()->current(),
+            'meta' => [
+                'title' => $course->title.' | '.config('app.name'),
+                'description' => $ogDescription,
+                'image' => $course->thumbnail ?: config('seo.og_image'),
+                'url' => url()->current(),
+            ],
         ]);
     }
 
