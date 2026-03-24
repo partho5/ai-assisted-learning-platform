@@ -39,7 +39,7 @@ export type CourseResource = {
     type: ResourceType;
     url: string | null;
     content: string | null;
-    source: string | null;
+    caption: string | null;
     estimated_time: number | null;
     mentor_note: string | null;
     why_this_resource: string;

@@ -766,7 +766,7 @@ function ResourceForm({
         type: existing?.type ?? 'video',
         url: existing?.url ?? '',
         content: existing?.content ?? '',
-        source: existing?.source ?? '',
+        caption: existing?.caption ?? '',
         estimated_time: String(existing?.estimated_time ?? ''),
         mentor_note: existing?.mentor_note ?? '',
         why_this_resource: existing?.why_this_resource ?? '',
@@ -775,6 +775,20 @@ function ResourceForm({
     });
 
     const needsUrl = ['video', 'article', 'document', 'audio'].includes(form.data.type);
+
+    const [ytEmbedBlocked, setYtEmbedBlocked] = useState<boolean>(false);
+    useEffect(() => {
+        if (form.data.type !== 'video') { setYtEmbedBlocked(false); return; }
+        const match = form.data.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?]+)/);
+        if (!match) { setYtEmbedBlocked(false); return; }
+        const videoId = match[1];
+        const timer = setTimeout(() => {
+            fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
+                .then((res) => setYtEmbedBlocked(!res.ok))
+                .catch(() => setYtEmbedBlocked(false));
+        }, 600);
+        return () => clearTimeout(timer);
+    }, [form.data.url, form.data.type]);
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
@@ -824,6 +838,11 @@ function ResourceForm({
                                 disabled={form.processing}
                                 placeholder="https://..."
                             />
+                            {ytEmbedBlocked && (
+                                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                                    ⚠ This video has embedding disabled. Learners will see a "Watch on YouTube" link instead of an inline player.
+                                </p>
+                            )}
                         </Field>
                     )}
                     {form.data.type === 'image' && (
@@ -845,32 +864,33 @@ function ResourceForm({
                             />
                         </Field>
                     )}
-                    <div className="grid grid-cols-2 gap-3 text-muted-foreground">
-                        <Field label="Source ( optional )" error={form.errors.source}>
-                            <Input
-                                value={form.data.source}
-                                onChange={(e) => form.setData('source', e.target.value)}
+                    <Field label="Estimated time (minutes)" error={form.errors.estimated_time}>
+                        <Input
+                            type="number"
+                            min={1}
+                            value={form.data.estimated_time}
+                            onChange={(e) => form.setData('estimated_time', e.target.value)}
+                            disabled={form.processing}
+                            placeholder="15"
+                        />
+                    </Field>
+                    {form.data.type !== 'text' && (
+                        <Field label="Write about this resource (optional)" error={form.errors.caption}>
+                            <RichTextEditor
+                                value={form.data.caption}
+                                onChange={(content) => form.setData('caption', content)}
                                 disabled={form.processing}
-                                placeholder="Example: YouTube, Medium…"
+                                placeholder="Add context, notes, or a description about this resource…"
                             />
                         </Field>
-                        <Field label="Estimated time (minutes)" error={form.errors.estimated_time}>
-                            <Input
-                                type="number"
-                                min={1}
-                                value={form.data.estimated_time}
-                                onChange={(e) => form.setData('estimated_time', e.target.value)}
-                                disabled={form.processing}
-                                placeholder="15"
-                            />
-                        </Field>
-                    </div>
+                    )}
                 </div>
 
                 {/* ── Guidance ── */}
                 <div className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
                     <p className="text-[14px] font-semibold tracking-widest text-emerald-600 dark:text-emerald-400">Guidance for Learners</p>
                     <Field label="Importance of this lesson (why it's helpful)" error={form.errors.why_this_resource} required>
+                        <span className="text-red-500">Keep as short as possible</span>
                         <RichTextEditor
                             value={form.data.why_this_resource}
                             onChange={(content) => form.setData('why_this_resource', content)}

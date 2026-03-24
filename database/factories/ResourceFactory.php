@@ -23,7 +23,7 @@ class ResourceFactory extends Factory
                 ? fake()->url()
                 : null,
             'content' => $type === ResourceType::Text ? fake()->paragraphs(2, true) : null,
-            'source' => fake()->optional(0.6)->randomElement(['YouTube', 'Vimeo', 'Medium', 'Dev.to', 'GitHub', 'Official Docs']),
+            'caption' => fake()->optional(0.4)->sentence(),
             'estimated_time' => fake()->numberBetween(5, 60),
             'mentor_note' => fake()->optional(0.5)->sentence(),
             'why_this_resource' => fake()->sentence(),
@@ -37,7 +37,6 @@ class ResourceFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'type' => ResourceType::Video,
             'url' => 'https://www.youtube.com/watch?v='.fake()->bothify('???????????'),
-            'source' => 'YouTube',
             'content' => null,
         ]);
     }
@@ -47,7 +46,6 @@ class ResourceFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'type' => ResourceType::Article,
             'url' => fake()->url(),
-            'source' => fake()->randomElement(['Medium', 'Dev.to', 'Official Docs']),
             'content' => null,
         ]);
     }

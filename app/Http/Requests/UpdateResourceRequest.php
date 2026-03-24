@@ -31,7 +31,7 @@ class UpdateResourceRequest extends FormRequest
             'why_this_resource' => ['required', 'string'],
             'url' => [$requiresUrl ? 'required' : 'nullable', 'nullable', 'url', 'max:2048'],
             'content' => ['nullable', 'string'],
-            'source' => ['nullable', 'string', 'max:100'],
+            'caption' => ['nullable', 'string'],
             'estimated_time' => ['nullable', 'integer', 'min:1'],
             'mentor_note' => ['nullable', 'string'],
             'is_free' => ['boolean'],

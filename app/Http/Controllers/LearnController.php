@@ -103,7 +103,7 @@ class LearnController extends Controller
             $canAccess = $r->is_free || $hasFullAccess;
 
             return array_merge(
-                $r->only(['id', 'module_id', 'title', 'type', 'source',
+                $r->only(['id', 'module_id', 'title', 'type', 'caption',
                     'estimated_time', 'mentor_note', 'why_this_resource', 'is_free', 'order']),
                 [
                     'url' => $canAccess ? $r->url : null,

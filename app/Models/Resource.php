@@ -19,7 +19,7 @@ class Resource extends Model
         'type',
         'url',
         'content',
-        'source',
+        'caption',
         'estimated_time',
         'mentor_note',
         'why_this_resource',

@@ -37,7 +37,7 @@ class ResourceManagementTest extends TestCase
                 'type' => ResourceType::Video->value,
                 'url' => 'https://www.youtube.com/watch?v=abc123',
                 'why_this_resource' => 'Best intro for beginners.',
-                'source' => 'YouTube',
+                'caption' => 'A great introductory video.',
             ])
             ->assertRedirect();
 

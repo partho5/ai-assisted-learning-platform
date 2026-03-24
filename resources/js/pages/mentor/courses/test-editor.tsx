@@ -488,7 +488,7 @@ function QuestionCard({
                 </span>
                 <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <Badge variant="secondary" className="text-xs capitalize">{QUESTION_TYPE_LABELS[q.question_type]}</Badge>
-                    <span className="text-xs font-medium text-muted-foreground">{q.points}pt</span>
+                    <span className="w-12 shrink-0 text-right text-xs font-medium tabular-nums text-muted-foreground">{q.points} mark</span>
                     <button onClick={handleDelete} className="rounded px-1.5 py-0.5 text-xs text-destructive hover:bg-destructive/10">
                         Delete
                     </button>
@@ -526,7 +526,7 @@ function QuestionCard({
                                     </select>
                                 </div>
                                 <div>
-                                    <Label className="text-xs">Points</Label>
+                                    <Label className="text-xs">Marks</Label>
                                     <Input
                                         type="number" min={1} className="mt-1 text-sm"
                                         value={q.points}
@@ -672,7 +672,11 @@ function QuestionCard({
                                 <span className="text-xs text-green-600">Saved</span>
                             )}
                         </div>
-                        <Button onClick={save} disabled={q.saving || !q.body.trim()}>
+                        <Button
+                            onClick={save}
+                            disabled={q.saving || !q.body.trim()}
+                            className={q.dirty ? 'animate-ring-warn' : ''}
+                        >
                             {q.saving ? 'Saving…' : q.serverId ? 'Save Question' : 'Create Question'}
                         </Button>
                     </div>

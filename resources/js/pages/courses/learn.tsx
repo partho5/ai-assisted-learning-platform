@@ -59,7 +59,7 @@ interface EnrichedResource {
     type: ResourceType;
     url: string | null;
     content: string | null;
-    source: string | null;
+    caption: string | null;
     estimated_time: number | null;
     mentor_note: string | null;
     why_this_resource: string | null;
@@ -114,35 +114,65 @@ function StatusIcon({ status }: { status?: string }) {
 
 // ─── Resource content renderer ────────────────────────────────────────────────
 
-function ResourceContent({ resource }: { resource: EnrichedResource }) {
-    if (resource.type === 'video' && resource.url) {
-        const youtubeMatch = resource.url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);
-        const vimeoMatch = resource.url.match(/vimeo\.com\/(\d+)/);
-        let embedUrl = '';
-        if (youtubeMatch) embedUrl = `https://www.youtube.com/embed/${youtubeMatch[1]}`;
-        else if (vimeoMatch) embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-        else embedUrl = resource.url;
+function VideoEmbed({ resource }: { resource: EnrichedResource }) {
+    const youtubeMatch = resource.url!.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?]+)/);
+    const vimeoMatch = resource.url!.match(/vimeo\.com\/(\d+)/);
+    const videoId = youtubeMatch?.[1] ?? null;
 
+    // null = checking, true = embeddable, false = blocked
+    const [canEmbed, setCanEmbed] = useState<boolean | null>(videoId ? null : true);
+
+    useEffect(() => {
+        if (!videoId) { return; }
+        fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`)
+            .then((res) => setCanEmbed(res.ok))
+            .catch(() => setCanEmbed(true));
+    }, [videoId]);
+
+    let embedUrl = '';
+    if (youtubeMatch) { embedUrl = `https://www.youtube.com/embed/${videoId}`; }
+    else if (vimeoMatch) { embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`; }
+    else { embedUrl = resource.url!; }
+
+    if (canEmbed === null) {
+        return <div className="aspect-video w-full animate-pulse rounded-lg bg-muted" />;
+    }
+
+    if (!canEmbed) {
         return (
-            <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
-                <iframe
-                    src={embedUrl}
-                    className="h-full w-full"
-                    allow="fullscreen"
-                    allowFullScreen
-                    loading="lazy"
-                    title={resource.title}
-                />
+            <div className="aspect-video w-full flex flex-col items-center justify-center gap-3 rounded-lg bg-black text-white">
+                <p className="text-sm text-white/70">This video can't be embedded.</p>
+                <a href={resource.url!} target="_blank" rel="noopener noreferrer">
+                    <Button variant="secondary" size="compact">Watch on YouTube ↗</Button>
+                </a>
             </div>
         );
+    }
+
+    return (
+        <div className="aspect-video w-full overflow-hidden rounded-lg bg-black">
+            <iframe
+                src={embedUrl}
+                className="h-full w-full"
+                allow="fullscreen"
+                allowFullScreen
+                loading="lazy"
+                title={resource.title}
+            />
+        </div>
+    );
+}
+
+function ResourceContent({ resource }: { resource: EnrichedResource }) {
+    if (resource.type === 'video' && resource.url) {
+        return <VideoEmbed resource={resource} />;
     }
 
     if (resource.type === 'article') {
         return (
             <div className="rounded-lg border border-border bg-card p-2 md:p-4">
-                <div className="mb-3 flex items-center gap-2">
+                <div className="mb-3">
                     <Badge variant="secondary">Article</Badge>
-                    {resource.source && <span className="text-sm text-muted-foreground">{resource.source}</span>}
                 </div>
                 {resource.why_this_resource && <RichHtml content={resource.why_this_resource} className="mb-4 text-sm text-muted-foreground" />}
                 {resource.url && (
@@ -326,7 +356,7 @@ function TestPreview({
                                 {question.is_required && <span className="ml-1 text-destructive">*</span>}
                             </Label>
                             <span className="shrink-0 text-sm text-muted-foreground">
-                                {question.points} pt{question.points !== 1 ? 's' : ''}
+                                {question.points} mark{question.points !== 1 ? 's' : ''}
                             </span>
                         </div>
                         {question.hint && <p className="mb-2 text-sm text-muted-foreground">{question.hint}</p>}
@@ -495,7 +525,7 @@ function TestForm({
                             {question.is_required && <span className="ml-1 text-destructive">*</span>}
                         </Label>
                         <span className="shrink-0 text-sm text-muted-foreground">
-                            {question.points} pt{question.points !== 1 ? 's' : ''}
+                            {question.points} mark{question.points !== 1 ? 's' : ''}
                         </span>
                     </div>
                     {question.hint && <p className="mb-2 text-sm text-muted-foreground">{question.hint}</p>}
@@ -583,8 +613,15 @@ function ResourceBlock({
                 <>
                     {/* Content */}
                     {!isAssignment && (
-                        <div className="mb-5">
+                        <div className={resource.caption && resource.type !== 'text' ? 'mb-3' : 'mb-5'}>
                             <ResourceContent resource={resource} />
+                        </div>
+                    )}
+
+                    {/* Caption — all types except text */}
+                    {resource.caption && resource.type !== 'text' && (
+                        <div className="mb-5">
+                            <RichHtml content={resource.caption} className="text-base text-muted-foreground" />
                         </div>
                     )}
 
