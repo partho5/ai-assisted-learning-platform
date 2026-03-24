@@ -864,7 +864,7 @@ function ResourceForm({
                             />
                         </Field>
                     )}
-                    <Field label="Estimated time (minutes)" error={form.errors.estimated_time}>
+                    <Field label="Estimated time to complete this lesson (minutes)" error={form.errors.estimated_time}>
                         <Input
                             type="number"
                             min={1}
