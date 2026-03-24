@@ -405,11 +405,13 @@ function ResourceBlock({
     courseSlug,
     enrollment,
     locale,
+    isGuest,
 }: {
     resource: EnrichedResource;
     courseSlug: string;
     enrollment: Enrollment | null;
     locale: string;
+    isGuest: boolean;
 }) {
     const isObserverLocked = !resource.is_free && (!enrollment || enrollment.access_level === 'observer');
     const isAssignment = resource.type === 'assignment';
@@ -439,7 +441,7 @@ function ResourceBlock({
                 )}
             </div>
 
-            {resource.why_this_resource && !isAssignment && (
+            {resource.why_this_resource && (
                 <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-base">
                     <span className="mb-1 block font-medium">
                         Importance of this lesson:
@@ -468,6 +470,23 @@ function ResourceBlock({
                     {!isAssignment && (
                         <div className="mb-5">
                             <ResourceContent resource={resource} />
+                        </div>
+                    )}
+
+                    {/* Test / assignment — unauthenticated prompt */}
+                    {hasTest && isGuest && (
+                        <div className="mt-4 rounded-lg border border-border bg-muted/40 p-4 text-center text-base text-muted-foreground">
+                            <Link href={`/${locale}/login`} className="font-medium text-primary hover:underline">
+                                Log in
+                            </Link>{' '}
+                            to access the self-test for this lesson.
+                        </div>
+                    )}
+
+                    {/* Test / assignment — logged in but not enrolled */}
+                    {hasTest && !isGuest && !enrollment && (
+                        <div className="mt-4 rounded-lg border border-border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
+                            Enroll in this course to access the self-test.
                         </div>
                     )}
 
@@ -884,6 +903,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                             courseSlug={course.slug}
                             enrollment={enrollment}
                             locale={l}
+                            isGuest={isGuest}
                         />
                     </section>
                 ))}
