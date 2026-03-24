@@ -139,7 +139,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
 
     if (resource.type === 'article') {
         return (
-            <div className="rounded-lg border border-border bg-card p-2">
+            <div className="rounded-lg border border-border bg-card p-2 md:p-4">
                 <div className="mb-3 flex items-center gap-2">
                     <Badge variant="secondary">Article</Badge>
                     {resource.source && <span className="text-sm text-muted-foreground">{resource.source}</span>}
@@ -156,7 +156,7 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
 
     if (resource.type === 'text') {
         return (
-            <div className="rounded-lg border border-border bg-card p-2">
+            <div className="rounded-lg border border-border bg-card p-2 md:p-4">
                 <div
                     className="prose dark:prose-invert rich-html max-w-none text-base leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: resource.content || '' }}
@@ -421,8 +421,8 @@ function TestForm({
                             {index + 1}. {question.body}
                             {question.is_required && <span className="ml-1 text-destructive">*</span>}
                         </Label>
-                        <span className="shrink-0 rounded border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                            {question.points} mark{question.points !== 1 ? 's' : ''}
+                        <span className="shrink-0 text-sm text-muted-foreground">
+                            {question.points} pt{question.points !== 1 ? 's' : ''}
                         </span>
                     </div>
                     {question.hint && <p className="mb-2 text-sm text-muted-foreground">{question.hint}</p>}
@@ -484,9 +484,9 @@ function ResourceBlock({
             </div>
 
             {resource.why_this_resource && (
-                <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-base">
+                <div className="mb-4 rounded-lg border border-border bg-muted/30 p-2 md:p-4 text-base">
                     <span className="mb-1 block font-medium">
-                        Importance of this lesson (why it's helpful):
+                        Importance of this lesson:
                     </span>
                     <RichHtml
                         content={resource.why_this_resource}
