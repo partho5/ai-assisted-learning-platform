@@ -55,6 +55,11 @@ class LearningExperienceTest extends TestCase
         return route('test-attempts.endorse', ['locale' => 'en', 'attempt' => $attempt->id]);
     }
 
+    private function attemptResultRoute(TestAttempt $attempt): string
+    {
+        return route('learn.attempts.result', ['locale' => 'en', 'attempt' => $attempt->id]);
+    }
+
     private function setupCourseWithResource(string $resourceType = 'text', bool $isFree = false): array
     {
         $mentor = User::factory()->mentor()->create();
@@ -282,9 +287,9 @@ class LearningExperienceTest extends TestCase
         $resource = Resource::factory()->assignment()->for($module)->create();
         $test = Test::factory()->forResource($resource)->create();
         TestQuestion::factory()->for($test)->create([
-            'question_type' => QuestionType::ShortText,
+            'question_type' => QuestionType::MultipleChoice,
             'evaluation_method' => EvaluationMethod::ExactMatch,
-            'correct_answer' => 'paris',
+            'correct_answer' => null,
             'points' => 2,
         ]);
 
@@ -456,6 +461,27 @@ class LearningExperienceTest extends TestCase
     }
 
     // ─── Progress ────────────────────────────────────────────────────────────
+
+    public function test_result_page_includes_learn_url_pointing_to_resource(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->published()->for($mentor, 'mentor')->create();
+        $module = Module::factory()->for($course)->create();
+        $resource = Resource::factory()->assignment()->for($module)->create();
+        $test = Test::factory()->forResource($resource)->create();
+
+        $learner = User::factory()->learner()->create();
+        $attempt = TestAttempt::factory()->for($test)->for($learner, 'user')->graded()->create();
+
+        $response = $this->actingAs($learner)
+            ->get($this->attemptResultRoute($attempt));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('courses/attempt-result')
+            ->where('learnUrl', fn ($url) => str_contains($url, '/courses/'.$course->slug.'/learn/'.$resource->id))
+        );
+    }
 
     public function test_progress_percent_reflects_endorsed_completions(): void
     {

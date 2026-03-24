@@ -1,4 +1,4 @@
-export type QuestionType = 'short_text' | 'paragraph' | 'multiple_choice' | 'checkboxes' | 'dropdown' | 'date' | 'time';
+export type QuestionType = 'paragraph' | 'multiple_choice' | 'checkboxes' | 'dropdown' | 'date' | 'time';
 export type EvaluationMethod = 'exact_match' | 'numeric_comparison' | 'ai_graded';
 export type NumericOperator = 'eq' | 'gt' | 'gte' | 'lt' | 'lte';
 export type AttemptStatus = 'in_progress' | 'submitted' | 'grading' | 'graded' | 'endorsed';

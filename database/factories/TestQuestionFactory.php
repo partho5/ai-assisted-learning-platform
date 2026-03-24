@@ -18,14 +18,14 @@ class TestQuestionFactory extends Factory
         return [
             'test_id' => Test::factory(),
             'order' => fake()->numberBetween(0, 10),
-            'question_type' => QuestionType::ShortText,
+            'question_type' => QuestionType::Paragraph,
             'body' => fake()->sentence().'?',
             'hint' => fake()->optional(0.3)->sentence(),
             'points' => fake()->numberBetween(1, 5),
-            'evaluation_method' => EvaluationMethod::ExactMatch,
+            'evaluation_method' => EvaluationMethod::AiGraded,
             'numeric_operator' => null,
-            'correct_answer' => fake()->word(),
-            'ai_rubric' => null,
+            'correct_answer' => null,
+            'ai_rubric' => fake()->paragraph(),
             'ai_help_enabled' => false,
             'is_required' => true,
         ];

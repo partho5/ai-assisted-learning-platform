@@ -69,6 +69,7 @@ interface EnrichedResource {
         id: number;
         title: string | null;
         passing_score: number | null;
+        max_attempts: number | null;
         questions: TestQuestion[];
     } | null;
     completion: ResourceCompletion | null;
@@ -334,26 +335,67 @@ function TestForm({
         }));
     }
 
+    function csrfToken(): string {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+    }
+
     async function autosave(qId: number, v: string) {
         if (!attempt) return;
         setSaving(true);
         await fetch(saveAnswers.url({ locale, attempt: attempt.id }), {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken(),
+            },
             body: JSON.stringify({ answers: buildAnswers({ [qId]: v }) }),
         });
         setSaving(false);
     }
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!attempt) return;
+
+        if (autosaveRef.current) clearTimeout(autosaveRef.current);
+
+        await fetch(saveAnswers.url({ locale, attempt: attempt.id }), {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken(),
+            },
+            body: JSON.stringify({ answers: buildAnswers() }),
+        });
+
         router.post(submitAttempt.url({ locale, attempt: attempt.id }), {}, { preserveScroll: true });
     }
 
     if (!attempt) {
+        const maxAttempts = resource.test?.max_attempts ?? null;
+        const attemptsUsed = resource.previousAttempts.length;
+        const exhausted = maxAttempts !== null && attemptsUsed >= maxAttempts;
+
+        if (exhausted) {
+            return (
+                <div className="rounded-lg border border-border bg-muted/30 px-4 py-5 text-center">
+                    <p className="font-medium text-foreground">
+                        You've used all {maxAttempts} attempt{maxAttempts !== 1 ? 's' : ''} for this test.
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">No more attempts are available.</p>
+                </div>
+            );
+        }
+
         return (
             <div className="text-center">
+                {maxAttempts !== null && (
+                    <p className="mb-3 text-sm text-muted-foreground">
+                        {attemptsUsed} of {maxAttempts} attempt{maxAttempts !== 1 ? 's' : ''} used
+                    </p>
+                )}
                 <Button
                     onClick={() =>
                         router.post(
@@ -371,7 +413,7 @@ function TestForm({
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
-            {saving && <p className="text-xs text-muted-foreground">Saving…</p>}
+            <p className={`text-xs text-muted-foreground transition-opacity duration-300 ${saving ? 'opacity-100' : 'opacity-0'}`}>Saving…</p>
             {questions.map((question, index) => (
                 <div key={question.id} className="rounded-lg border border-border bg-card p-4">
                     <div className="mb-1 flex items-start justify-between gap-2">
@@ -379,8 +421,8 @@ function TestForm({
                             {index + 1}. {question.body}
                             {question.is_required && <span className="ml-1 text-destructive">*</span>}
                         </Label>
-                        <span className="shrink-0 text-sm text-muted-foreground">
-                            {question.points} pt{question.points !== 1 ? 's' : ''}
+                        <span className="shrink-0 rounded border border-border bg-muted/60 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                            {question.points} mark{question.points !== 1 ? 's' : ''}
                         </span>
                     </div>
                     {question.hint && <p className="mb-2 text-sm text-muted-foreground">{question.hint}</p>}
@@ -444,7 +486,7 @@ function ResourceBlock({
             {resource.why_this_resource && (
                 <div className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-base">
                     <span className="mb-1 block font-medium">
-                        Importance of this lesson:
+                        Importance of this lesson (why it's helpful):
                     </span>
                     <RichHtml
                         content={resource.why_this_resource}

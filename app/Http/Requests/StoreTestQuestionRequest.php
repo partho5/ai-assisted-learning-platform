@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\EvaluationMethod;
 use App\Enums\NumericOperator;
 use App\Enums\QuestionType;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,14 +17,15 @@ class StoreTestQuestionRequest extends FormRequest
     /** @return array<string, mixed> */
     public function rules(): array
     {
+        $questionType = QuestionType::tryFrom($this->input('question_type'));
+
         return [
             'question_type' => ['required', Rule::enum(QuestionType::class)],
             'body' => ['required', 'string'],
             'hint' => ['nullable', 'string'],
             'points' => ['nullable', 'integer', 'min:1'],
-            'evaluation_method' => ['required', Rule::enum(EvaluationMethod::class)],
             'numeric_operator' => [
-                Rule::requiredIf($this->evaluation_method === EvaluationMethod::NumericComparison->value),
+                Rule::requiredIf($questionType?->isNumericComparison() ?? false),
                 'nullable',
                 Rule::enum(NumericOperator::class),
             ],
@@ -34,6 +34,10 @@ class StoreTestQuestionRequest extends FormRequest
             'ai_help_enabled' => ['boolean'],
             'is_required' => ['boolean'],
             'order' => ['nullable', 'integer', 'min:0'],
+            'options' => ['nullable', 'array'],
+            'options.*.id' => ['nullable', 'integer'],
+            'options.*.label' => ['required_with:options', 'string', 'max:500'],
+            'options.*.is_correct' => ['nullable', 'boolean'],
         ];
     }
 }

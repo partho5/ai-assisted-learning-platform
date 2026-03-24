@@ -158,8 +158,8 @@ class TestAttemptController extends Controller
 
         // Notify mentor when learner submits an assignment (needs manual endorsement)
         if (! $attempt->test->isFormative()) {
-            $attempt->loadMissing(['test.resource.course.mentor', 'user']);
-            $mentor = $attempt->test->resource?->course?->mentor;
+            $attempt->loadMissing(['test.testable.module.course.mentor', 'user']);
+            $mentor = $attempt->test->testable?->module?->course?->mentor;
             if ($mentor) {
                 app(ForumNotificationService::class)->notifySubmissionPendingReview(
                     $mentor,
@@ -183,13 +183,25 @@ class TestAttemptController extends Controller
             abort(403);
         }
 
-        $attempt->load(['test.questions.options', 'answers']);
+        $attempt->load(['test.questions.options', 'answers', 'test.testable.module.course']);
+
+        $resource = $attempt->test->testable;
+        $learnUrl = null;
+
+        if ($resource instanceof Resource) {
+            $learnUrl = route('learn.show', [
+                'locale' => app()->getLocale(),
+                'course' => $resource->module->course->slug,
+                'resource' => $resource->id,
+            ]).'#r-'.$resource->id;
+        }
 
         $isShowcased = in_array($attempt->id, $user->showcased_attempt_ids ?? []);
 
         return Inertia::render('courses/attempt-result', [
             'attempt' => $attempt,
             'isShowcased' => $isShowcased,
+            'learnUrl' => $learnUrl,
         ]);
     }
 

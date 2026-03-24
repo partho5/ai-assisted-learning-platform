@@ -4,7 +4,6 @@ namespace App\Enums;
 
 enum QuestionType: string
 {
-    case ShortText = 'short_text';
     case Paragraph = 'paragraph';
     case MultipleChoice = 'multiple_choice';
     case Checkboxes = 'checkboxes';
@@ -17,8 +16,27 @@ enum QuestionType: string
         return in_array($this, [self::MultipleChoice, self::Checkboxes, self::Dropdown]);
     }
 
-    public function supportsNumericComparison(): bool
+    public function isAiGraded(): bool
     {
-        return $this === self::ShortText;
+        return $this === self::Paragraph;
+    }
+
+    public function isNumericComparison(): bool
+    {
+        return in_array($this, [self::Date, self::Time]);
+    }
+
+    /** Derive the correct evaluation method for this question type. */
+    public function defaultEvaluationMethod(): EvaluationMethod
+    {
+        if ($this->isAiGraded()) {
+            return EvaluationMethod::AiGraded;
+        }
+
+        if ($this->isNumericComparison()) {
+            return EvaluationMethod::NumericComparison;
+        }
+
+        return EvaluationMethod::ExactMatch;
     }
 }

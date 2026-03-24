@@ -7,6 +7,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, TestAttempt, TestAttemptAnswer, TestQuestion } from '@/types';
 
+function resolveAnswerDisplay(question: TestQuestion, value: string | null): string | null {
+    if (value === null) return null;
+    if (question.question_type === 'checkboxes') {
+        const ids: number[] = JSON.parse(value) ?? [];
+        return ids.map((id) => question.options.find((o) => o.id === id)?.label ?? String(id)).join(', ');
+    }
+    if (question.question_type === 'multiple_choice' || question.question_type === 'dropdown') {
+        const id = parseInt(value, 10);
+        return question.options.find((o) => o.id === id)?.label ?? value;
+    }
+    return value;
+}
+
 interface AttemptWithRelations extends TestAttempt {
     test: {
         id: number;
@@ -60,7 +73,7 @@ export default function AttemptReview({ attempt }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Review — ${attempt.user.name}`} />
 
-            <div className="mx-auto max-w-2xl space-y-6 px-4 py-8">
+            <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
                 {/* Header */}
                 <div className="rounded-xl border border-border bg-card p-5">
                     <div className="flex items-start justify-between gap-3">
@@ -96,7 +109,7 @@ export default function AttemptReview({ attempt }: Props) {
                                 </div>
 
                                 <div className="mb-2 rounded bg-muted/50 px-3 py-2 text-sm">
-                                    {answer?.answer_value ?? <span className="text-muted-foreground italic">No answer</span>}
+                                    {resolveAnswerDisplay(question, answer?.answer_value ?? null) ?? <span className="text-muted-foreground italic">No answer</span>}
                                 </div>
 
                                 {isAiPending && (
