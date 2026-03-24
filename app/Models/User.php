@@ -137,6 +137,12 @@ class User extends Authenticatable
         return $this->hasMany(ForumReply::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<Partner, $this> */
+    public function partner(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Partner::class);
+    }
+
     /** @return \Illuminate\Database\Eloquent\Relations\HasOne<UserReputation, $this> */
     public function reputation(): \Illuminate\Database\Eloquent\Relations\HasOne
     {

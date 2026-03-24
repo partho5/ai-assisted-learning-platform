@@ -7,7 +7,9 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\Forum\ForumAiMemberAdminController;
 use App\Http\Controllers\Admin\Forum\ForumCategoryAdminController;
 use App\Http\Controllers\Admin\Forum\ForumModerationController;
+use App\Http\Controllers\Admin\PartnerAdminController;
 use App\Http\Controllers\Admin\SubmissionController as AdminSubmissionController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AiHelpController;
 use App\Http\Controllers\ArticleController;
@@ -33,6 +35,8 @@ use App\Http\Controllers\LlmsTxtController;
 use App\Http\Controllers\Mentor\CategoryController as MentorCategoryController;
 use App\Http\Controllers\Mentor\DashboardController as MentorDashboardController;
 use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\PartnerReferralController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PersonalNotesController;
 use App\Http\Controllers\PortfolioController;
@@ -95,6 +99,15 @@ Route::prefix('{locale}')
             Route::patch('notes', [PersonalNotesController::class, 'update'])->name('notes.update');
         });
 
+        // Partner program — all authenticated roles
+        Route::middleware(['auth', 'verified'])->group(function () {
+            Route::get('dashboard/partner', [PartnerController::class, 'index'])->name('partner.index');
+            Route::post('dashboard/partner', [PartnerController::class, 'store'])->name('partner.store');
+        });
+
+        // Referral click tracking (works for guests and auth users — needs session)
+        Route::post('referral/track', [PartnerReferralController::class, 'track'])->name('referral.track');
+
         // Mentor dashboard
         Route::get('mentor/dashboard', [MentorDashboardController::class, 'index'])
             ->middleware(['auth', 'verified', 'role:mentor,admin'])
@@ -108,8 +121,12 @@ Route::prefix('{locale}')
         // Admin-only routes
         Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
             Route::get('admin/chats/{chatSession}', [AdminChatSessionController::class, 'show'])->name('admin.chats.show');
+            Route::get('admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
             Route::get('admin/submissions', [AdminSubmissionController::class, 'index'])->name('admin.submissions.index');
             Route::get('admin/ai-stats', [AiStatsController::class, 'index'])->name('admin.ai-stats');
+            Route::get('admin/partners', [PartnerAdminController::class, 'index'])->name('admin.partners.index');
+            Route::post('admin/partners/commissions/{commission}/confirm', [PartnerAdminController::class, 'confirm'])->name('admin.partners.commissions.confirm');
+            Route::post('admin/partners/commissions/{commission}/revoke', [PartnerAdminController::class, 'revoke'])->name('admin.partners.commissions.revoke');
             Route::post('courses/{course}/approve', [CourseController::class, 'approve'])->name('courses.approve');
             Route::post('courses/{course}/reject', [CourseController::class, 'reject'])->name('courses.reject');
         });

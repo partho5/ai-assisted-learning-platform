@@ -14,6 +14,7 @@ class Payment extends Model
         'user_id',
         'course_id',
         'coupon_code_id',
+        'referred_by_partner_id',
         'paypal_order_id',
         'paypal_subscription_id',
         'status',
@@ -50,6 +51,12 @@ class Payment extends Model
     public function couponCode(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(CouponCode::class);
+    }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Partner, $this> */
+    public function referredByPartner(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Partner::class, 'referred_by_partner_id');
     }
 
     public function isCaptured(): bool

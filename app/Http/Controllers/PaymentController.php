@@ -9,6 +9,9 @@ use App\Mail\SubscriptionCancelledMail;
 use App\Models\CouponCode;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Partner;
+use App\Models\PartnerCommission;
+use App\Models\PartnerReferral;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\PayPalClient;
@@ -57,10 +60,11 @@ class PaymentController extends Controller
 
         $coupon = $this->resolveCoupon($request->input('coupon_code'), $course);
         $amounts = $this->calculateAmounts((float) $course->price, $coupon);
+        $referredByPartnerId = $this->resolveReferralPartner($request, $course);
 
         if ($amounts['final'] <= 0) {
             // 100% discount — grant access directly without PayPal
-            return $this->grantFreeAccess($request->user(), $course, $coupon, $amounts);
+            return $this->grantFreeAccess($request->user(), $course, $coupon, $amounts, $referredByPartnerId);
         }
 
         $order = $this->paypal->createOrder(
@@ -74,6 +78,7 @@ class PaymentController extends Controller
             'user_id' => $request->user()->id,
             'course_id' => $course->id,
             'coupon_code_id' => $coupon?->id,
+            'referred_by_partner_id' => $referredByPartnerId,
             'paypal_order_id' => $order['id'],
             'status' => 'pending',
             'billing_type' => 'one_time',
@@ -114,6 +119,7 @@ class PaymentController extends Controller
             }
 
             $this->upsertFullEnrollment($request->user()->id, $course->id);
+            $this->recordCommissionIfReferred($payment);
         });
 
         Mail::queue(new PaymentConfirmedMail($request->user(), $course, $payment->fresh()));
@@ -130,9 +136,10 @@ class PaymentController extends Controller
 
         $coupon = $this->resolveCoupon($request->input('coupon_code'), $course);
         $amounts = $this->calculateAmounts((float) $course->price, $coupon);
+        $referredByPartnerId = $this->resolveReferralPartner($request, $course);
 
         if ($amounts['final'] <= 0) {
-            return $this->grantFreeAccess($request->user(), $course, $coupon, $amounts);
+            return $this->grantFreeAccess($request->user(), $course, $coupon, $amounts, $referredByPartnerId);
         }
 
         $planId = $this->ensurePlan($course, $amounts['final']);
@@ -147,6 +154,7 @@ class PaymentController extends Controller
             'user_id' => $request->user()->id,
             'course_id' => $course->id,
             'coupon_code_id' => $coupon?->id,
+            'referred_by_partner_id' => $referredByPartnerId,
             'paypal_subscription_id' => $subscription['id'],
             'status' => 'pending',
             'billing_type' => 'subscription',
@@ -190,6 +198,7 @@ class PaymentController extends Controller
             $expiresAt = now()->addMonths($months);
 
             $this->upsertFullEnrollment($request->user()->id, $course->id, $expiresAt);
+            $this->recordCommissionIfReferred($payment);
         });
 
         Mail::queue(new SubscriptionActivatedMail(
@@ -279,14 +288,16 @@ class PaymentController extends Controller
         Course $course,
         ?CouponCode $coupon,
         array $amounts,
+        ?int $referredByPartnerId = null,
     ): JsonResponse {
         $payment = null;
 
-        DB::transaction(function () use ($user, $course, $coupon, $amounts, &$payment) {
+        DB::transaction(function () use ($user, $course, $coupon, $amounts, $referredByPartnerId, &$payment) {
             $payment = Payment::create([
                 'user_id' => $user->id,
                 'course_id' => $course->id,
                 'coupon_code_id' => $coupon?->id,
+                'referred_by_partner_id' => $referredByPartnerId,
                 'status' => 'captured',
                 'billing_type' => $course->billing_type,
                 'original_amount' => $amounts['original'],
@@ -300,6 +311,7 @@ class PaymentController extends Controller
             }
 
             $this->upsertFullEnrollment($user->id, $course->id);
+            $this->recordCommissionIfReferred($payment);
         });
 
         Mail::queue(new PaymentConfirmedMail($user, $course, $payment));
@@ -422,8 +434,87 @@ class PaymentController extends Controller
 
         $payment->update(['status' => 'refunded']);
 
+        // Revoke partner commission on refund
+        PartnerCommission::where('payment_id', $payment->id)
+            ->where('status', '!=', 'revoked')
+            ->update(['status' => 'revoked']);
+
         if ($payment->user && $payment->course) {
             Mail::queue(new PaymentRefundedMail($payment->user, $payment->course, $payment));
         }
+    }
+
+    // ─── Partner referral helpers ─────────────────────────────────────────────
+
+    /** Resolve the referring partner from either localStorage code or server-side referral record. */
+    private function resolveReferralPartner(Request $request, Course $course): ?int
+    {
+        if (! $course->partner_commission_rate) {
+            return null;
+        }
+
+        $code = $request->input('referral_code');
+
+        if ($code) {
+            $partner = Partner::where('code', $code)->active()->first();
+        } else {
+            // Fallback to server-side referral record
+            $referral = PartnerReferral::where('course_id', $course->id)
+                ->where(function ($q) use ($request) {
+                    $q->where('visitor_user_id', $request->user()->id)
+                        ->orWhere('visitor_session_id', $request->session()->getId());
+                })
+                ->active()
+                ->latest('clicked_at')
+                ->first();
+
+            $partner = $referral?->partner;
+        }
+
+        if (! $partner || ! $partner->is_active) {
+            return null;
+        }
+
+        // Block self-referral
+        if ($partner->user_id === $request->user()->id) {
+            return null;
+        }
+
+        return $partner->id;
+    }
+
+    /** Create a PartnerCommission record if the payment was referred. */
+    private function recordCommissionIfReferred(Payment $payment): void
+    {
+        if (! $payment->referred_by_partner_id) {
+            return;
+        }
+
+        $course = Course::find($payment->course_id);
+
+        if (! $course || ! $course->partner_commission_rate) {
+            return;
+        }
+
+        $baseAmount = (float) $course->price;
+        $rate = (float) $course->partner_commission_rate;
+        $commissionAmount = round($baseAmount * $rate / 100, 2);
+
+        PartnerCommission::create([
+            'partner_id' => $payment->referred_by_partner_id,
+            'payment_id' => $payment->id,
+            'course_id' => $course->id,
+            'purchaser_user_id' => $payment->user_id,
+            'commission_rate' => $rate,
+            'base_amount' => $baseAmount,
+            'commission_amount' => $commissionAmount,
+            'status' => 'pending',
+        ]);
+
+        // Mark server-side referral as converted
+        PartnerReferral::where('partner_id', $payment->referred_by_partner_id)
+            ->where('course_id', $course->id)
+            ->whereNull('converted_at')
+            ->update(['converted_at' => now()]);
     }
 }

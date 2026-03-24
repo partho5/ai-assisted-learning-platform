@@ -62,7 +62,7 @@ function AuthorView({ articles, isAdmin, locale, user }: AuthorProps & { locale:
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href={articleCreate.url(locale)}>New Article</Link>
+                        <Link href={articleCreate.url(locale)}>+ New Article</Link>
                     </Button>
                 </div>
 

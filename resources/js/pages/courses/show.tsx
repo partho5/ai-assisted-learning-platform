@@ -1,8 +1,10 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
 import { store as enrollStore } from '@/actions/App/Http/Controllers/EnrollmentController';
 import { show as learnShow } from '@/actions/App/Http/Controllers/LearnController';
 import { course as courseChatAction } from '@/actions/App/Http/Controllers/AiChatController';
 import { index as chatHistory } from '@/routes/chat/history';
+import { track as referralTrack } from '@/actions/App/Http/Controllers/PartnerReferralController';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { PurchaseButton } from '@/components/payment/purchase-button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import MentorCard from '@/components/mentor-card';
 import RichHtml from '@/components/rich-html';
 import PublicLayout from '@/layouts/public-layout';
+import { captureReferral } from '@/lib/referral';
 import type { Course, Enrollment } from '@/types';
 
 interface Props {
@@ -40,6 +43,38 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
             ? `${Math.round(course.estimated_duration / 60)} hours`
             : `${course.estimated_duration} min`
         : null;
+
+    // Detect ?ref= query parameter for partner referral tracking
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const refCode = params.get('ref');
+        if (!refCode) return;
+
+        // Strip ?ref= from URL for clean UX
+        params.delete('ref');
+        const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '') + window.location.hash;
+        history.replaceState(null, '', cleanUrl);
+
+        // Track server-side + store in localStorage
+        const csrf = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+        fetch(referralTrack.url({ locale: l }), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': csrf ? decodeURIComponent(csrf[1]) : '',
+            },
+            body: JSON.stringify({ code: refCode, course_slug: course.slug, referrer_url: document.referrer || null }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.valid) {
+                    captureReferral(course.slug, refCode);
+                }
+            })
+            .catch(() => {
+                // Silent fail — best-effort tracking
+            });
+    }, []);
 
     function handleEnroll() {
         router.post(enrollStore.url({ locale: l, course: course.slug }));

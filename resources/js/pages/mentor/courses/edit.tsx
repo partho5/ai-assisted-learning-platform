@@ -98,6 +98,7 @@ function CourseDetailsForm({
         price: course.price ?? '',
         currency: course.currency ?? 'USD',
         subscription_duration_months: String(course.subscription_duration_months ?? ''),
+        partner_commission_rate: course.partner_commission_rate ?? '',
     });
 
     function submit(e: React.FormEvent) {
@@ -484,10 +485,31 @@ function CourseDetailsForm({
                                 />
                             </Field>
                         )}
+                        <Field
+                            label="Partner Commission (%)"
+                            error={form.errors.partner_commission_rate}
+                        >
+                            <Input
+                                type="number"
+                                min={0}
+                                max={100}
+                                step={0.01}
+                                value={form.data.partner_commission_rate}
+                                onChange={(e) =>
+                                    form.setData(
+                                        'partner_commission_rate',
+                                        e.target.value,
+                                    )
+                                }
+                                disabled={form.processing}
+                                placeholder="e.g. 10"
+                            />
+                        </Field>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                        Price of 0 or blank = free enrollment. Coupon codes can
-                        be managed below after saving.
+                        Price of 0 or blank = free enrollment. Set a partner
+                        commission rate to enable the affiliate program for this
+                        course.
                     </p>
                 </div>
 

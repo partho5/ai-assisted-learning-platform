@@ -39,6 +39,7 @@ class Course extends Model
         'billing_type',
         'subscription_duration_months',
         'paypal_plan_id',
+        'partner_commission_rate',
     ];
 
     /** @return array<string, string> */
@@ -52,6 +53,7 @@ class Course extends Model
             'is_free' => 'boolean',
             'price' => 'decimal:2',
             'subscription_duration_months' => 'integer',
+            'partner_commission_rate' => 'decimal:2',
         ];
     }
 

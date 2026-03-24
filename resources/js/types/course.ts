@@ -93,6 +93,7 @@ export type Course = {
     currency: string;
     billing_type: BillingType;
     subscription_duration_months: number | null;
+    partner_commission_rate: string | null;
     category: Category | null;
     mentor?: CourseMentor;
     authors?: CourseMentorWithRole[];

@@ -12,6 +12,7 @@ import {
     createSubscription,
     activateSubscription,
 } from '@/actions/App/Http/Controllers/PaymentController';
+import { getReferral, clearReferral } from '@/lib/referral';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Course } from '@/types';
@@ -29,6 +30,7 @@ function InnerButtons({
     course,
     locale,
     couponCode,
+    referralCode,
     originalPrice,
     finalPrice,
     onSuccess,
@@ -37,6 +39,7 @@ function InnerButtons({
     course: Course;
     locale: string;
     couponCode: string;
+    referralCode: string | null;
     originalPrice: number;
     finalPrice: number;
     onSuccess: () => void;
@@ -71,7 +74,7 @@ function InnerButtons({
                     const res = await fetch(createSubscription.url({ locale, course: course.slug }), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrf() },
-                        body: JSON.stringify({ coupon_code: couponCode || undefined }),
+                        body: JSON.stringify({ coupon_code: couponCode || undefined, referral_code: referralCode || undefined }),
                     });
                     const data = await res.json();
                     if (!res.ok || !data.subscription_id) throw new Error(data.error ?? 'Failed to create subscription');
@@ -99,7 +102,7 @@ function InnerButtons({
                 const res = await fetch(createOrder.url({ locale, course: course.slug }), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrf() },
-                    body: JSON.stringify({ coupon_code: couponCode || undefined }),
+                    body: JSON.stringify({ coupon_code: couponCode || undefined, referral_code: referralCode || undefined }),
                 });
                 const data = await res.json();
                 if (!res.ok || !data.order_id) {
@@ -142,6 +145,7 @@ export function CheckoutModal({ course, locale, isOpen, onClose }: Props) {
     const { paypalClientId } = usePage().props;
     const overlayRef = useRef<HTMLDivElement>(null);
     const originalPrice = parseFloat(course.price ?? '0');
+    const referralCode = getReferral(course.slug);
 
     const [couponInput, setCouponInput] = useState('');
     const [couponCode, setCouponCode] = useState('');
@@ -211,7 +215,7 @@ export function CheckoutModal({ course, locale, isOpen, onClose }: Props) {
         const res = await fetch(createOrder.url({ locale, course: course.slug }), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrf() },
-            body: JSON.stringify({ coupon_code: couponCode }),
+            body: JSON.stringify({ coupon_code: couponCode, referral_code: referralCode || undefined }),
         });
         const data = await res.json();
         if (data.success || data.free) {
@@ -223,6 +227,7 @@ export function CheckoutModal({ course, locale, isOpen, onClose }: Props) {
 
     function handleSuccess() {
         setSucceeded(true);
+        clearReferral(course.slug);
         setTimeout(() => {
             onClose();
             router.reload({ only: ['enrollment'] });
@@ -355,6 +360,7 @@ export function CheckoutModal({ course, locale, isOpen, onClose }: Props) {
                                         course={course}
                                         locale={locale}
                                         couponCode={couponCode}
+                                        referralCode={referralCode}
                                         originalPrice={originalPrice}
                                         finalPrice={finalPrice}
                                         onSuccess={handleSuccess}
