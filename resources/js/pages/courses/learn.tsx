@@ -297,6 +297,79 @@ function QuestionField({
     return <Input type="text" value={value} onChange={(e) => onChange(e.target.value)} />;
 }
 
+// ─── Test preview (read-only for guests / non-enrolled) ───────────────────────
+
+function TestPreview({
+    resource,
+    courseSlug,
+    locale,
+    isGuest,
+}: {
+    resource: EnrichedResource;
+    courseSlug: string;
+    locale: string;
+    isGuest: boolean;
+}) {
+    const questions = resource.test?.questions ?? [];
+    const isAssignment = resource.type === 'assignment';
+
+    return (
+        <div className="mt-4 space-y-4">
+            <h3 className="text-lg font-semibold">{isAssignment ? 'Assignment' : 'Self-Check'}</h3>
+
+            <div className="pointer-events-none select-none space-y-3 opacity-60">
+                {questions.map((question, index) => (
+                    <div key={question.id} className="rounded-lg border border-border bg-card p-4">
+                        <div className="mb-1 flex items-start justify-between gap-2">
+                            <Label className="text-base font-medium leading-relaxed">
+                                {index + 1}. {question.body}
+                                {question.is_required && <span className="ml-1 text-destructive">*</span>}
+                            </Label>
+                            <span className="shrink-0 text-sm text-muted-foreground">
+                                {question.points} pt{question.points !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        {question.hint && <p className="mb-2 text-sm text-muted-foreground">{question.hint}</p>}
+                        <QuestionField question={question} value="" onChange={() => {}} />
+                    </div>
+                ))}
+                <Button disabled className="w-full opacity-50">
+                    Submit Test
+                </Button>
+            </div>
+
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-center">
+                {isGuest ? (
+                    <>
+                        <p className="font-medium text-foreground">Want to take this test?</p>
+                        <p className="mt-1 mb-3 text-sm text-muted-foreground">
+                            Create a free account and enroll to track your progress.
+                        </p>
+                        <div className="flex justify-center gap-2">
+                            <Link href={`/register`}>
+                                <Button size="default">Sign up free</Button>
+                            </Link>
+                            <Link href={`/login`}>
+                                <Button size="default" variant="secondary">Log in</Button>
+                            </Link>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <p className="font-medium text-foreground">Enroll to take this test</p>
+                        <p className="mt-1 mb-3 text-sm text-muted-foreground">
+                            Enroll in this course to submit answers and track your progress.
+                        </p>
+                        <Link href={`/${locale}/courses/${courseSlug}`}>
+                            <Button size="sm">Enroll Now</Button>
+                        </Link>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
 // ─── Test form ─────────────────────────────────────────────────────────────────
 
 function TestForm({
@@ -515,21 +588,14 @@ function ResourceBlock({
                         </div>
                     )}
 
-                    {/* Test / assignment — unauthenticated prompt */}
-                    {hasTest && isGuest && (
-                        <div className="mt-4 rounded-lg border border-border bg-muted/40 p-4 text-center text-base text-muted-foreground">
-                            <Link href={`/${locale}/login`} className="font-medium text-primary hover:underline">
-                                Log in
-                            </Link>{' '}
-                            to access the self-test for this lesson.
-                        </div>
-                    )}
-
-                    {/* Test / assignment — logged in but not enrolled */}
-                    {hasTest && !isGuest && !enrollment && (
-                        <div className="mt-4 rounded-lg border border-border bg-muted/40 p-4 text-center text-sm text-muted-foreground">
-                            Enroll in this course to access the self-test.
-                        </div>
+                    {/* Test / assignment — not enrolled: show read-only preview with enroll CTA */}
+                    {hasTest && !enrollment && (
+                        <TestPreview
+                            resource={resource}
+                            courseSlug={courseSlug}
+                            locale={locale}
+                            isGuest={isGuest}
+                        />
                     )}
 
                     {/* Test / assignment — enrolled only */}
