@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     edit as articleEdit,
@@ -131,6 +132,24 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
         mainEntity: faqPairs,
     } : null;
 
+    const bodyRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!bodyRef.current) return;
+        const appHost = new URL(appUrl).hostname;
+        bodyRef.current.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
+            try {
+                const host = new URL(a.href).hostname;
+                if (host && host !== appHost) {
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                }
+            } catch {
+                // relative or malformed href — leave as-is
+            }
+        });
+    }, [appUrl, article.body]);
+
     function handleDelete() {
         if (prompt('Type "delete" to confirm') !== 'delete') return;
         router.delete(articleDestroy.url({ locale: l, article: article.slug }));
@@ -242,6 +261,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
                     {/* Body */}
                     {article.body && (
                         <div
+                            ref={bodyRef}
                             className="prose prose-base dark:prose-invert mt-8 max-w-none"
                             dangerouslySetInnerHTML={{ __html: article.body }}
                         />
