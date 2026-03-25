@@ -180,18 +180,18 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
 
             <div className="mx-auto max-w-4xl px-4 py-8 md:px-6 md:py-12">
                 {/* Breadcrumb */}
-                <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Link href={`/${l}/resources`} className="hover:text-foreground">Resources</Link>
+                <nav aria-label="Breadcrumb" className="mb-6 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
+                    <Link href={`/${l}/resources`} className="shrink-0 whitespace-nowrap hover:text-foreground">Resources</Link>
                     {article.category && (
                         <>
-                            <span>/</span>
-                            <Link href={`/${l}/resources?category=${article.category.slug}`} className="hover:text-foreground">
+                            <span className="shrink-0">/</span>
+                            <Link href={`/${l}/resources?category=${article.category.slug}`} className="shrink-0 whitespace-nowrap hover:text-foreground">
                                 {article.category.name}
                             </Link>
                         </>
                     )}
-                    <span>/</span>
-                    <span className="truncate text-foreground">{article.title}</span>
+                    <span className="shrink-0">/</span>
+                    <span className="min-w-0 truncate text-foreground">{article.title}</span>
                 </nav>
 
                 <article>
