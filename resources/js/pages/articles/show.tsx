@@ -195,15 +195,8 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
                 </nav>
 
                 <article>
-                    {/* Category pill */}
-                    {article.category && (
-                        <div className="mb-3">
-                            <Badge variant="outline">{article.category.name}</Badge>
-                        </div>
-                    )}
-
                     {/* Title */}
-                    <h1 className="text-3xl font-bold tracking-tight leading-tight md:text-4xl">{article.title}</h1>
+                    <h1 className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent text-3xl font-bold tracking-tight leading-tight md:text-4xl">{article.title}</h1>
 
                     {/* Excerpt / speakable intro */}
                     {article.excerpt && (
@@ -217,28 +210,21 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
                                 {article.author.name}
                             </Link>
                         )}
-                        {article.published_at && (
-                            <time dateTime={article.published_at}>
-                                {new Date(article.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        {article.updated_at && (
+                            <time dateTime={article.updated_at}>
+                                Updated {new Date(article.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                             </time>
                         )}
                         <span>{article.read_time_minutes} min read</span>
-                        {article.tags && article.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
-                                {article.tags.map((tag) => (
-                                    <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
-                                ))}
-                            </div>
-                        )}
                     </div>
 
                     {/* Edit / Delete controls */}
                     {canEdit && (
                         <div className="mt-4 flex gap-2">
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="ghost" size="compact" asChild>
                                 <Link href={articleEdit.url({ locale: l, article: article.slug })}>Edit</Link>
                             </Button>
-                            <Button variant="destructive" size="sm" onClick={handleDelete}>Delete</Button>
+                            <Button variant="danger" size="compact" onClick={handleDelete}>Delete</Button>
                         </div>
                     )}
 
@@ -256,9 +242,26 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
                     {/* Body */}
                     {article.body && (
                         <div
-                            className="prose prose-sm dark:prose-invert mt-8 max-w-none"
+                            className="prose prose-base dark:prose-invert mt-8 max-w-none"
                             dangerouslySetInnerHTML={{ __html: article.body }}
                         />
+                    )}
+
+                    {/* Category + Tags */}
+                    {(article.category || (article.tags && article.tags.length > 0)) && (
+                        <div className="mt-8 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                            {article.category && (
+                                <Badge variant="outline">{article.category.name}</Badge>
+                            )}
+                            {article.tags && article.tags.length > 0 && (
+                                <>
+                                    <span className="font-medium">Tags:</span>
+                                    {article.tags.map((tag) => (
+                                        <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                                    ))}
+                                </>
+                            )}
+                        </div>
                     )}
                 </article>
 

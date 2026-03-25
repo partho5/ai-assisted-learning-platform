@@ -342,16 +342,16 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         </p>
 
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                            {canRegister && (
-                                <Button
-                                    asChild
-                                    variant="hero"
-                                    size="lg"
-                                    className="bg-indigo-700 hover:bg-black"
-                                >
-                                    <Link href={register()}>Join now</Link>
-                                </Button>
-                            )}
+                            {/*{canRegister && (*/}
+                            {/*    <Button*/}
+                            {/*        asChild*/}
+                            {/*        variant="hero"*/}
+                            {/*        size="lg"*/}
+                            {/*        className="bg-indigo-700 hover:bg-black"*/}
+                            {/*    >*/}
+                            {/*        <Link href={register()}>Join now</Link>*/}
+                            {/*    </Button>*/}
+                            {/*)}*/}
                             <Button
                                 asChild
                                 size="lg"
