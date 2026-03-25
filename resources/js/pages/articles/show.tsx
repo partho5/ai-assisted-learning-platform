@@ -132,7 +132,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
     } : null;
 
     function handleDelete() {
-        if (!confirm(`Delete "${article.title}"? This cannot be undone.`)) return;
+        if (prompt('Type "delete" to confirm') !== 'delete') return;
         router.delete(articleDestroy.url({ locale: l, article: article.slug }));
     }
 

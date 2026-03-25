@@ -100,6 +100,10 @@ class ArticleController extends Controller
 
         $article->load('author:id,name,username,avatar,headline,bio,created_at', 'category');
 
+        $description = $article->excerpt
+            ? mb_substr(trim($article->excerpt), 0, 160)
+            : mb_substr(trim(strip_tags($article->body ?? '')), 0, 160);
+
         return Inertia::render('articles/show', [
             'article' => $article,
             'ogUrl' => url()->current(),
@@ -107,6 +111,12 @@ class ArticleController extends Controller
             'schemaTypes' => [
                 'howTo' => $article->detectsHowTo(),
                 'faq' => $article->detectsFaq(),
+            ],
+            'meta' => [
+                'title' => $article->title.' | '.config('app.name'),
+                'description' => $description,
+                'image' => $article->featured_image ?: config('seo.og_image'),
+                'url' => url()->current(),
             ],
         ]);
     }
