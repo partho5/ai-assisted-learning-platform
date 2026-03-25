@@ -136,19 +136,22 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
 
     useEffect(() => {
         if (!bodyRef.current) return;
-        const appHost = new URL(appUrl).hostname;
+        const currentHost = window.location.hostname;
         bodyRef.current.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
             try {
                 const host = new URL(a.href).hostname;
-                if (host && host !== appHost) {
+                if (host && host !== currentHost) {
                     a.target = '_blank';
                     a.rel = 'noopener noreferrer';
+                } else {
+                    a.removeAttribute('target');
+                    a.removeAttribute('rel');
                 }
             } catch {
-                // relative or malformed href — leave as-is
+                // relative or malformed href — leave as-is (same tab)
             }
         });
-    }, [appUrl, article.body]);
+    }, [article.body]);
 
     function handleDelete() {
         if (prompt('Type "delete" to confirm') !== 'delete') return;
