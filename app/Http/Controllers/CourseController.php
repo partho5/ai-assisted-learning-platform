@@ -221,9 +221,10 @@ class CourseController extends Controller
             unset($data['is_featured']);
         }
 
-        if (isset($data['title']) && $data['title'] !== $course->title) {
-            $data['slug'] = $this->uniqueSlug($data['title'], $course->id);
-        }
+        // edit slug with title changing. prevent it currently. reason: SEO impact concern.
+//        if (isset($data['title']) && $data['title'] !== $course->title) {
+//            $data['slug'] = $this->uniqueSlug($data['title'], $course->id);
+//        }
 
         $course->update($data);
 
