@@ -14,6 +14,7 @@ interface ProfileData {
     avatar: string | null;
     headline: string | null;
     bio: string | null;
+    social_links?: import('@/types/auth').SocialLink[] | null;
     portfolio_visibility: PortfolioVisibility;
     joined_at: string | null;
 }

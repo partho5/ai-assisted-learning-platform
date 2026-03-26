@@ -65,6 +65,7 @@ export type CourseMentor = {
     avatar: string | null;
     headline: string | null;
     bio?: string | null;
+    social_links?: import('./auth').SocialLink[] | null;
 };
 
 export type CourseMentorWithRole = CourseMentor & {
@@ -102,6 +103,7 @@ export type Course = {
     resources_count?: number;
     enrollments_count?: number;
     coupon_codes?: CouponCode[];
+    updated_at?: string;
 };
 
 export type SelectOption = {

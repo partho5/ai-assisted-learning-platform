@@ -5,6 +5,7 @@ import { Underline } from '@tiptap/extension-underline';
 import { TextStyle, Color, FontSize } from '@tiptap/extension-text-style';
 import { Highlight } from '@tiptap/extension-highlight';
 import { Link } from '@tiptap/extension-link';
+import { Image } from '@tiptap/extension-image';
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
@@ -63,6 +64,13 @@ function Toolbar({ editor }: { editor: Editor }) {
             editor.chain().focus().extendMarkRange('link').unsetLink().run();
         } else {
             editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        }
+    }, [editor]);
+
+    const addImage = useCallback(() => {
+        const url = window.prompt('Image URL');
+        if (url) {
+            editor.chain().focus().setImage({ src: url }).run();
         }
     }, [editor]);
 
@@ -190,8 +198,9 @@ function Toolbar({ editor }: { editor: Editor }) {
 
             <Sep />
 
-            {/* Link & code */}
+            {/* Link, image & code */}
             <ToolbarBtn onClick={setLink} active={editor.isActive('link')} title="Link">🔗</ToolbarBtn>
+            <ToolbarBtn onClick={addImage} title="Insert image">🖼</ToolbarBtn>
             <ToolbarBtn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive('codeBlock')} title="Code block">{`</>`}</ToolbarBtn>
 
             <Sep />
@@ -254,6 +263,7 @@ export default function RichTextEditor({ value, onChange, disabled = false, plac
             Color,
             Highlight.configure({ multicolor: true }),
             Link.configure({ openOnClick: false }),
+            Image.configure({ inline: false, allowBase64: false }),
             Table.configure({ resizable: true }),
             TableRow,
             TableHeader,

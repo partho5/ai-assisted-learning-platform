@@ -45,6 +45,7 @@ class User extends Authenticatable
         'showcased_attempt_ids',
         'is_ai',
         'onesignal_player_id',
+        'social_links',
     ];
 
     /**
@@ -75,6 +76,7 @@ class User extends Authenticatable
             'tier' => UserTier::class,
             'showcased_attempt_ids' => 'array',
             'is_ai' => 'boolean',
+            'social_links' => 'array',
         ];
     }
 

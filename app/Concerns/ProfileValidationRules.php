@@ -21,6 +21,9 @@ trait ProfileValidationRules
             'bio' => ['nullable', 'string', 'max:2000'],
             'avatar' => ['nullable', 'url', 'max:500'],
             'portfolio_visibility' => ['nullable', 'string', 'in:public,unlisted,private'],
+            'social_links' => ['nullable', 'array'],
+            'social_links.*.platform' => ['required_with:social_links', 'string', 'max:50'],
+            'social_links.*.url' => ['required_with:social_links', 'url', 'max:500'],
         ];
     }
 

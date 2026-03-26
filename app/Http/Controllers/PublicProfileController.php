@@ -138,6 +138,7 @@ class PublicProfileController extends Controller
                 'avatar' => $user->avatar,
                 'headline' => $user->headline,
                 'bio' => $user->bio,
+                'social_links' => $user->social_links,
                 'portfolio_visibility' => $user->portfolio_visibility,
                 'joined_at' => $user->created_at?->toDateString(),
             ],

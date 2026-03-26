@@ -30,7 +30,7 @@ class StoreResourceRequest extends FormRequest
             'type' => ['required', Rule::enum(ResourceType::class)],
             'why_this_resource' => ['required', 'string'],
             'url' => [$requiresUrl ? 'required' : 'nullable', 'nullable', 'url', 'max:2048'],
-            'content' => ['nullable', 'string'],
+            'content' => [$type === ResourceType::Text->value ? 'required' : 'nullable', 'string'],
             'caption' => ['nullable', 'string'],
             'estimated_time' => ['nullable', 'integer', 'min:1'],
             'mentor_note' => ['nullable', 'string'],

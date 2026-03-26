@@ -141,6 +141,7 @@ class ResourceManagementTest extends TestCase
             ->post($this->resourceRoute('resources.store', $course, $module), [
                 'title' => 'Hacked',
                 'type' => ResourceType::Text->value,
+                'content' => 'Some content',
                 'why_this_resource' => 'x',
             ])
             ->assertForbidden();

@@ -1,5 +1,6 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -9,9 +10,29 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import type { BreadcrumbItem } from '@/types';
+import type { SocialLink } from '@/types/auth';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
+
+const PLATFORM_OPTIONS = [
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'twitter', label: 'Twitter / X' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'github', label: 'GitHub' },
+    { value: 'stackoverflow', label: 'Stack Overflow' },
+    { value: 'leetcode', label: 'LeetCode' },
+    { value: 'hackerrank', label: 'HackerRank' },
+    { value: 'codeforces', label: 'Codeforces' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'devto', label: 'Dev.to' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'producthunt', label: 'Product Hunt' },
+    { value: 'website', label: 'Website / Portfolio' },
+    { value: 'skool', label: 'Skool' },
+];
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,6 +49,23 @@ export default function Profile({
     status?: string;
 }) {
     const { auth } = usePage().props;
+    const [socialLinks, setSocialLinks] = useState<SocialLink[]>(
+        (auth.user.social_links as SocialLink[] | null) ?? [],
+    );
+
+    function addSocialLink() {
+        setSocialLinks((prev) => [...prev, { platform: 'website', url: '' }]);
+    }
+
+    function removeSocialLink(index: number) {
+        setSocialLinks((prev) => prev.filter((_, i) => i !== index));
+    }
+
+    function updateSocialLink(index: number, field: keyof SocialLink, value: string) {
+        setSocialLinks((prev) =>
+            prev.map((link, i) => (i === index ? { ...link, [field]: value } : link)),
+        );
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -141,6 +179,46 @@ export default function Profile({
                                     />
                                     <p className="text-xs text-muted-foreground">Paste a URL to your profile photo.</p>
                                     <InputError className="mt-2" message={errors.avatar} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label>Social &amp; website links</Label>
+                                    <div className="space-y-2">
+                                        {socialLinks.map((link, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <select
+                                                    name={`social_links[${index}][platform]`}
+                                                    value={link.platform}
+                                                    onChange={(e) => updateSocialLink(index, 'platform', e.target.value)}
+                                                    className="border-input bg-background ring-offset-background focus-visible:ring-ring h-9 rounded-md border px-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                                                >
+                                                    {PLATFORM_OPTIONS.map((opt) => (
+                                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                    ))}
+                                                </select>
+                                                <Input
+                                                    name={`social_links[${index}][url]`}
+                                                    type="url"
+                                                    value={link.url}
+                                                    onChange={(e) => updateSocialLink(index, 'url', e.target.value)}
+                                                    placeholder="https://..."
+                                                    className="flex-1"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="danger"
+                                                    size="compact"
+                                                    onClick={() => removeSocialLink(index)}
+                                                >
+                                                    Remove
+                                                </Button>
+                                            </div>
+                                        ))}
+                                        <Button type="button" variant="secondary" size="compact" onClick={addSocialLink}>
+                                            + Add Link
+                                        </Button>
+                                    </div>
+                                    <InputError className="mt-2" message={errors['social_links']} />
                                 </div>
 
                                 <div className="grid gap-2">

@@ -227,6 +227,11 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                                     {course.enrollments_count} enrolled
                                 </span>
                             )}
+                            {course.updated_at && (
+                                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800/40 dark:text-gray-300">
+                                    Updated {new Date(course.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                </span>
+                            )}
                         </div>
 
                         {/* Thumbnail */}

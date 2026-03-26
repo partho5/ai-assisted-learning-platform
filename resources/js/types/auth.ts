@@ -2,6 +2,11 @@ export type UserRole = 'admin' | 'mentor' | 'learner';
 
 export type PortfolioVisibility = 'public' | 'unlisted' | 'private';
 
+export type SocialLink = {
+    platform: string;
+    url: string;
+};
+
 export type ReputationLevel = {
     min: number;
     max: number | null;
@@ -20,6 +25,7 @@ export type User = {
     headline?: string | null;
     bio?: string | null;
     portfolio_visibility?: PortfolioVisibility;
+    social_links?: SocialLink[] | null;
     showcased_attempt_ids?: number[] | null;
     reputation_points?: number;
     reputation_level?: ReputationLevel;

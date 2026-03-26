@@ -1,5 +1,58 @@
 import { Link } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import type { SocialLink } from '@/types/auth';
+
+const PLATFORM_ICONS: Record<string, { label: string; icon: string }> = {
+    facebook: { label: 'Facebook', icon: '📘' },
+    twitter: { label: 'Twitter / X', icon: '🐦' },
+    linkedin: { label: 'LinkedIn', icon: '💼' },
+    github: { label: 'GitHub', icon: '🐙' },
+    gitlab: { label: 'GitLab', icon: '🦊' },
+    bitbucket: { label: 'Bitbucket', icon: '🪣' },
+    stackoverflow: { label: 'Stack Overflow', icon: '📚' },
+    leetcode: { label: 'LeetCode', icon: '🧩' },
+    hackerrank: { label: 'HackerRank', icon: '💻' },
+    codeforces: { label: 'Codeforces', icon: '🏆' },
+    kaggle: { label: 'Kaggle', icon: '📊' },
+    medium: { label: 'Medium', icon: '📝' },
+    devto: { label: 'Dev.to', icon: '👩‍💻' },
+    hashnode: { label: 'Hashnode', icon: '📰' },
+    youtube: { label: 'YouTube', icon: '🎬' },
+    instagram: { label: 'Instagram', icon: '📸' },
+    tiktok: { label: 'TikTok', icon: '🎵' },
+    dribbble: { label: 'Dribbble', icon: '🏀' },
+    behance: { label: 'Behance', icon: '🎨' },
+    figma: { label: 'Figma Community', icon: '🎯' },
+    producthunt: { label: 'Product Hunt', icon: '🚀' },
+    upwork: { label: 'Upwork', icon: '💼' },
+    fiverr: { label: 'Fiverr', icon: '🤝' },
+    freelancer: { label: 'Freelancer', icon: '👨‍💼' },
+    website: { label: 'Website / Portfolio', icon: '🌐' },
+};
+
+function SocialLinks({ links }: { links: SocialLink[] }) {
+    if (links.length === 0) return null;
+    return (
+        <div className="mt-3 flex flex-wrap gap-2">
+            {links.map((link, i) => {
+                const platform = PLATFORM_ICONS[link.platform] ?? { label: link.platform, icon: '🌐' };
+                return (
+                    <a
+                        key={i}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={platform.label}
+                        className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                    >
+                        <span>{platform.icon}</span>
+                        <span>{platform.label}</span>
+                    </a>
+                );
+            })}
+        </div>
+    );
+}
 
 interface MentorData {
     id?: number;
@@ -8,6 +61,7 @@ interface MentorData {
     avatar: string | null;
     headline?: string | null;
     bio?: string | null;
+    social_links?: SocialLink[] | null;
 }
 
 interface MentorCardProps {
@@ -89,6 +143,9 @@ export default function MentorCard({ mentor, locale, variant = 'card', linked = 
                     {mentor.bio && (
                         <p className="mt-2 max-w-prose whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">{mentor.bio}</p>
                     )}
+                    {mentor.social_links && mentor.social_links.length > 0 && (
+                        <SocialLinks links={mentor.social_links} />
+                    )}
                     {children}
                 </div>
             </div>
@@ -114,6 +171,9 @@ export default function MentorCard({ mentor, locale, variant = 'card', linked = 
                 )}
                 {mentor.bio && (
                     <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">{mentor.bio}</p>
+                )}
+                {mentor.social_links && mentor.social_links.length > 0 && (
+                    <SocialLinks links={mentor.social_links} />
                 )}
             </div>
         </div>

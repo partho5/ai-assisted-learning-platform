@@ -101,7 +101,7 @@ class CourseController extends Controller
         }
 
         $course->load([
-            'authors:id,name,username,avatar,headline,bio',
+            'authors:id,name,username,avatar,headline,bio,social_links',
             'category',
             'modules' => fn ($q) => $q->orderBy('order'),
             'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at'),
@@ -138,7 +138,7 @@ class CourseController extends Controller
         $this->authorizeOwner($course);
 
         $course->load([
-            'authors:id,name,username,avatar,headline,bio',
+            'authors:id,name,username,avatar,headline,bio,social_links',
             'category',
             'modules' => fn ($q) => $q->orderBy('order'),
             'modules.resources' => fn ($q) => $q->orderBy('order')->orderBy('created_at'),

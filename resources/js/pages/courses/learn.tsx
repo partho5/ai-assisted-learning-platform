@@ -262,7 +262,7 @@ function QuestionField({
     value: string;
     onChange: (v: string) => void;
 }) {
-    if (question.question_type === 'multiple_choice' || question.question_type === 'dropdown') {
+    if (question.question_type === 'multiple_choice') {
         return (
             <div className="space-y-2">
                 {question.options.map((opt) => (
@@ -279,6 +279,23 @@ function QuestionField({
                     </label>
                 ))}
             </div>
+        );
+    }
+
+    if (question.question_type === 'dropdown') {
+        return (
+            <select
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-ring"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            >
+                <option value="">Select an option...</option>
+                {question.options.map((opt) => (
+                    <option key={opt.id} value={String(opt.id)}>
+                        {opt.label}
+                    </option>
+                ))}
+            </select>
         );
     }
 
@@ -342,12 +359,21 @@ function TestPreview({
 }) {
     const questions = resource.test?.questions ?? [];
     const isAssignment = resource.type === 'assignment';
+    const [showSignInPopup, setShowSignInPopup] = useState(false);
+
+    function handleInteraction() {
+        if (isGuest) {
+            setShowSignInPopup(true);
+            setTimeout(() => setShowSignInPopup(false), 5000);
+        }
+    }
 
     return (
         <div className="mt-4 space-y-4">
             <h3 className="text-lg font-semibold">{isAssignment ? 'Assignment' : 'Self-Check'}</h3>
 
-            <div className="pointer-events-none select-none space-y-3 opacity-60">
+            {/* Questions — look interactive but intercept clicks for guests */}
+            <div className="relative space-y-3" onClick={isGuest ? handleInteraction : undefined}>
                 {questions.map((question, index) => (
                     <div key={question.id} className="rounded-lg border border-border bg-card p-4">
                         <div className="mb-1 flex items-start justify-between gap-2">
@@ -360,14 +386,48 @@ function TestPreview({
                             </span>
                         </div>
                         {question.hint && <p className="mb-2 text-sm text-muted-foreground">{question.hint}</p>}
-                        <QuestionField question={question} value="" onChange={() => {}} />
+                        {isGuest ? (
+                            <div className="pointer-events-none">
+                                <QuestionField question={question} value="" onChange={() => {}} />
+                            </div>
+                        ) : (
+                            <QuestionField question={question} value="" onChange={() => {}} />
+                        )}
                     </div>
                 ))}
-                <Button disabled className="w-full opacity-50">
+                <Button disabled className="w-full opacity-50" onClick={isGuest ? handleInteraction : undefined}>
                     Submit Test
                 </Button>
             </div>
 
+            {/* Sign-in popup — slides up from bottom, non-intrusive */}
+            {isGuest && showSignInPopup && (
+                <div className="fixed bottom-50 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300">
+                    <div className="mx-auto max-w-lg rounded-t-xl border border-b-0 border-border px-6 py-4 shadow-lg bg-amber-100">
+                        <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium text-foreground">
+                                Please sign in to take this test
+                            </p>
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setShowSignInPopup(false); }}
+                                className="text-red-400 hover:text-red-500 text-muted-foreground hover:text-foreground text-3xl leading-none"
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div className="mt-3 flex gap-2">
+                            <Link href="/register">
+                                <Button size="compact">Sign up free</Button>
+                            </Link>
+                            <Link href="/login">
+                                <Button size="compact" variant="secondary">Log in</Button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* "Want to take this test?" section — always visible */}
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-center">
                 {isGuest ? (
                     <>
@@ -794,11 +854,31 @@ export default function Learn({ course, initialResourceId, resources, enrollment
     const sidebarRef = useRef<HTMLDivElement>(null);
     const resourceRefs = useRef<Map<number, HTMLElement>>(new Map());
 
-    // Initial scroll: hash takes priority, then initialResourceId
+    // localStorage key for persisting scroll position
+    const scrollStorageKey = `learn-scroll-${course.slug}`;
+
+    // Initial scroll: hash takes priority, then localStorage, then initialResourceId
     useEffect(() => {
         const hash = window.location.hash;
-        const match = hash.match(/^#r-(\d+)$/);
-        const targetId = match ? parseInt(match[1]) : initialResourceId;
+        const hashMatch = hash.match(/^#r-(\d+)$/);
+        let targetId = initialResourceId;
+
+        if (hashMatch) {
+            targetId = parseInt(hashMatch[1]);
+        } else {
+            try {
+                const saved = localStorage.getItem(scrollStorageKey);
+                if (saved) {
+                    const savedId = parseInt(saved);
+                    if (resources.some((r) => r.id === savedId)) {
+                        targetId = savedId;
+                    }
+                }
+            } catch {
+                // localStorage unavailable — ignore
+            }
+        }
+
         requestAnimationFrame(() => {
             document.getElementById(`r-${targetId}`)?.scrollIntoView({ behavior: 'instant', block: 'start' });
         });
@@ -850,10 +930,15 @@ export default function Learn({ course, initialResourceId, resources, enrollment
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Update URL hash when active resource changes
+    // Update URL hash and localStorage when active resource changes
     useEffect(() => {
         history.replaceState(null, '', `#r-${activeResourceId}`);
-    }, [activeResourceId]);
+        try {
+            localStorage.setItem(scrollStorageKey, String(activeResourceId));
+        } catch {
+            // localStorage unavailable — ignore
+        }
+    }, [activeResourceId, scrollStorageKey]);
 
     // Sync sidebar: scroll active item into view (skip when user clicked a sidebar item)
     useEffect(() => {

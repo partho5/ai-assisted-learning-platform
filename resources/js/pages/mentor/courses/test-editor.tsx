@@ -1,5 +1,5 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
     store as testStore,
     update as testUpdate,
@@ -305,6 +305,19 @@ function QuestionCard({
     const isAiGraded = q.question_type === 'paragraph';
     const isDateOrTime = q.question_type === 'date' || q.question_type === 'time';
 
+    const [focusOptionId, setFocusOptionId] = useState<string | null>(null);
+    const optionInputRefs = useRef<Map<string, HTMLInputElement>>(new Map());
+
+    useEffect(() => {
+        if (focusOptionId) {
+            const input = optionInputRefs.current.get(focusOptionId);
+            if (input) {
+                input.focus();
+                setFocusOptionId(null);
+            }
+        }
+    }, [focusOptionId, q.options]);
+
     // ── Local state mutators ───────────────────────────────────────────────
     const set = useCallback(
         <K extends keyof LocalQuestion>(key: K, value: LocalQuestion[K]) => {
@@ -322,11 +335,13 @@ function QuestionCard({
     }
 
     function addOption() {
+        const newTempId = makeTempId();
         onUpdate(q.tempId, {
             ...q,
             dirty: true,
-            options: [...q.options, { tempId: makeTempId(), label: '', is_correct: false }],
+            options: [...q.options, { tempId: newTempId, label: '', is_correct: false }],
         });
+        setFocusOptionId(newTempId);
     }
 
     function removeOption(optTempId: string) {
@@ -557,6 +572,10 @@ function QuestionCard({
                                             title="Mark as correct"
                                         />
                                         <Input
+                                            ref={(el) => {
+                                                if (el) optionInputRefs.current.set(opt.tempId, el);
+                                                else optionInputRefs.current.delete(opt.tempId);
+                                            }}
                                             className="flex-1 h-8 text-sm"
                                             placeholder={`Option ${idx + 1}`}
                                             value={opt.label}
@@ -695,6 +714,7 @@ export default function TestEditor({ course, module, resource, test, questions: 
     const [questions, setQuestions] = useState<LocalQuestion[]>(() =>
         serverQuestions.map((q) => serverQuestionToLocal(q)),
     );
+    const questionsEndRef = useRef<HTMLDivElement>(null);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'My Courses', href: `/${l}/courses` },
@@ -706,6 +726,9 @@ export default function TestEditor({ course, module, resource, test, questions: 
     function addQuestion() {
         const nextOrder = questions.length > 0 ? Math.max(...questions.map((q) => q.order)) + 1 : 1;
         setQuestions((prev) => [...prev, makeBlankQuestion(nextOrder)]);
+        requestAnimationFrame(() => {
+            questionsEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
     }
 
     const handleUpdate = useCallback((tempId: string, updated: LocalQuestion) => {
@@ -768,6 +791,7 @@ export default function TestEditor({ course, module, resource, test, questions: 
                             />
                         ))}
 
+                        <div ref={questionsEndRef} />
                         <Button size="compact" onClick={addQuestion} className="w-full bg-green-500 hover:bg-green-600 mt-4">+ Add Question</Button>
                     </div>
                 )}

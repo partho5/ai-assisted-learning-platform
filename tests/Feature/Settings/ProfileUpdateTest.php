@@ -79,6 +79,49 @@ class ProfileUpdateTest extends TestCase
         $this->assertNull($user->fresh());
     }
 
+    public function test_social_links_can_be_updated()
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'email' => $user->email,
+                'social_links' => [
+                    ['platform' => 'github', 'url' => 'https://github.com/testuser'],
+                    ['platform' => 'website', 'url' => 'https://example.com'],
+                ],
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('profile.edit'));
+
+        $user->refresh();
+
+        $this->assertCount(2, $user->social_links);
+        $this->assertSame('github', $user->social_links[0]['platform']);
+        $this->assertSame('https://github.com/testuser', $user->social_links[0]['url']);
+    }
+
+    public function test_social_links_require_valid_urls()
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->patch(route('profile.update'), [
+                'name' => $user->name,
+                'email' => $user->email,
+                'social_links' => [
+                    ['platform' => 'github', 'url' => 'not-a-url'],
+                ],
+            ]);
+
+        $response->assertSessionHasErrors('social_links.0.url');
+    }
+
     public function test_correct_password_must_be_provided_to_delete_account()
     {
         $user = User::factory()->create();

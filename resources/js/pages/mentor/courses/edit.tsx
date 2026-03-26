@@ -876,8 +876,17 @@ function ResourceForm({
                             />
                         </Field>
                     )}
+                    <Field label="Importance of this lesson (why it's helpful)" error={form.errors.why_this_resource} required>
+                        <span className="text-red-500">Keep as short as possible</span>
+                        <RichTextEditor
+                            value={form.data.why_this_resource}
+                            onChange={(content) => form.setData('why_this_resource', content)}
+                            disabled={form.processing}
+                            placeholder="Why did you choose this specific lesson?"
+                        />
+                    </Field>
                     {form.data.type === 'text' && (
-                        <Field label="Content" error={form.errors.content}>
+                        <Field label="Content" error={form.errors.content} required>
                             <RichTextEditor
                                 value={form.data.content}
                                 onChange={(content) => form.setData('content', content)}
@@ -911,15 +920,6 @@ function ResourceForm({
                 {/* ── Guidance ── */}
                 <div className="flex flex-col gap-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-800/40 dark:bg-emerald-950/20">
                     <p className="text-[14px] font-semibold tracking-widest text-emerald-600 dark:text-emerald-400">Guidance for Learners</p>
-                    <Field label="Importance of this lesson (why it's helpful)" error={form.errors.why_this_resource} required>
-                        <span className="text-red-500">Keep as short as possible</span>
-                        <RichTextEditor
-                            value={form.data.why_this_resource}
-                            onChange={(content) => form.setData('why_this_resource', content)}
-                            disabled={form.processing}
-                            placeholder="Why did you choose this specific lesson?"
-                        />
-                    </Field>
                     <Field label="Mentor note (optional)" error={form.errors.mentor_note}>
                         <Input
                             value={form.data.mentor_note}
