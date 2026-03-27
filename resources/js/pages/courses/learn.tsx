@@ -611,12 +611,16 @@ function ResourceBlock({
     enrollment,
     locale,
     isGuest,
+    lessonNumber,
+    moduleNumber,
 }: {
     resource: EnrichedResource;
     courseSlug: string;
     enrollment: Enrollment | null;
     locale: string;
     isGuest: boolean;
+    lessonNumber: number;
+    moduleNumber: number;
 }) {
     const isObserverLocked = !resource.is_free && (!enrollment || enrollment.access_level === 'observer');
     const isAssignment = resource.type === 'assignment';
@@ -637,8 +641,13 @@ function ResourceBlock({
     return (
         <div>
             {/* Resource header */}
-            <div className="mb-4 px-2  dark:text-gray-100">
-                <h2 className="text-xl text-blue-600 font-bold">{resource.title}</h2>
+            <div className="mb-4 px-2 dark:text-gray-100">
+                <h2 className="text-xl text-blue-600 font-bold">
+                <span aria-hidden="true" className="mr-2 sm:mr-2 block sm:inline mb-1 sm:mb-0 w-fit px-2 py-0.5 rounded text-xs bg-gray-900 text-gray-100 font-normal align-middle">
+                    Module {moduleNumber} — Lesson {lessonNumber}
+                </span>
+                    {resource.title}
+                </h2>
                 {resource.estimated_time && (
                     <p className="mt-0.5 text-base text-muted-foreground">
                         ~{resource.estimated_time} min
@@ -1119,7 +1128,10 @@ export default function Learn({ course, initialResourceId, resources, enrollment
 
             {/* ── Main content — continuous scroll ── */}
             <main ref={mainRef} className="flex-1 overflow-y-auto max-w-6xl mx-auto px-1 py-6 md:py-8">
-                {resources.map((resource) => (
+                {resources.map((resource, index) => {
+                    const lessonNumber = resources.slice(0, index).filter(r => r.module_id === resource.module_id).length + 1;
+                    const moduleNumber = [...new Set(resources.slice(0, index + 1).map(r => r.module_id))].indexOf(resource.module_id) + 1;
+                    return (
                     <section
                         key={resource.id}
                         id={`r-${resource.id}`}
@@ -1135,9 +1147,12 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                             enrollment={enrollment}
                             locale={l}
                             isGuest={isGuest}
+                            lessonNumber={lessonNumber}
+                            moduleNumber={moduleNumber}
                         />
                     </section>
-                ))}
+                    );
+                })}
             </main>
         </div>
         </div>
