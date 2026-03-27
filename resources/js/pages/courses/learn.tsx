@@ -637,7 +637,7 @@ function ResourceBlock({
     return (
         <div>
             {/* Resource header */}
-            <div className="mb-4 px-2">
+            <div className="mb-4 px-2  dark:text-gray-100">
                 <h2 className="text-xl text-blue-600 font-bold">{resource.title}</h2>
                 {resource.estimated_time && (
                     <p className="mt-0.5 text-base text-muted-foreground">
@@ -647,7 +647,7 @@ function ResourceBlock({
             </div>
 
             {resource.why_this_resource && (
-                <div className="mb-4 rounded-lg border border-border bg-muted/30 p-2 md:p-4 text-base">
+                <div className="mb-4 rounded-lg border border-border bg-muted/30 p-2 md:p-4 text-base dark:text-gray-100">
                     <span className="mb-1 block font-medium">
                         Importance of this lesson:
                     </span>
@@ -660,7 +660,7 @@ function ResourceBlock({
 
             {/* Observer locked overlay */}
             {isObserverLocked ? (
-                <div className="rounded-xl border border-border bg-muted/30 p-8 text-center">
+                <div className="rounded-xl border border-border bg-muted/30 p-8 text-center  dark:text-gray-100">
                     <div className="mb-2 text-3xl">🔒</div>
                     <p className="text-sm font-medium">
                         This lesson requires full access
@@ -680,7 +680,7 @@ function ResourceBlock({
 
                     {/* Caption — all types except text */}
                     {resource.caption && resource.type !== 'text' && (
-                        <div className="mb-5">
+                        <div className="mb-5  dark:text-gray-100">
                             <RichHtml content={resource.caption} className="text-base text-muted-foreground" />
                         </div>
                     )}
@@ -1010,9 +1010,10 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                     <h2 className="mb-3 text-sm font-semibold p-2">{course.title}</h2>
 
                     {/* Module + resource list */}
-                    {course.modules.map((mod) => (
+                    {course.modules.map((mod, index) => (
                         <div key={mod.id} className="mb-3">
-                            <p className="mb-1 p-2 text-xs font-semibold  tracking-wide text-muted-foreground">
+                            <span className="ml-2 px-2.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700">Module <strong className="ml-1">{index + 1}</strong> </span>
+                            <p className=" -mt-2 p-2 text-base font-semibold  tracking-wide ">
                                 {mod.title}
                             </p>
                             <ul className="space-y-0.5">

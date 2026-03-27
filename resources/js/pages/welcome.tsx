@@ -335,10 +335,8 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             </span>
                         </h1>
 
-                        <p className="mx-auto mb-10 max-w-xl text-lg text-slate-600">
-                            Complete real assignments, get them publicly
-                            endorsed, that proves what you can{' '}
-                            <i>actually do</i>.
+                        <p className="mx-auto mb-10 max-w-xl text-lg text-slate-600 dark:text-slate-300">
+                            Learners get direct help from industry experts
                         </p>
 
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
