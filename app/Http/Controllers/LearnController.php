@@ -126,6 +126,7 @@ class LearnController extends Controller
             'slug' => $course->slug,
             'thumbnail' => $course->thumbnail,
             'description' => $course->description,
+            'updated_at' => $course->updated_at,
             'modules' => $course->modules->map(fn ($m) => [
                 'id' => $m->id,
                 'title' => $m->title,

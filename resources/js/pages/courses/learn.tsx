@@ -49,6 +49,7 @@ interface LearnCourse {
     slug: string;
     thumbnail: string | null;
     description: string | null;
+    updated_at: string | null;
     modules: SidebarModule[];
 }
 
@@ -1017,6 +1018,12 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                     )}
 
                     <h2 className="mb-3 text-sm font-semibold p-2">{course.title}</h2>
+
+                    {course.updated_at && (
+                        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800/40 dark:text-gray-300 block mx-auto mb-3 w-fit">
+                            Updated {new Date(course.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                    )}
 
                     {/* Module + resource list */}
                     {course.modules.map((mod, index) => (
