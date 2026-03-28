@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import MentorCard from '@/components/mentor-card';
 import RichHtml from '@/components/rich-html';
 import PublicLayout from '@/layouts/public-layout';
+import { trackCourseView, trackEnroll } from '@/lib/analytics';
 import { captureReferral } from '@/lib/referral';
 import type { Course, Enrollment } from '@/types';
 
@@ -43,6 +44,8 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
             ? `${Math.round(course.estimated_duration / 60)} hours`
             : `${course.estimated_duration} min`
         : null;
+
+    useEffect(() => { trackCourseView(course.id, course.title); }, [course.id]);
 
     // Detect ?ref= query parameter for partner referral tracking
     useEffect(() => {
@@ -77,6 +80,7 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
     }, []);
 
     function handleEnroll() {
+        trackEnroll(course.id, course.title);
         router.post(enrollStore.url({ locale: l, course: course.slug }));
     }
 

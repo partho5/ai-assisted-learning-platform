@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, CheckCircle, ChevronRight, Sparkles, Users } from
 import { Button } from '@/components/ui/button';
 import { RotatingText } from '@/components/rotating-text';
 import PublicLayout from '@/layouts/public-layout';
+import { trackLandingCta } from '@/lib/analytics';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { register } from '@/routes';
 
@@ -355,7 +356,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 size="lg"
                                 className="group bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md hover:from-black hover:to-blue-700"
                             >
-                                <Link href={coursesIndex.url(l)}>
+                                <Link href={coursesIndex.url(l)} onClick={() => trackLandingCta('hero_browse_courses')}>
                                     Browse courses
                                     <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                                 </Link>
@@ -920,7 +921,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     variant="secondary"
                                     className="w-full"
                                 >
-                                    <Link href={register()}>
+                                    <Link href={register()} onClick={() => trackLandingCta('pricing_get_started')}>
                                         Get started free
                                     </Link>
                                 </Button>
@@ -963,7 +964,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 ))}
                             </ul>
                             <Button asChild variant="enroll" className="w-full">
-                                <Link href={coursesIndex.url(l)}>
+                                <Link href={coursesIndex.url(l)} onClick={() => trackLandingCta('pricing_browse_courses')}>
                                     Browse courses
                                 </Link>
                             </Button>
@@ -998,7 +999,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     </p>
                     {canRegister && (
                         <Button asChild variant="enroll" size="lg">
-                            <Link href={register()}>
+                            <Link href={register()} onClick={() => trackLandingCta('final_sign_up')}>
                                 Sign up free{' '}
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>

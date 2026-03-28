@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import PublicLayout from '@/layouts/public-layout';
+import { trackTestSubmit, trackResourceComplete } from '@/lib/analytics';
 import type {
     BreadcrumbItem,
     Enrollment,
@@ -534,6 +535,7 @@ function TestForm({
             body: JSON.stringify({ answers: buildAnswers() }),
         });
 
+        trackTestSubmit(resource.test!.id, courseSlug);
         router.post(submitAttempt.url({ locale, attempt: attempt.id }), {}, { preserveScroll: true });
     }
 
@@ -632,6 +634,7 @@ function ResourceBlock({
         resource.completion?.status === 'in_progress';
 
     function handleMarkComplete() {
+        trackResourceComplete(resource.id, courseSlug);
         router.post(
             markComplete.url({ locale, course: courseSlug, resource: resource.id }),
             {},

@@ -12,6 +12,7 @@ import {
     createSubscription,
     activateSubscription,
 } from '@/actions/App/Http/Controllers/PaymentController';
+import { trackPurchase } from '@/lib/analytics';
 import { getReferral, clearReferral } from '@/lib/referral';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -227,6 +228,7 @@ export function CheckoutModal({ course, locale, isOpen, onClose }: Props) {
 
     function handleSuccess() {
         setSucceeded(true);
+        trackPurchase(course.id, course.title, finalPrice, course.currency ?? 'USD');
         clearReferral(course.slug);
         setTimeout(() => {
             onClose();

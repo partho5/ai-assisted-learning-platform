@@ -34,12 +34,12 @@ export function trackPurchase(courseId: number, courseTitle: string, amount: num
     trackEvent('purchase', { course_id: courseId, course_title: courseTitle, value: amount, currency });
 }
 
-export function trackTestSubmit(testId: number, courseId: number): void {
-    trackEvent('test_submit', { test_id: testId, course_id: courseId });
+export function trackTestSubmit(testId: number, courseSlug: string): void {
+    trackEvent('test_submit', { test_id: testId, course_slug: courseSlug });
 }
 
-export function trackResourceComplete(resourceId: number, courseId: number): void {
-    trackEvent('resource_complete', { resource_id: resourceId, course_id: courseId });
+export function trackResourceComplete(resourceId: number, courseSlug: string): void {
+    trackEvent('resource_complete', { resource_id: resourceId, course_slug: courseSlug });
 }
 
 export function trackSignUp(method: string = 'email'): void {
