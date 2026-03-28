@@ -19,7 +19,7 @@ class ResourceController extends Controller
 
         $data = $request->validated();
         $data['module_id'] = $module->id;
-        $data['order'] = $data['order'] ?? $module->resources()->max('order') + 1;
+        $data['order'] = $module->resources()->max('order') + 1;
 
         $module->resources()->create($data);
 

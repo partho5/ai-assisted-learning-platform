@@ -48,7 +48,7 @@ class ResourceManagementTest extends TestCase
         ]);
     }
 
-    public function test_why_this_resource_is_required(): void
+    public function test_why_this_resource_is_nullable(): void
     {
         $mentor = User::factory()->mentor()->create();
         $course = Course::factory()->for($mentor, 'mentor')->create();
@@ -60,7 +60,7 @@ class ResourceManagementTest extends TestCase
                 'type' => ResourceType::Video->value,
                 'url' => 'https://youtube.com/watch?v=xyz',
             ])
-            ->assertSessionHasErrors('why_this_resource');
+            ->assertSessionHasNoErrors();
     }
 
     public function test_url_is_required_for_video_resource(): void
