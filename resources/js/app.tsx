@@ -1,10 +1,11 @@
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
 import { initializeFontScale } from './hooks/use-font-scale';
+import { trackPageView } from './lib/analytics';
 
 const appName = import.meta.env.VITE_APP_NAME;
 
@@ -34,3 +35,8 @@ initializeTheme();
 
 // This will apply font scale preference on load...
 initializeFontScale();
+
+// Track SPA page navigations in Google Analytics...
+router.on('navigate', () => {
+    trackPageView(window.location.href, document.title);
+});

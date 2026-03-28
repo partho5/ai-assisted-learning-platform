@@ -1,8 +1,13 @@
 import type { Auth } from '@/types/auth';
 
+/** Google Analytics gtag interface */
+type GtagCommand = 'config' | 'event' | 'js' | 'set';
+
 /** OneSignal SDK global interface */
 declare global {
     interface Window {
+        gtag?: (command: GtagCommand, ...args: unknown[]) => void;
+        dataLayer?: unknown[];
         OneSignal?: {
             Notifications?: {
                 requestPermission(): Promise<void>;

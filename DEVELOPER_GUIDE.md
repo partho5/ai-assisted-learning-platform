@@ -477,10 +477,75 @@ Route::get('courses', CourseController::class)
 
 ---
 
+## Google Analytics
+
+### Setup
+
+**File:** `.env`
+
+```env
+GA_MEASUREMENT_ID=G-XXXXXXXXXX   # Your Google Analytics Measurement ID
+# Leave blank to disable GA entirely (no script is injected)
+```
+
+**Config:** `config/services.php` → `services.google.analytics_id`
+
+GA is only injected when `GA_MEASUREMENT_ID` is set. Leave it empty locally to avoid polluting your analytics data.
+
+### How it works
+
+- **Blade** (`resources/views/app.blade.php`) — injects the `gtag.js` script with `send_page_view: false` (prevents double-counting the first load)
+- **React** (`resources/js/app.tsx`) — listens to Inertia's `navigate` event and fires a `page_view` for every SPA navigation
+
+Because the app uses `/en/` and `/bn/` locale prefixes, those are tracked as separate pages (intentional — they are genuinely separate content).
+
+### Custom Events
+
+All custom events live in [`resources/js/lib/analytics.ts`](resources/js/lib/analytics.ts). Import and call wherever needed:
+
+```ts
+import { trackCourseView, trackEnroll, trackPurchase, trackLandingCta } from '@/lib/analytics';
+
+// In a useEffect or event handler:
+trackCourseView(course.id, course.title);
+trackEnroll(course.id, course.title);
+trackPurchase(course.id, course.title, 29.99, 'USD');
+trackLandingCta('hero_get_started');
+```
+
+**Available helpers:**
+
+| Helper | Fires GA event |
+|--------|---------------|
+| `trackCourseView(id, title)` | `course_view` |
+| `trackEnroll(id, title)` | `enroll` |
+| `trackPurchase(id, title, amount, currency)` | `purchase` |
+| `trackTestSubmit(testId, courseId)` | `test_submit` |
+| `trackResourceComplete(resourceId, courseId)` | `resource_complete` |
+| `trackSignUp(method?)` | `sign_up` |
+| `trackLogin(method?)` | `login` |
+| `trackLandingCta(ctaName)` | `landing_cta_click` |
+| `trackEvent(name, params?)` | any custom event |
+
+**To add a new event**, add a function to `analytics.ts`:
+
+```ts
+export function trackForumPost(threadId: number): void {
+    trackEvent('forum_post', { thread_id: threadId });
+}
+```
+
+### Kill switch
+
+Clear `GA_MEASUREMENT_ID` in `.env` → no script is loaded, no events fire. No code change or rebuild needed.
+
+---
+
 ## Deployment Checklist
 
 Before deploying to production:
 
+- [ ] Set `GA_MEASUREMENT_ID=G-XXXXXXXXXX` in `.env`
 - [ ] Enable email verification: `Features::emailVerification()`
 - [ ] Set `APP_DEBUG=false` in `.env`
 - [ ] Run `php artisan config:cache`

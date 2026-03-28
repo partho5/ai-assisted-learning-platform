@@ -41,6 +41,16 @@
             }
         </style>
 
+        @if(config('services.google.analytics_id'))
+            <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics_id') }}"></script>
+            <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '{{ config('services.google.analytics_id') }}', { send_page_view: false });
+            </script>
+        @endif
+
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
         {{-- Server-side OG meta tags for social media crawlers (they don't execute JS) --}}

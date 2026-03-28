@@ -62,4 +62,8 @@ return [
         'api_secret' => env('CLOUDINARY_API_SECRET'),
     ],
 
+    'google' => [
+        'analytics_id' => env('GA_MEASUREMENT_ID'),
+    ],
+
 ];
