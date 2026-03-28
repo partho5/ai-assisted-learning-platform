@@ -157,7 +157,7 @@ function makeBlankQuestion(order: number): LocalQuestion {
         question_type: 'multiple_choice',
         body: '',
         hint: '',
-        points: 1,
+        points: 3,
         correct_answer: '',
         ai_rubric: '',
         numeric_operator: 'eq',
@@ -525,6 +525,7 @@ function QuestionCard({
                                     value={q.body}
                                     onChange={(e) => set('body', e.target.value)}
                                     placeholder="Type your question here…"
+                                    autoFocus={!q.serverId}
                                 />
                             </div>
                             <div className="grid gap-3 sm:grid-cols-2">

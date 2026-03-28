@@ -372,8 +372,6 @@ function TestPreview({
 
     return (
         <div className="mt-4 space-y-4">
-            <h3 className="text-lg font-semibold">{isAssignment ? 'Assignment' : 'Self-Check'}</h3>
-
             {/* Questions — look interactive but intercept clicks for guests */}
             <div className="relative space-y-3" onClick={isGuest ? handleInteraction : undefined}>
                 {questions.map((question, index) => (
@@ -659,7 +657,7 @@ function ResourceBlock({
                 )}
             </div>
 
-            {resource.why_this_resource && (
+            {resource.why_this_resource && resource.why_this_resource.replace(/<[^>]*>/g, '').trim() && (
                 <div className="mb-4 rounded-lg border border-border bg-muted/30 p-2 md:p-4 text-base dark:text-gray-100">
                     <span className="mb-1 block font-medium">
                         Importance of this lesson:
@@ -711,10 +709,7 @@ function ResourceBlock({
                     {/* Test / assignment — enrolled only */}
                     {hasTest && enrollment && (
                         <div className="mt-4 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-semibold">
-                                    {isAssignment ? 'Assignment' : 'Self-Check'}
-                                </h3>
+                            <div className="flex items-center justify-end">
                                 {isCompleted && <Badge>Endorsed ✓</Badge>}
                                 {!isCompleted && isSubmitted && (
                                     <Badge variant="secondary">Submitted</Badge>

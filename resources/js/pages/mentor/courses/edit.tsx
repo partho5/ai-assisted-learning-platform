@@ -876,7 +876,7 @@ function ResourceForm({
                             />
                         </Field>
                     )}
-                    <Field label="Importance of this lesson (why it's helpful)" error={form.errors.why_this_resource} required>
+                    <Field label="Importance of this lesson (why it's helpful)" error={form.errors.why_this_resource} required={form.data.type !== 'assignment'}>
                         <span className="text-red-500">Keep as short as possible</span>
                         <RichTextEditor
                             value={form.data.why_this_resource}
@@ -960,12 +960,14 @@ function ResourceForm({
 
 function ModulePanel({
     module,
+    moduleIndex,
     courseSlug,
     locale,
     resourceTypes,
     dragHandleProps,
 }: {
     module: CourseModule;
+    moduleIndex: number;
     courseSlug: string;
     locale: string;
     resourceTypes: SelectOption[];
@@ -1049,7 +1051,10 @@ function ModulePanel({
                             >
                                 <GripVertical className="h-4 w-4" />
                             </button>
-                            <h3 className="truncate font-semibold text-violet-900 dark:text-violet-100">{module.title}</h3>
+                            <h3 className="truncate font-semibold text-violet-900 dark:text-violet-100">
+                                <span className="mr-1 text-xs font-normal bg-gray-900 text-gray-200 px-1 py-0.5 rounded">Module {moduleIndex + 1}</span>
+                                {module.title}
+                            </h3>
                         </div>
                         <div className="flex items-center gap-1">
                             <Button type="button" variant="ghost" size="compact" onClick={() => setEditingModule(true)}>
@@ -1235,10 +1240,11 @@ export default function CourseEdit({ course, categories, difficulties, languages
 
                     <DndContext sensors={sensors} onDragEnd={handleModuleDragEnd}>
                         <SortableContext items={modules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
-                            {modules.map((module) => (
+                            {modules.map((module, index) => (
                                 <SortableModulePanel
                                     key={module.id}
                                     module={module}
+                                    moduleIndex={index}
                                     courseSlug={course.slug}
                                     locale={l}
                                     resourceTypes={resourceTypes}

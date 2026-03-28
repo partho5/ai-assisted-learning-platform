@@ -28,7 +28,7 @@ class UpdateResourceRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::enum(ResourceType::class)],
-            'why_this_resource' => ['required', 'string'],
+            'why_this_resource' => [$type === ResourceType::Assignment->value ? 'nullable' : 'required', 'nullable', 'string'],
             'url' => [$requiresUrl ? 'required' : 'nullable', 'nullable', 'url', 'max:2048'],
             'content' => [$type === ResourceType::Text->value ? 'required' : 'nullable', 'string'],
             'caption' => ['nullable', 'string'],

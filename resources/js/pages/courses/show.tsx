@@ -289,14 +289,14 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                                 Curriculum
                             </h2>
                             <div className="flex flex-col gap-3">
-                                {course.modules.map((module) => (
+                                {course.modules.map((module, moduleIndex) => (
                                     <div
                                         key={module.id}
                                         className="overflow-hidden rounded-xl border border-border bg-card"
                                     >
                                         <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-3">
                                             <h3 className="font-semibold">
-                                                {module.title}
+                                                Module {moduleIndex + 1} — {module.title}
                                             </h3>
                                             <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-600 dark:bg-violet-900/40 dark:text-violet-300">
                                                 {module.resources.length} lesson
