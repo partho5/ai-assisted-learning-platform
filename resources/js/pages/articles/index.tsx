@@ -4,6 +4,7 @@ import {
     edit as articleEdit,
     destroy as articleDestroy,
     show as articleShow,
+    preview as articlePreview,
     index as articleIndex,
 } from '@/actions/App/Http/Controllers/ArticleController';
 import { Badge } from '@/components/ui/badge';
@@ -80,7 +81,9 @@ function AuthorView({ articles, isAdmin, locale, user }: AuthorProps & { locale:
                                 <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <Link
-                                            href={articleShow.url({ locale, article: article.slug })}
+                                            href={article.status === 'published'
+                                                ? articleShow.url({ locale, article: article.slug })
+                                                : articlePreview.url({ locale, article: article.slug })}
                                             className="font-medium hover:underline"
                                         >
                                             {article.title}
@@ -249,7 +252,7 @@ function ArticleCard({ article, locale }: { article: Article; locale: string }) 
                 <div className="aspect-video overflow-hidden">
                     <img
                         src={article.featured_image}
-                        alt={article.title}
+                        alt={article.featured_image_alt ?? article.title}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                 </div>

@@ -29,13 +29,15 @@ class StoreArticleRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', 'unique:articles,slug', 'regex:/^[a-z0-9\-]+$/'],
-            'excerpt' => ['nullable', 'string', 'max:160'],
+            'excerpt' => ['nullable', 'string', 'max:500'],
             'body' => ['required', 'string'],
             'featured_image' => ['nullable', 'url', 'max:2048'],
+            'featured_image_alt' => ['nullable', 'string', 'max:255'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string', 'max:50'],
             'category_id' => ['nullable', 'exists:categories,id'],
             'status' => ['required', Rule::enum(ArticleStatus::class)],
+            'publish_at' => ['required_if:status,scheduled', 'nullable', 'date'],
         ];
     }
 }

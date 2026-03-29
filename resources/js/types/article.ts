@@ -1,7 +1,7 @@
 import type { User } from './auth';
 import type { Category } from './course';
 
-export type ArticleStatus = 'draft' | 'published';
+export type ArticleStatus = 'draft' | 'scheduled' | 'published';
 
 export type Article = {
     id: number;
@@ -12,6 +12,7 @@ export type Article = {
     excerpt: string | null;
     body: string | null;
     featured_image: string | null;
+    featured_image_alt: string | null;
     tags: string[] | null;
     status: ArticleStatus;
     read_time_minutes: number;

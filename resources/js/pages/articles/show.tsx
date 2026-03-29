@@ -21,9 +21,10 @@ interface Props {
     ogUrl: string;
     appUrl: string;
     schemaTypes: SchemaTypes;
+    isPreview?: boolean;
 }
 
-export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Props) {
+export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPreview = false }: Props) {
     const { auth, locale, name } = usePage().props as Record<string, any>;
     const l = String(locale);
     const appName = String(name);
@@ -172,7 +173,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
                 <meta property="og:image" content={ogImage} />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
-                <meta property="og:image:alt" content={article.title} />
+                <meta property="og:image:alt" content={article.featured_image_alt ?? article.title} />
                 <meta property="og:url" content={ogUrl} />
                 <meta property="og:type" content="article" />
                 <meta property="og:locale" content="en_US" />
@@ -199,6 +200,12 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
                     <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
                 )}
             </Head>
+
+            {isPreview && (
+                <div className="sticky top-0 z-50 bg-amber-500/95 px-4 py-2 text-center text-sm font-medium text-amber-950 shadow">
+                    Preview — this article is not publicly visible yet
+                </div>
+            )}
 
             <div className="mx-auto max-w-4xl px-4 py-8 md:px-6 md:py-12">
                 {/* Breadcrumb */}
@@ -255,7 +262,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes }: Pro
                         <div className="mt-6 overflow-hidden rounded-xl">
                             <img
                                 src={article.featured_image}
-                                alt={article.title}
+                                alt={article.featured_image_alt ?? article.title}
                                 className="w-full object-cover"
                             />
                         </div>

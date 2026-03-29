@@ -21,6 +21,7 @@ class Article extends Model
         'excerpt',
         'body',
         'featured_image',
+        'featured_image_alt',
         'tags',
         'status',
         'read_time_minutes',
@@ -54,15 +55,26 @@ class Article extends Model
         return 'slug';
     }
 
+    /**
+     * True when the article should be visible on the public site.
+     * Includes "scheduled" articles whose publish time has arrived.
+     */
     public function isPublished(): bool
     {
-        return $this->status === ArticleStatus::Published;
+        return $this->status === ArticleStatus::Published
+            || ($this->status === ArticleStatus::Scheduled && $this->published_at?->isPast());
     }
 
     /** @param Builder<Article> $query */
     public function scopePublished(Builder $query): void
     {
-        $query->where('status', ArticleStatus::Published->value);
+        $query->where(function (Builder $q) {
+            $q->where('status', ArticleStatus::Published->value)
+                ->orWhere(function (Builder $q2) {
+                    $q2->where('status', ArticleStatus::Scheduled->value)
+                        ->where('published_at', '<=', now());
+                });
+        });
     }
 
     /** Auto-calculate read time from body word count (200 wpm). */

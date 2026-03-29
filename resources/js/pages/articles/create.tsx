@@ -30,9 +30,11 @@ export default function ArticleCreate({ categories, statuses }: Props) {
         excerpt: '',
         body: '',
         featured_image: '',
+        featured_image_alt: '',
         tags: '',
         category_id: '',
         status: 'published',
+        publish_at: '',
     });
 
     const [slugEdited, setSlugEdited] = useState(false);
@@ -54,6 +56,7 @@ export default function ArticleCreate({ categories, statuses }: Props) {
         form.submit(articleStore(l));
     }
 
+    const isScheduled = form.data.status === 'scheduled';
     const isDraft = form.data.status === 'draft';
 
     return (
@@ -96,22 +99,24 @@ export default function ArticleCreate({ categories, statuses }: Props) {
                         {form.errors.slug && <p className="text-sm text-destructive">{form.errors.slug}</p>}
                     </div>
 
-                    {/* Excerpt — meta description */}
+                    {/* Excerpt / meta description */}
                     <div className="space-y-1.5">
                         <Label htmlFor="excerpt">
                             Excerpt
-                            <span className="ml-1 text-xs font-normal text-muted-foreground">(used as meta description — max 160 chars)</span>
+                            <span className="ml-1 text-xs font-normal text-muted-foreground">(used as meta description — ideal: up to 200 chars)</span>
                         </Label>
                         <div className="relative">
-                            <Input
+                            <textarea
                                 id="excerpt"
+                                rows={3}
                                 value={form.data.excerpt}
-                                onChange={(e) => form.setData('excerpt', e.target.value.slice(0, 160))}
+                                onChange={(e) => form.setData('excerpt', e.target.value.slice(0, 500))}
                                 placeholder="One-sentence summary shown in Google search results…"
                                 disabled={form.processing}
+                                className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-4 py-3 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                             />
-                            <span className={`absolute right-2 top-1/2 -translate-y-1/2 text-xs ${form.data.excerpt.length >= 155 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-                                {form.data.excerpt.length}/160
+                            <span className={`absolute right-2 bottom-2 text-xs ${form.data.excerpt.length > 200 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                                {form.data.excerpt.length}/200
                             </span>
                         </div>
                         {form.errors.excerpt && <p className="text-sm text-destructive">{form.errors.excerpt}</p>}
@@ -130,6 +135,22 @@ export default function ArticleCreate({ categories, statuses }: Props) {
                             disabled={form.processing}
                         />
                         {form.errors.featured_image && <p className="text-sm text-destructive">{form.errors.featured_image}</p>}
+                    </div>
+
+                    {/* Featured image alt text */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="featured_image_alt">
+                            Image Alt Text
+                            <span className="ml-1 text-xs font-normal text-muted-foreground">(for accessibility &amp; SEO)</span>
+                        </Label>
+                        <Input
+                            id="featured_image_alt"
+                            value={form.data.featured_image_alt}
+                            onChange={(e) => form.setData('featured_image_alt', e.target.value)}
+                            placeholder="Describe the image…"
+                            disabled={form.processing}
+                        />
+                        {form.errors.featured_image_alt && <p className="text-sm text-destructive">{form.errors.featured_image_alt}</p>}
                     </div>
 
                     {/* Tags */}
@@ -180,6 +201,21 @@ export default function ArticleCreate({ categories, statuses }: Props) {
                         </select>
                     </div>
 
+                    {/* Publish-at datetime — only shown when scheduled */}
+                    {isScheduled && (
+                        <div className="space-y-1.5">
+                            <Label htmlFor="publish_at">Publish At *</Label>
+                            <Input
+                                id="publish_at"
+                                type="datetime-local"
+                                value={form.data.publish_at}
+                                onChange={(e) => form.setData('publish_at', e.target.value)}
+                                disabled={form.processing}
+                            />
+                            {form.errors.publish_at && <p className="text-sm text-destructive">{form.errors.publish_at}</p>}
+                        </div>
+                    )}
+
                     {/* Body */}
                     <div className="space-y-1.5">
                         <Label>
@@ -200,8 +236,8 @@ export default function ArticleCreate({ categories, statuses }: Props) {
                     <div className="flex gap-3 pt-2">
                         <Button type="submit" disabled={form.processing}>
                             {form.processing
-                                ? (isDraft ? 'Saving…' : 'Publishing…')
-                                : (isDraft ? 'Save Draft' : 'Publish Article')}
+                                ? (isDraft ? 'Saving…' : isScheduled ? 'Scheduling…' : 'Publishing…')
+                                : (isDraft ? 'Save Draft' : isScheduled ? 'Schedule' : 'Publish Article')}
                         </Button>
                         <Button type="button" variant="ghost" onClick={() => history.back()} disabled={form.processing}>
                             Cancel

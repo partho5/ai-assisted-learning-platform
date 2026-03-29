@@ -319,6 +319,7 @@ Route::prefix('{locale}')
             Route::get('resources/api/tags', [ArticleController::class, 'tags'])->name('articles.tags');
             Route::post('resources', [ArticleController::class, 'store'])->name('articles.store');
             Route::get('resources/{article:slug}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
+            Route::get('resources/{article:slug}/preview', [ArticleController::class, 'preview'])->name('articles.preview');
             Route::put('resources/{article:slug}', [ArticleController::class, 'update'])->name('articles.update');
             Route::delete('resources/{article:slug}', [ArticleController::class, 'destroy'])->name('articles.destroy');
         });

@@ -294,4 +294,120 @@ class ArticleTest extends TestCase
         $response->assertSee('/en/resources/my-guide');
         $response->assertDontSee('/en/resources/hidden-draft');
     }
+
+    // ── Scheduled status ─────────────────────────────────────────────────────
+
+    public function test_scheduled_article_past_due_is_publicly_visible(): void
+    {
+        $article = Article::factory()->create([
+            'status' => 'scheduled',
+            'published_at' => now()->subMinute(),
+        ]);
+
+        $this->get(route('articles.show', ['locale' => 'en', 'article' => $article->slug]))
+            ->assertOk();
+    }
+
+    public function test_scheduled_article_future_returns_404(): void
+    {
+        $article = Article::factory()->create([
+            'status' => 'scheduled',
+            'published_at' => now()->addDay(),
+        ]);
+
+        $this->get(route('articles.show', ['locale' => 'en', 'article' => $article->slug]))
+            ->assertNotFound();
+    }
+
+    public function test_mentor_can_store_scheduled_article(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('articles.store', ['locale' => 'en']), [
+                'title' => 'Future article',
+                'slug' => 'future-article',
+                'body' => '<p>content</p>',
+                'status' => 'scheduled',
+                'publish_at' => now()->addDay()->format('Y-m-d\TH:i'),
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('articles', [
+            'slug' => 'future-article',
+            'status' => 'scheduled',
+        ]);
+    }
+
+    public function test_store_scheduled_requires_publish_at(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('articles.store', ['locale' => 'en']), [
+                'title' => 'Future article',
+                'slug' => 'future-article',
+                'body' => '<p>content</p>',
+                'status' => 'scheduled',
+            ])
+            ->assertSessionHasErrors('publish_at');
+    }
+
+    // ── Preview ───────────────────────────────────────────────────────────────
+
+    public function test_author_can_preview_draft_article(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $article = Article::factory()->draft()->create(['author_id' => $mentor->id]);
+
+        $this->actingAs($mentor)
+            ->get(route('articles.preview', ['locale' => 'en', 'article' => $article->slug]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('articles/show')
+                ->where('isPreview', true)
+            );
+    }
+
+    public function test_other_mentor_cannot_preview_article(): void
+    {
+        $owner = User::factory()->mentor()->create();
+        $other = User::factory()->mentor()->create();
+        $article = Article::factory()->draft()->create(['author_id' => $owner->id]);
+
+        $this->actingAs($other)
+            ->get(route('articles.preview', ['locale' => 'en', 'article' => $article->slug]))
+            ->assertForbidden();
+    }
+
+    public function test_guest_cannot_preview_article(): void
+    {
+        $article = Article::factory()->draft()->create();
+
+        $this->get(route('articles.preview', ['locale' => 'en', 'article' => $article->slug]))
+            ->assertRedirect();
+    }
+
+    // ── Featured image alt ────────────────────────────────────────────────────
+
+    public function test_featured_image_alt_is_stored_on_create(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('articles.store', ['locale' => 'en']), [
+                'title' => 'Alt text test',
+                'slug' => 'alt-text-test',
+                'body' => '<p>body</p>',
+                'featured_image' => 'https://example.com/img.jpg',
+                'featured_image_alt' => 'A descriptive alt text',
+                'status' => 'draft',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('articles', [
+            'slug' => 'alt-text-test',
+            'featured_image_alt' => 'A descriptive alt text',
+        ]);
+    }
 }

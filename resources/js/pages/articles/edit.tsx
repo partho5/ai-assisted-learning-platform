@@ -1,5 +1,5 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
-import { update as articleUpdate } from '@/actions/App/Http/Controllers/ArticleController';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { update as articleUpdate, preview as articlePreview } from '@/actions/App/Http/Controllers/ArticleController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,15 +24,22 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
     const { locale } = usePage().props as Record<string, any>;
     const l = String(locale);
 
+    // Format existing published_at as a local datetime-local value for the picker
+    const existingPublishAt = article.published_at
+        ? new Date(article.published_at).toISOString().slice(0, 16)
+        : '';
+
     const form = useForm({
         title: article.title,
         slug: article.slug,
         excerpt: article.excerpt ?? '',
         body: article.body ?? '',
         featured_image: article.featured_image ?? '',
+        featured_image_alt: article.featured_image_alt ?? '',
         tags: (article.tags ?? []).join(', '),
         category_id: article.category_id ? String(article.category_id) : '',
         status: article.status,
+        publish_at: article.status === 'scheduled' ? existingPublishAt : '',
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -40,6 +47,15 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
         form.submit(articleUpdate({ locale: l, article: article.slug }));
     }
 
+    function handlePreview() {
+        form.submit(articleUpdate({ locale: l, article: article.slug }), {
+            onSuccess: () => {
+                router.visit(articlePreview.url({ locale: l, article: article.slug }));
+            },
+        });
+    }
+
+    const isScheduled = form.data.status === 'scheduled';
     const isDraft = form.data.status === 'draft';
 
     return (
@@ -61,41 +77,41 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
                         {form.errors.title && <p className="text-sm text-destructive">{form.errors.title}</p>}
                     </div>
 
-                    {/* Slug */}
+                    {/* Slug — read-only in edit view */}
                     <div className="space-y-1.5">
                         <Label htmlFor="slug">
-                            Slug *
-                            <span className="ml-1 text-xs font-normal text-muted-foreground">(changing this breaks existing links)</span>
+                            Slug
+                            <span className="ml-1 text-xs font-normal text-muted-foreground">(read-only — changing breaks existing links)</span>
                         </Label>
                         <div className="flex items-center gap-2">
                             <span className="text-sm text-muted-foreground shrink-0">/resources/</span>
                             <Input
                                 id="slug"
                                 value={form.data.slug}
-                                onChange={(e) => form.setData('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-                                className="font-mono text-sm"
-                                disabled={form.processing}
+                                readOnly
+                                className="font-mono text-sm bg-muted/40 cursor-default select-all"
                             />
                         </div>
-                        {form.errors.slug && <p className="text-sm text-destructive">{form.errors.slug}</p>}
                     </div>
 
-                    {/* Excerpt */}
+                    {/* Excerpt / meta description */}
                     <div className="space-y-1.5">
                         <Label htmlFor="excerpt">
                             Excerpt
-                            <span className="ml-1 text-xs font-normal text-muted-foreground">(meta description — max 160 chars)</span>
+                            <span className="ml-1 text-xs font-normal text-muted-foreground">(meta description — ideal: up to 200 chars)</span>
                         </Label>
                         <div className="relative">
-                            <Input
+                            <textarea
                                 id="excerpt"
+                                rows={3}
                                 value={form.data.excerpt}
-                                onChange={(e) => form.setData('excerpt', e.target.value.slice(0, 160))}
+                                onChange={(e) => form.setData('excerpt', e.target.value.slice(0, 500))}
                                 placeholder="One-sentence summary shown in Google search results…"
                                 disabled={form.processing}
+                                className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 w-full rounded-md border bg-transparent px-4 py-3 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                             />
-                            <span className={`absolute right-2 top-1/2 -translate-y-1/2 text-xs ${form.data.excerpt.length >= 155 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-                                {form.data.excerpt.length}/160
+                            <span className={`absolute right-2 bottom-2 text-xs ${form.data.excerpt.length > 200 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+                                {form.data.excerpt.length}/200
                             </span>
                         </div>
                         {form.errors.excerpt && <p className="text-sm text-destructive">{form.errors.excerpt}</p>}
@@ -114,6 +130,22 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
                             disabled={form.processing}
                         />
                         {form.errors.featured_image && <p className="text-sm text-destructive">{form.errors.featured_image}</p>}
+                    </div>
+
+                    {/* Featured image alt text */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="featured_image_alt">
+                            Image Alt Text
+                            <span className="ml-1 text-xs font-normal text-muted-foreground">(for accessibility &amp; SEO)</span>
+                        </Label>
+                        <Input
+                            id="featured_image_alt"
+                            value={form.data.featured_image_alt}
+                            onChange={(e) => form.setData('featured_image_alt', e.target.value)}
+                            placeholder="Describe the image…"
+                            disabled={form.processing}
+                        />
+                        {form.errors.featured_image_alt && <p className="text-sm text-destructive">{form.errors.featured_image_alt}</p>}
                     </div>
 
                     {/* Tags */}
@@ -154,7 +186,7 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
                         <select
                             id="status"
                             value={form.data.status}
-                            onChange={(e) => form.setData('status', e.target.value as 'draft' | 'published')}
+                            onChange={(e) => form.setData('status', e.target.value as 'draft' | 'scheduled' | 'published')}
                             disabled={form.processing}
                             className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
                         >
@@ -163,6 +195,21 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
                             ))}
                         </select>
                     </div>
+
+                    {/* Publish-at datetime — only shown when scheduled */}
+                    {isScheduled && (
+                        <div className="space-y-1.5">
+                            <Label htmlFor="publish_at">Publish At *</Label>
+                            <Input
+                                id="publish_at"
+                                type="datetime-local"
+                                value={form.data.publish_at}
+                                onChange={(e) => form.setData('publish_at', e.target.value)}
+                                disabled={form.processing}
+                            />
+                            {form.errors.publish_at && <p className="text-sm text-destructive">{form.errors.publish_at}</p>}
+                        </div>
+                    )}
 
                     {/* Body */}
                     <div className="space-y-1.5">
@@ -175,11 +222,19 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
                         {form.errors.body && <p className="text-sm text-destructive">{form.errors.body}</p>}
                     </div>
 
-                    <div className="flex gap-3 pt-2">
+                    <div className="flex flex-wrap gap-3 pt-2">
                         <Button type="submit" disabled={form.processing}>
                             {form.processing
-                                ? (isDraft ? 'Saving…' : 'Updating…')
-                                : (isDraft ? 'Save Draft' : 'Update Article')}
+                                ? (isDraft ? 'Saving…' : isScheduled ? 'Scheduling…' : 'Updating…')
+                                : (isDraft ? 'Save Draft' : isScheduled ? 'Schedule' : 'Update Article')}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            disabled={form.processing}
+                            onClick={handlePreview}
+                        >
+                            Preview
                         </Button>
                         <Button type="button" variant="ghost" onClick={() => history.back()} disabled={form.processing}>
                             Cancel

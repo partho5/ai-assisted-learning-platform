@@ -145,7 +145,11 @@ class ArticleController extends Controller
 
         if (($data['status'] ?? '') === ArticleStatus::Published->value) {
             $data['published_at'] = Carbon::now();
+        } elseif (($data['status'] ?? '') === ArticleStatus::Scheduled->value) {
+            $data['published_at'] = Carbon::parse($data['publish_at']);
         }
+
+        unset($data['publish_at']);
 
         $article = Article::create($data);
 
@@ -155,7 +159,7 @@ class ArticleController extends Controller
         }
 
         return redirect()->route('articles.edit', ['locale' => app()->getLocale(), 'article' => $article->slug])
-            ->with('success', 'Draft saved.');
+            ->with('success', $article->status === ArticleStatus::Scheduled ? 'Article scheduled.' : 'Draft saved.');
     }
 
     public function edit(Article $article): Response
@@ -169,6 +173,34 @@ class ArticleController extends Controller
         ]);
     }
 
+    public function preview(Article $article): Response
+    {
+        Gate::authorize('update', $article);
+
+        $article->load('author:id,name,username,avatar,headline,bio,created_at', 'category');
+
+        $description = $article->excerpt
+            ? mb_substr(trim($article->excerpt), 0, 160)
+            : mb_substr(trim(strip_tags($article->body ?? '')), 0, 160);
+
+        return Inertia::render('articles/show', [
+            'article' => $article,
+            'isPreview' => true,
+            'ogUrl' => url()->current(),
+            'appUrl' => rtrim(config('app.url'), '/'),
+            'schemaTypes' => [
+                'howTo' => $article->detectsHowTo(),
+                'faq' => $article->detectsFaq(),
+            ],
+            'meta' => [
+                'title' => $article->title.' | '.config('app.name'),
+                'description' => $description,
+                'image' => $article->featured_image ?: config('seo.og_image'),
+                'url' => url()->current(),
+            ],
+        ]);
+    }
+
     public function update(UpdateArticleRequest $request, Article $article): RedirectResponse
     {
         Gate::authorize('update', $article);
@@ -179,23 +211,28 @@ class ArticleController extends Controller
             $data['read_time_minutes'] = Article::calculateReadTime($data['body']);
         }
 
-        // Set published_at when first publishing
-        if (
-            ($data['status'] ?? '') === ArticleStatus::Published->value
-            && $article->status !== ArticleStatus::Published
-        ) {
-            $data['published_at'] = Carbon::now();
+        if (($data['status'] ?? '') === ArticleStatus::Published->value) {
+            // Only stamp published_at when first transitioning to published
+            if ($article->status !== ArticleStatus::Published) {
+                $data['published_at'] = Carbon::now();
+            }
+        } elseif (($data['status'] ?? '') === ArticleStatus::Scheduled->value) {
+            $data['published_at'] = Carbon::parse($data['publish_at']);
         }
+
+        unset($data['publish_at']);
 
         $article->update($data);
 
-        if ($article->fresh()->isPublished()) {
+        $fresh = $article->fresh();
+
+        if ($fresh->isPublished()) {
             return redirect()->route('articles.show', ['locale' => app()->getLocale(), 'article' => $article->slug])
                 ->with('success', 'Article updated.');
         }
 
         return redirect()->route('articles.edit', ['locale' => app()->getLocale(), 'article' => $article->slug])
-            ->with('success', 'Draft saved.');
+            ->with('success', $fresh->status === ArticleStatus::Scheduled ? 'Article scheduled.' : 'Draft saved.');
     }
 
     public function destroy(Article $article): RedirectResponse

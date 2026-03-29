@@ -48,4 +48,12 @@ class ArticleFactory extends Factory
             'published_at' => null,
         ]);
     }
+
+    public function scheduled(?string $publishAt = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => ArticleStatus::Scheduled,
+            'published_at' => $publishAt ? now()->parse($publishAt) : now()->addDay(),
+        ]);
+    }
 }
