@@ -297,7 +297,7 @@ class ArticleTest extends TestCase
 
     // ── Scheduled status ─────────────────────────────────────────────────────
 
-    public function test_scheduled_article_past_due_is_publicly_visible(): void
+    public function test_scheduled_article_past_due_returns_404(): void
     {
         $article = Article::factory()->create([
             'status' => 'scheduled',
@@ -305,7 +305,7 @@ class ArticleTest extends TestCase
         ]);
 
         $this->get(route('articles.show', ['locale' => 'en', 'article' => $article->slug]))
-            ->assertOk();
+            ->assertNotFound();
     }
 
     public function test_scheduled_article_future_returns_404(): void

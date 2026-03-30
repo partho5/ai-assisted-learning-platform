@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     edit as articleEdit,
@@ -8,6 +7,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import MentorCard from '@/components/mentor-card';
+import RichHtml from '@/components/rich-html';
 import PublicLayout from '@/layouts/public-layout';
 import type { Article } from '@/types';
 
@@ -133,27 +133,6 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
         mainEntity: faqPairs,
     } : null;
 
-    const bodyRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!bodyRef.current) return;
-        const currentHost = window.location.hostname;
-        bodyRef.current.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
-            try {
-                const host = new URL(a.href).hostname;
-                if (host && host !== currentHost) {
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
-                } else {
-                    a.removeAttribute('target');
-                    a.removeAttribute('rel');
-                }
-            } catch {
-                // relative or malformed href — leave as-is (same tab)
-            }
-        });
-    }, [article.body]);
-
     function handleDelete() {
         if (prompt('Type "delete" to confirm') !== 'delete') return;
         router.delete(articleDestroy.url({ locale: l, article: article.slug }));
@@ -207,9 +186,9 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
                 </div>
             )}
 
-            <div className="mx-auto max-w-4xl px-4 py-8 md:px-6 md:py-12">
+            <div className="mx-auto max-w-5xl px-0 py-8 md:px-6 md:py-12">
                 {/* Breadcrumb */}
-                <nav aria-label="Breadcrumb" className="mb-6 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
+                <nav aria-label="Breadcrumb" className="ml-2 md:ml-0 mb-6 flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
                     <Link href={`/${l}/resources`} className="shrink-0 whitespace-nowrap hover:text-foreground">Resources</Link>
                     {article.category && (
                         <>
@@ -225,15 +204,15 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
 
                 <article>
                     {/* Title */}
-                    <h1 className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent text-3xl font-bold tracking-tight leading-tight md:text-4xl">{article.title}</h1>
+                    <h1 className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent text-3xl font-bold tracking-tight leading-tight md:text-4xl ml-2 md:ml-0">{article.title}</h1>
 
                     {/* Excerpt / speakable intro */}
                     {article.excerpt && (
-                        <p className="article-excerpt mt-4 text-lg leading-relaxed text-muted-foreground">{article.excerpt}</p>
+                        <p className="article-excerpt ml-2 md:ml-0 mt-4 text-lg leading-relaxed text-muted-foreground">{article.excerpt}</p>
                     )}
 
                     {/* Meta row */}
-                    <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    <div className="ml-2 md:ml-0 mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                         {article.author && (
                             <Link href={`/${l}/u/${article.author.username}`} className="font-medium hover:text-foreground">
                                 {article.author.name}
@@ -270,11 +249,9 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
 
                     {/* Body */}
                     {article.body && (
-                        <div
-                            ref={bodyRef}
-                            className="prose prose-base dark:prose-invert mt-8 max-w-none"
-                            dangerouslySetInnerHTML={{ __html: article.body }}
-                        />
+                        <div className="mt-8 bg-card px-2 py-6 md:rounded-xl md:border md:border-border/60 md:px-6 md:py-6 md:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08),0_1px_4px_-1px_rgba(0,0,0,0.04)] dark:md:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4),0_1px_4px_-1px_rgba(0,0,0,0.2)]">
+                            <RichHtml content={article.body} size="base" externalLinksNewTab />
+                        </div>
                     )}
 
                     {/* Category + Tags */}

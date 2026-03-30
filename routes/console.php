@@ -12,6 +12,9 @@ Artisan::command('inspire', function () {
 // Only embeds chunks whose content_hash differs — zero cost for unchanged content.
 Schedule::command('rag:index')->dailyAt('03:00');
 
+// Auto-publish articles whose scheduled publish time has arrived.
+Schedule::command('articles:publish-scheduled')->everyMinute()->withoutOverlapping();
+
 // Check for unanswered forum threads and dispatch AI replies every 30 minutes.
 Schedule::command('forum:trigger-unanswered')->everyThirtyMinutes()->withoutOverlapping();
 

@@ -206,12 +206,7 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                             </p>
                         )}
 
-                        <div
-                            className="prose prose-sm dark:prose-invert rich-html mb-5 max-w-none leading-relaxed text-muted-foreground"
-                            dangerouslySetInnerHTML={{
-                                __html: course.description,
-                            }}
-                        />
+                        <RichHtml content={course.description} className="rich-html mb-5 leading-relaxed text-muted-foreground" />
 
                         {/* Stats row */}
                         <div className="mb-8 flex flex-wrap gap-2">
@@ -260,7 +255,7 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                                 <div className="bg-indigo-50/30 p-5 dark:bg-indigo-950/10">
                                     <RichHtml
                                         content={course.what_you_will_learn}
-                                        className="leading-relaxed text-muted-foreground"
+                                        className="rich-html leading-relaxed text-muted-foreground"
                                     />
                                 </div>
                             </section>
@@ -277,7 +272,7 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                                 <div className="bg-indigo-50/30 p-5 dark:bg-indigo-950/10">
                                     <RichHtml
                                         content={course.prerequisites}
-                                        className="leading-relaxed text-muted-foreground"
+                                        className="rich-html leading-relaxed text-muted-foreground"
                                     />
                                 </div>
                             </section>
@@ -367,12 +362,9 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                                                                     )}
                                                                 </div>
                                                                 {resource.why_this_resource && (
-                                                                    <RichHtml
-                                                                        content={
-                                                                            resource.why_this_resource
-                                                                        }
-                                                                        className="text-xs text-muted-foreground"
-                                                                    />
+                                                                    <p className="text-xs text-muted-foreground">
+                                                                        {resource.why_this_resource.replace(/<[^>]*>/g, '').trim()}
+                                                                    </p>
                                                                 )}
                                                             </div>
                                                             {resource.estimated_time && (
@@ -395,13 +387,13 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
 
                         {/* Mentor(s) */}
                         {course.authors && course.authors.length > 0 ? (
-                            <section className="overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800/60">
-                                <div className="border-b border-emerald-200 bg-emerald-50/80 px-5 py-3 dark:border-emerald-800/60 dark:bg-emerald-950/40">
-                                    <h2 className="font-semibold text-emerald-900 dark:text-emerald-100">
+                            <section className="overflow-hidden rounded-xl border border-blue-200 dark:border-blue-800/60">
+                                <div className="border-b border-blue-200 bg-[#f0f6ff]/80 px-5 py-3 dark:border-blue-800/60 dark:bg-blue-950/40">
+                                    <h2 className="font-semibold text-blue-900 dark:text-blue-100">
                                         About the mentor{course.authors.length > 1 ? 's' : ''}
                                     </h2>
                                 </div>
-                                <div className="divide-y divide-emerald-200 bg-emerald-50/20 dark:divide-emerald-800/60 dark:bg-emerald-950/10">
+                                <div className="divide-y divide-blue-200 bg-[#f0f6ff]/20 dark:divide-blue-800/60 dark:bg-blue-950/10">
                                     {course.authors.map((author) => (
                                         <MentorCard key={author.id} mentor={author} locale={l} standalone={false} />
                                     ))}

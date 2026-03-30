@@ -95,7 +95,7 @@ export default function MentorCard({ mentor, locale, variant = 'card', linked = 
         const avatar = mentor.avatar ? (
             <img src={mentor.avatar} alt={mentor.name} className="size-5 rounded-full object-cover" />
         ) : (
-            <div className="flex size-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+            <div className="flex size-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-semibold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
                 {mentor.name.charAt(0).toUpperCase()}
             </div>
         );
@@ -154,9 +154,9 @@ export default function MentorCard({ mentor, locale, variant = 'card', linked = 
 
     // card variant
     const avatar = mentor.avatar ? (
-        <img src={mentor.avatar} alt={mentor.name} className="size-14 rounded-full object-cover ring-2 ring-emerald-200 dark:ring-emerald-800" />
+        <img src={mentor.avatar} alt={mentor.name} className="size-14 rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-800" />
     ) : (
-        <div className="flex size-14 items-center justify-center rounded-full bg-emerald-100 text-xl font-semibold text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+        <div className="flex size-14 items-center justify-center rounded-full bg-blue-100 text-xl font-semibold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
             {mentor.name.charAt(0).toUpperCase()}
         </div>
     );
@@ -184,11 +184,11 @@ export default function MentorCard({ mentor, locale, variant = 'card', linked = 
     }
 
     return (
-        <section className="overflow-hidden rounded-xl border border-emerald-200 dark:border-emerald-800/60">
-            <div className="border-b border-emerald-200 bg-emerald-50/80 px-5 py-3 dark:border-emerald-800/60 dark:bg-emerald-950/40">
-                <h2 className="font-semibold text-emerald-900 dark:text-emerald-100">About the mentor</h2>
+        <section className="overflow-hidden rounded-xl border border-blue-200 dark:border-blue-800/60">
+            <div className="border-b border-blue-200 bg-[#f0f6ff]/80 px-5 py-3 dark:border-blue-800/60 dark:bg-blue-950/40">
+                <h2 className="font-semibold text-blue-900 dark:text-blue-100">About the mentor</h2>
             </div>
-            <div className="bg-emerald-50/20 p-5 dark:bg-emerald-950/10">
+            <div className="bg-[#f0f6ff]/20 p-5 dark:bg-blue-950/10">
                 {cardContent}
             </div>
         </section>

@@ -228,6 +228,23 @@
 .notes-editor .tiptap-editor { border: 2px solid var(--primary); border-radius: 8px; }
 .notes-editor .ProseMirror { min-height: 60vh; }
 
+/* Section block content inside editor — inherit parent colors, support block formatting */
+.tiptap-editor .section-block-content {
+    > * + * { margin-top: 0.5rem; }
+    h1 { font-size: 1.5rem; font-weight: 700; color: inherit; }
+    h2 { font-size: 1.25rem; font-weight: 600; color: inherit; }
+    h3 { font-size: 1.1rem; font-weight: 600; color: inherit; }
+    p { color: inherit; }
+    strong, b, em, i, u, s { color: inherit; }
+    ul { list-style-type: disc; padding-left: 1.5rem; color: inherit; }
+    ol { list-style-type: decimal; padding-left: 1.5rem; color: inherit; }
+    li { color: inherit; }
+    a { text-decoration: underline; color: inherit; }
+    code { background-color: rgba(0,0,0,0.15); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.875em; color: inherit; }
+    pre { background-color: rgba(0,0,0,0.2); padding: 0.75rem; border-radius: 6px; overflow-x: auto; color: inherit; }
+    pre code { background: none; padding: 0; }
+}
+
 .rich-html table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
 .rich-html td, .rich-html th { border: 1px solid var(--border); padding: 0.4rem 0.6rem; vertical-align: top; }
 .rich-html th { background-color: var(--muted); font-weight: 600; }
@@ -236,6 +253,10 @@
 .rich-html span[style*="color"] em,
 .rich-html span[style*="color"] b,
 .rich-html span[style*="color"] i { color: inherit; }
+
+/* Article body text — 2× font size for paragraph/span/div, not headings */
+.rich-html p, .rich-html span, .rich-html div,
+.article-body p, .article-body span, .article-body div { font-size: 1.2rem; }
 
 /* ─── Prose content (forum / course learn pages) ─────────────────────────── */
 
@@ -368,3 +389,108 @@ div[data-type="callout"][data-variant="green"]::before { color: #27500A; }
     color: #C0DD97;
 }
 .dark div[data-type="callout"][data-variant="green"]::before { color: #EAF3DE; }
+
+/* ─── Section blocks (read-only rendering) ─────────────────────────────── */
+div[data-type="section-block"] {
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 16px 0;
+}
+div[data-type="section-block"][data-label]:not([data-label=""])::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin-bottom: 10px;
+}
+
+/* Prose reset inside sections — let the section control colors */
+div[data-type="section-block"] h1,
+div[data-type="section-block"] h2,
+div[data-type="section-block"] h3 { color: inherit; }
+div[data-type="section-block"] p { color: inherit; }
+div[data-type="section-block"] li { color: inherit; }
+div[data-type="section-block"] strong,
+div[data-type="section-block"] b,
+div[data-type="section-block"] em,
+div[data-type="section-block"] i,
+div[data-type="section-block"] u,
+div[data-type="section-block"] s { color: inherit; }
+div[data-type="section-block"] a { color: inherit; text-decoration: underline; }
+
+/* Hero Dark */
+div[data-type="section-block"][data-variant="hero-dark"] {
+    background: #093464;
+    border: 1px solid #0d4080;
+    color: #bfdbfe;
+}
+div[data-type="section-block"][data-variant="hero-dark"]::before { color: #93c5fd; }
+div[data-type="section-block"][data-variant="hero-dark"] h1,
+div[data-type="section-block"][data-variant="hero-dark"] h2,
+div[data-type="section-block"][data-variant="hero-dark"] h3 { color: #ffffff; }
+div[data-type="section-block"][data-variant="hero-dark"] a { color: #93c5fd; }
+
+/* Electric Blue */
+div[data-type="section-block"][data-variant="hero-light"] {
+    background: #1709ed;
+    border: 1px solid #1207c4;
+    color: #c7d2fe;
+}
+div[data-type="section-block"][data-variant="hero-light"]::before { color: #a5b4fc; }
+div[data-type="section-block"][data-variant="hero-light"] h1,
+div[data-type="section-block"][data-variant="hero-light"] h2,
+div[data-type="section-block"][data-variant="hero-light"] h3 { color: #ffffff; }
+div[data-type="section-block"][data-variant="hero-light"] a { color: #a5b4fc; }
+
+/* Accent */
+div[data-type="section-block"][data-variant="accent"] {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e3a5f;
+}
+div[data-type="section-block"][data-variant="accent"]::before { color: #3b82f6; }
+
+/* Bordered */
+div[data-type="section-block"][data-variant="bordered"] {
+    background: color-mix(in srgb, #fff7ed 50%, transparent);
+    border: 2px solid #f97316;
+    color: #431407;
+}
+div[data-type="section-block"][data-variant="bordered"]::before { color: #f97316; }
+
+/* Section block dark mode */
+.dark div[data-type="section-block"][data-variant="hero-dark"] {
+    background: #093464;
+    border-color: #0d4080;
+    color: #bfdbfe;
+}
+.dark div[data-type="section-block"][data-variant="hero-dark"]::before { color: #93c5fd; }
+.dark div[data-type="section-block"][data-variant="hero-dark"] h1,
+.dark div[data-type="section-block"][data-variant="hero-dark"] h2,
+.dark div[data-type="section-block"][data-variant="hero-dark"] h3 { color: #ffffff; }
+
+.dark div[data-type="section-block"][data-variant="hero-light"] {
+    background: #1709ed;
+    border-color: #1207c4;
+    color: #c7d2fe;
+}
+.dark div[data-type="section-block"][data-variant="hero-light"]::before { color: #a5b4fc; }
+.dark div[data-type="section-block"][data-variant="hero-light"] h1,
+.dark div[data-type="section-block"][data-variant="hero-light"] h2,
+.dark div[data-type="section-block"][data-variant="hero-light"] h3 { color: #ffffff; }
+.dark div[data-type="section-block"][data-variant="hero-light"] a { color: #a5b4fc; }
+
+.dark div[data-type="section-block"][data-variant="accent"] {
+    background: #172554;
+    border-color: #1e3a5f;
+    color: #bfdbfe;
+}
+.dark div[data-type="section-block"][data-variant="accent"]::before { color: #60a5fa; }
+
+.dark div[data-type="section-block"][data-variant="bordered"] {
+    background: color-mix(in srgb, #431407 30%, transparent);
+    border-color: #fb923c;
+    color: #fed7aa;
+}
+.dark div[data-type="section-block"][data-variant="bordered"]::before { color: #fb923c; }

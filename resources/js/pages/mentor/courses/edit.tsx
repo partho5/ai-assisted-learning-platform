@@ -785,7 +785,7 @@ function ResourceForm({
 }) {
     const form = useForm({
         title: existing?.title ?? '',
-        type: existing?.type ?? 'video',
+        type: existing?.type ?? 'text',
         url: existing?.url ?? '',
         content: existing?.content ?? '',
         caption: existing?.caption ?? '',
@@ -847,7 +847,11 @@ function ResourceForm({
                             <Select
                                 value={form.data.type}
                                 onChange={(e) => form.setData('type', e.target.value as ResourceType)}
-                                options={resourceTypes}
+                                options={resourceTypes.map((opt) =>
+                                    ['video', 'article', 'document', 'audio'].includes(opt.value)
+                                        ? { ...opt, label: `${opt.label} (Link)` }
+                                        : opt,
+                                )}
                                 disabled={form.processing}
                             />
                         </Field>

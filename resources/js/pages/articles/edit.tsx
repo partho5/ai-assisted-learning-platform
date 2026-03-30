@@ -24,9 +24,13 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
     const { locale } = usePage().props as Record<string, any>;
     const l = String(locale);
 
-    // Format existing published_at as a local datetime-local value for the picker
+    // Format existing published_at as local time for the datetime-local picker
     const existingPublishAt = article.published_at
-        ? new Date(article.published_at).toISOString().slice(0, 16)
+        ? (() => {
+            const d = new Date(article.published_at);
+            const pad = (n: number) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+          })()
         : '';
 
     const form = useForm({
@@ -42,12 +46,21 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
         publish_at: article.status === 'scheduled' ? existingPublishAt : '',
     });
 
+    function withUtcPublishAt(): void {
+        form.transform((data) => ({
+            ...data,
+            publish_at: data.publish_at ? new Date(data.publish_at).toISOString() : '',
+        }));
+    }
+
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        withUtcPublishAt();
         form.submit(articleUpdate({ locale: l, article: article.slug }));
     }
 
     function handlePreview() {
+        withUtcPublishAt();
         form.submit(articleUpdate({ locale: l, article: article.slug }), {
             onSuccess: () => {
                 router.visit(articlePreview.url({ locale: l, article: article.slug }));

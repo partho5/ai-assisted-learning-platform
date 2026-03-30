@@ -53,6 +53,10 @@ export default function ArticleCreate({ categories, statuses }: Props) {
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        form.transform((data) => ({
+            ...data,
+            publish_at: data.publish_at ? new Date(data.publish_at).toISOString() : '',
+        }));
         form.submit(articleStore(l));
     }
 

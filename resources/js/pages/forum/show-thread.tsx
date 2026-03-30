@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { store as storeReply, update as updateReply, destroy as destroyReply, accept as acceptReply } from '@/actions/App/Http/Controllers/Forum/ForumReplyController';
 import { destroy as destroyThread } from '@/actions/App/Http/Controllers/Forum/ForumThreadController';
 import { thread as voteThread, reply as voteReply } from '@/actions/App/Http/Controllers/Forum/ForumVoteController';
@@ -8,6 +8,7 @@ import { toggle as toggleFollow } from '@/actions/App/Http/Controllers/Forum/For
 import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
 import { Bookmark, CheckCircle, ChevronDown, ChevronRight, Edit, Lock, MessageSquare, Pin, Reply, ThumbsUp, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import RichHtml from '@/components/rich-html';
 import RichTextEditor from '@/components/rich-text-editor';
 import PostByline from '@/components/forum/post-byline';
 import AppLayout from '@/layouts/app-layout';
@@ -66,7 +67,6 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
     const [isFollowing, setIsFollowing] = useState(thread.is_following ?? false);
 
     const replyTree = useMemo(() => buildReplyTree(replies), [replies]);
-    const threadBodyRef = useRef<HTMLDivElement>(null);
 
     // Poll every 10 s while an AI reply is pending so the reply appears without manual refresh.
     useEffect(() => {
@@ -76,22 +76,6 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
         }, 10_000);
         return () => clearInterval(id);
     }, [thread.pending_ai_reply]);
-
-    // Open external links in new tab
-    useEffect(() => {
-        if (!threadBodyRef.current) { return; }
-        threadBodyRef.current.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
-            try {
-                const url = new URL(a.href, window.location.href);
-                if (url.origin !== window.location.origin) {
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
-                }
-            } catch {
-                // invalid href — leave as-is
-            }
-        });
-    }, [thread.body]);
 
     const Layout = auth?.user ? AppLayout : PublicLayout;
 
@@ -253,11 +237,7 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
                         </div>
                     )}
 
-                    <div
-                        ref={threadBodyRef}
-                        className="prose prose-sm dark:prose-invert max-w-none"
-                        dangerouslySetInnerHTML={{ __html: thread.body }}
-                    />
+                    <RichHtml content={thread.body} externalLinksNewTab />
 
                     {/* Thread actions */}
                     <div className="flex items-center gap-3 mt-6 pt-4 border-t flex-wrap">
@@ -622,22 +602,6 @@ function ReplyBody({ reply, locale, auth, threadArgs, canModerate, isThreadAutho
     const [hasVoted, setHasVoted] = useState(reply.has_voted ?? false);
     const [editing, setEditing] = useState(false);
     const [editBody, setEditBody] = useState(reply.body);
-    const bodyRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!bodyRef.current) { return; }
-        bodyRef.current.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {
-            try {
-                const url = new URL(a.href, window.location.href);
-                if (url.origin !== window.location.origin) {
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
-                }
-            } catch {
-                // invalid href — leave as-is
-            }
-        });
-    }, [reply.body]);
 
     function handleVote() {
         if (!auth?.user) { return; }
@@ -703,11 +667,7 @@ function ReplyBody({ reply, locale, auth, threadArgs, canModerate, isThreadAutho
                     </div>
                 </div>
             ) : (
-                <div
-                    ref={bodyRef}
-                    className="prose prose-sm dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: reply.body }}
-                />
+                <RichHtml content={reply.body} externalLinksNewTab />
             )}
 
             {/* Reply actions */}

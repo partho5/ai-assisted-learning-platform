@@ -91,6 +91,11 @@ function AuthorView({ articles, isAdmin, locale, user }: AuthorProps & { locale:
                                         <Badge variant={article.status === 'published' ? 'default' : 'secondary'}>
                                             {article.status}
                                         </Badge>
+                                        {article.status === 'scheduled' && article.published_at && (
+                                            <span className="text-xs text-amber-600">
+                                                {new Date(article.published_at).toLocaleString()}
+                                            </span>
+                                        )}
                                     </div>
                                     <p className="mt-0.5 text-xs text-muted-foreground">
                                         {article.read_time_minutes} min read

@@ -176,10 +176,10 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
                 <div className="mb-3">
                     <Badge variant="secondary">Article</Badge>
                 </div>
-                {resource.why_this_resource && <RichHtml content={resource.why_this_resource} className="mb-4 text-sm text-muted-foreground" />}
+                {resource.why_this_resource && <RichHtml content={resource.why_this_resource} className="rich-html mb-4 text-sm text-muted-foreground" />}
                 {resource.url && (
                     <a href={resource.url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="secondary" size="default">Open Article ↗</Button>
+                        <Button variant="secondary" size="default">Open Link ↗</Button>
                     </a>
                 )}
             </div>
@@ -188,11 +188,8 @@ function ResourceContent({ resource }: { resource: EnrichedResource }) {
 
     if (resource.type === 'text') {
         return (
-            <div className="rounded-lg border border-border bg-card p-2 md:p-4">
-                <div
-                    className="prose dark:prose-invert rich-html max-w-none text-base leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: resource.content || '' }}
-                />
+            <div className="bg-card px-4 py-6 md:rounded-xl md:border md:border-border/60 md:px-10 md:py-10 md:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08),0_1px_4px_-1px_rgba(0,0,0,0.04)] dark:md:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4),0_1px_4px_-1px_rgba(0,0,0,0.2)]">
+                <RichHtml content={resource.content || ''} size="base" className="rich-html text-base leading-relaxed" />
             </div>
         );
     }
@@ -664,7 +661,7 @@ function ResourceBlock({
                     </span>
                     <RichHtml
                         content={resource.why_this_resource}
-                        className="text-base"
+                        className="rich-html text-base"
                     />
                 </div>
             )}
@@ -692,7 +689,7 @@ function ResourceBlock({
                     {/* Caption — all types except text */}
                     {resource.caption && resource.type !== 'text' && (
                         <div className="mb-5  dark:text-gray-100">
-                            <RichHtml content={resource.caption} className="text-base text-muted-foreground" />
+                            <RichHtml content={resource.caption} className="rich-html text-base text-muted-foreground" />
                         </div>
                     )}
 
@@ -791,7 +788,7 @@ function ResourceBlock({
             )}
 
             {/* Per-resource forum link */}
-            <div className="mt-6 pt-4 border-t">
+            <div className="mt-6 pt-4">
                 {resource.forumThread && resource.forumThread.category ? (
                     <Link
                         href={`/${locale}/forum/${resource.forumThread.category.slug}/${resource.forumThread.slug}`}
@@ -1132,7 +1129,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
             </aside>
 
             {/* ── Main content — continuous scroll ── */}
-            <main ref={mainRef} className="flex-1 overflow-y-auto max-w-6xl mx-auto px-1 py-6 md:py-8">
+            <main ref={mainRef} className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto max-w-6xl mx-auto px-1 py-6 md:py-8">
                 {resources.map((resource, index) => {
                     const lessonNumber = resources.slice(0, index).filter(r => r.module_id === resource.module_id).length + 1;
                     const moduleNumber = [...new Set(resources.slice(0, index + 1).map(r => r.module_id))].indexOf(resource.module_id) + 1;
@@ -1144,7 +1141,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                             if (el) resourceRefs.current.set(resource.id, el);
                             else resourceRefs.current.delete(resource.id);
                         }}
-                        className="mb-16 scroll-mt-4 border-b border-border pb-16 last:border-0 last:pb-0"
+                        className="mb-16 scroll-mt-4 border-border pb-16 last:border-0 last:pb-0"
                     >
                         <ResourceBlock
                             resource={resource}

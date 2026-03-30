@@ -57,24 +57,17 @@ class Article extends Model
 
     /**
      * True when the article should be visible on the public site.
-     * Includes "scheduled" articles whose publish time has arrived.
+     * Only articles explicitly set to Published status are considered published.
      */
     public function isPublished(): bool
     {
-        return $this->status === ArticleStatus::Published
-            || ($this->status === ArticleStatus::Scheduled && $this->published_at?->isPast());
+        return $this->status === ArticleStatus::Published;
     }
 
     /** @param Builder<Article> $query */
     public function scopePublished(Builder $query): void
     {
-        $query->where(function (Builder $q) {
-            $q->where('status', ArticleStatus::Published->value)
-                ->orWhere(function (Builder $q2) {
-                    $q2->where('status', ArticleStatus::Scheduled->value)
-                        ->where('published_at', '<=', now());
-                });
-        });
+        $query->where('status', ArticleStatus::Published->value);
     }
 
     /** Auto-calculate read time from body word count (200 wpm). */
