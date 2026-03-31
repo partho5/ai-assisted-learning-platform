@@ -16,65 +16,30 @@ class SitemapController extends Controller
     public function index(): Response
     {
         $baseUrl = rtrim(config('app.url'), '/');
-        $locales = ['en', 'bn'];
 
         $urls = [];
 
         // Static pages — use a fixed date so crawlers don't think they change every request
         $staticLastmod = '2026-03-01T00:00:00+00:00';
-        foreach ($locales as $locale) {
-            $urls[] = [
-                'loc' => "{$baseUrl}/{$locale}/",
-                'lastmod' => $staticLastmod,
-                'changefreq' => 'weekly',
-                'priority' => '1.0',
-            ];
-            $urls[] = [
-                'loc' => "{$baseUrl}/{$locale}/courses",
-                'lastmod' => ($latestCourse = Course::query()->published()->max('updated_at')) ? Carbon::parse($latestCourse)->toAtomString() : $staticLastmod,
-                'changefreq' => 'daily',
-                'priority' => '0.9',
-            ];
-            // Resources index (articles) — listed under /en/ only since all content is English
-            if ($locale === 'en') {
-                $urls[] = [
-                    'loc' => "{$baseUrl}/en/resources",
-                    'lastmod' => ($latestArticle = Article::query()->published()->max('updated_at')) ? Carbon::parse($latestArticle)->toAtomString() : $staticLastmod,
-                    'changefreq' => 'daily',
-                    'priority' => '0.8',
-                ];
-            }
-            $urls[] = [
-                'loc' => "{$baseUrl}/{$locale}/about-us",
-                'lastmod' => $staticLastmod,
-                'changefreq' => 'monthly',
-                'priority' => '0.5',
-            ];
-            $urls[] = [
-                'loc' => "{$baseUrl}/{$locale}/contact",
-                'lastmod' => $staticLastmod,
-                'changefreq' => 'yearly',
-                'priority' => '0.4',
-            ];
-            $urls[] = [
-                'loc' => "{$baseUrl}/{$locale}/privacy-policy",
-                'lastmod' => $staticLastmod,
-                'changefreq' => 'yearly',
-                'priority' => '0.3',
-            ];
-            $urls[] = [
-                'loc' => "{$baseUrl}/{$locale}/terms",
-                'lastmod' => $staticLastmod,
-                'changefreq' => 'yearly',
-                'priority' => '0.3',
-            ];
-            $urls[] = [
-                'loc' => "{$baseUrl}/{$locale}/refund-policy",
-                'lastmod' => $staticLastmod,
-                'changefreq' => 'yearly',
-                'priority' => '0.3',
-            ];
-        }
+
+        // /en/ home and static pages — /bn/ is only for Bengali-audience courses, not a locale mirror
+        $latestCourse = Course::query()->published()->max('updated_at');
+        $courseLastmod = $latestCourse ? Carbon::parse($latestCourse)->toAtomString() : $staticLastmod;
+
+        $urls[] = ['loc' => "{$baseUrl}/en/", 'lastmod' => $staticLastmod, 'changefreq' => 'weekly', 'priority' => '1.0'];
+        $urls[] = ['loc' => "{$baseUrl}/en/courses", 'lastmod' => $courseLastmod, 'changefreq' => 'daily', 'priority' => '0.9'];
+        $urls[] = ['loc' => "{$baseUrl}/bn/courses", 'lastmod' => $courseLastmod, 'changefreq' => 'daily', 'priority' => '0.9'];
+        $urls[] = [
+            'loc' => "{$baseUrl}/en/resources",
+            'lastmod' => ($latestArticle = Article::query()->published()->max('updated_at')) ? Carbon::parse($latestArticle)->toAtomString() : $staticLastmod,
+            'changefreq' => 'daily',
+            'priority' => '0.8',
+        ];
+        $urls[] = ['loc' => "{$baseUrl}/en/about-us", 'lastmod' => $staticLastmod, 'changefreq' => 'monthly', 'priority' => '0.5'];
+        $urls[] = ['loc' => "{$baseUrl}/en/contact", 'lastmod' => $staticLastmod, 'changefreq' => 'yearly', 'priority' => '0.4'];
+        $urls[] = ['loc' => "{$baseUrl}/en/privacy-policy", 'lastmod' => $staticLastmod, 'changefreq' => 'yearly', 'priority' => '0.3'];
+        $urls[] = ['loc' => "{$baseUrl}/en/terms", 'lastmod' => $staticLastmod, 'changefreq' => 'yearly', 'priority' => '0.3'];
+        $urls[] = ['loc' => "{$baseUrl}/en/refund-policy", 'lastmod' => $staticLastmod, 'changefreq' => 'yearly', 'priority' => '0.3'];
 
         // Published courses — each course under its own language locale only
         $courses = Course::query()
@@ -170,14 +135,12 @@ class SitemapController extends Controller
             ->get();
 
         foreach ($users as $user) {
-            foreach ($locales as $locale) {
-                $urls[] = [
-                    'loc' => "{$baseUrl}/{$locale}/u/{$user->username}",
-                    'lastmod' => $user->updated_at->toAtomString(),
-                    'changefreq' => 'weekly',
-                    'priority' => '0.6',
-                ];
-            }
+            $urls[] = [
+                'loc' => "{$baseUrl}/en/u/{$user->username}",
+                'lastmod' => $user->updated_at->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.6',
+            ];
         }
 
         $xml = view('sitemap', compact('urls'))->render();
