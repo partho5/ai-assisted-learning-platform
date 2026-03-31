@@ -494,3 +494,139 @@ div[data-type="section-block"][data-variant="bordered"]::before { color: #f97316
     color: #fed7aa;
 }
 .dark div[data-type="section-block"][data-variant="bordered"]::before { color: #fb923c; }
+
+/* ─── Rich HTML: animated list enhancements ────────────────────────────────── */
+
+@keyframes rich-item-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rich-ul-ripple {
+    0%   { transform: scale(1); opacity: 0.4; }
+    100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* Override prose defaults for enhanced lists */
+ul[data-enhanced], .prose ul[data-enhanced] {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0.75rem 0 !important;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+ol[data-enhanced], .prose ol[data-enhanced] {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0.75rem 0 !important;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+    counter-reset: none !important;
+}
+.dark ul[data-enhanced], .dark .prose ul[data-enhanced],
+.dark ol[data-enhanced], .dark .prose ol[data-enhanced] {
+    border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+ul[data-enhanced] > li, .prose ul[data-enhanced] > li,
+ol[data-enhanced] > li, .prose ol[data-enhanced] > li {
+    padding: 0 !important;
+    margin: 0 !important;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+.dark ul[data-enhanced] > li, .dark .prose ul[data-enhanced] > li,
+.dark ol[data-enhanced] > li, .dark .prose ol[data-enhanced] > li {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+/* Hide prose ::before bullets/counters on enhanced items */
+ul[data-enhanced] > li::before, .prose ul[data-enhanced] > li::before,
+ol[data-enhanced] > li::before, .prose ol[data-enhanced] > li::before {
+    display: none !important;
+}
+
+/* UL — item row */
+.rich-ul-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 4px;
+    opacity: 0;
+    animation: rich-item-in 0.35s ease forwards;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+.rich-ul-item:hover { background: rgba(56, 189, 248, 0.10); }
+
+/* Pulse dot */
+.rich-ul-dot {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    margin-top: 22px;
+}
+.rich-ul-dot-core {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: #38BDF8;
+    z-index: 1;
+}
+.rich-ul-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: #38BDF8;
+    animation: rich-ul-ripple 2.2s ease-out infinite;
+}
+.rich-ul-ring.ring-2 { animation-delay: 1.1s; }
+
+/* OL — item row */
+.rich-ol-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 4px;
+    opacity: 0;
+    animation: rich-item-in 0.35s ease forwards;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+.rich-ol-item:hover { background: rgba(56, 189, 248, 0.10); }
+
+.rich-ol-badge {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    background: #e0f5fe;
+    color: #0369a1;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 27px;
+}
+.dark .rich-ol-badge {
+    background: rgba(56, 189, 248, 0.18);
+    color: #38BDF8;
+}
+
+/* Responsive table wrapper */
+.rich-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0.5rem 0;
+}
+.rich-table-wrap table {
+    margin: 0 !important;
+    min-width: 400px;
+}
+
+/* Shared text */
+.rich-ul-text, .rich-ol-text {
+    font-size: 15px;
+    line-height: 1.65;
+    flex: 1;
+    min-width: 0;
+}
