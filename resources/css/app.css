@@ -245,9 +245,12 @@
     pre code { background: none; padding: 0; }
 }
 
-.rich-html table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
+.rich-html table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; min-width: 0 !important; }
 .rich-html td, .rich-html th { border: 1px solid var(--border); padding: 0.4rem 0.6rem; vertical-align: top; }
-.rich-html th { background-color: var(--muted); font-weight: 600; }
+.rich-html th { background-color: var(--muted); font-weight: 600; text-align: center; }
+@media (max-width: 640px) {
+    .rich-html table { table-layout: fixed; }
+}
 .rich-html p:empty { display: none; }
 .rich-html span[style*="color"] strong,
 .rich-html span[style*="color"] em,

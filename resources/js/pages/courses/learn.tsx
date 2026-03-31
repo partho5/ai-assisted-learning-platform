@@ -262,21 +262,37 @@ function QuestionField({
     onChange: (v: string) => void;
 }) {
     if (question.question_type === 'multiple_choice') {
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
         return (
-            <div className="space-y-2">
-                {question.options.map((opt) => (
-                    <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-base">
-                        <input
-                            type="radio"
-                            name={`q-${question.id}`}
-                            value={String(opt.id)}
-                            checked={value === String(opt.id)}
-                            onChange={() => onChange(String(opt.id))}
-                            className="accent-primary"
-                        />
-                        {opt.label}
-                    </label>
-                ))}
+            <div className="space-y-2.5">
+                {question.options.map((opt, i) => {
+                    const selected = value === String(opt.id);
+                    return (
+                        <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => onChange(String(opt.id))}
+                            className={[
+                                'group w-full flex items-center gap-4 rounded-xl border-2 px-4 py-3.5 text-left transition-all duration-150 select-none cursor-pointer',
+                                selected
+                                    ? 'border-primary bg-primary/8 shadow-md shadow-primary/10'
+                                    : 'border-border bg-card hover:border-primary/40 hover:bg-muted/40 hover:-translate-y-px hover:shadow-sm',
+                                'active:scale-[0.975] active:translate-y-0',
+                            ].join(' ')}
+                        >
+                            <span className={[
+                                'shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150',
+                                selected
+                                    ? 'bg-primary text-primary-foreground scale-110'
+                                    : 'bg-muted text-muted-foreground group-hover:bg-primary/15 group-hover:text-primary',
+                            ].join(' ')}>
+                                {letters[i] ?? i + 1}
+                            </span>
+                            <span className="flex-1 text-sm font-medium leading-relaxed">{opt.label}</span>
+                            <span className={`shrink-0 text-primary text-base transition-all duration-200 ${selected ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>✓</span>
+                        </button>
+                    );
+                })}
             </div>
         );
     }
@@ -284,11 +300,11 @@ function QuestionField({
     if (question.question_type === 'dropdown') {
         return (
             <select
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full rounded-xl border-2 border-input bg-background px-4 py-3.5 text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-150"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             >
-                <option value="">Select an option...</option>
+                <option value="">Select an option…</option>
                 {question.options.map((opt) => (
                     <option key={opt.id} value={String(opt.id)}>
                         {opt.label}
@@ -305,18 +321,32 @@ function QuestionField({
             onChange(JSON.stringify(next.sort()));
         }
         return (
-            <div className="space-y-2">
-                {question.options.map((opt) => (
-                    <label key={opt.id} className="flex cursor-pointer items-center gap-2 text-base">
-                        <input
-                            type="checkbox"
-                            checked={selected.includes(opt.id)}
-                            onChange={() => toggle(opt.id)}
-                            className="accent-primary"
-                        />
-                        {opt.label}
-                    </label>
-                ))}
+            <div className="space-y-2.5">
+                {question.options.map((opt) => {
+                    const checked = selected.includes(opt.id);
+                    return (
+                        <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => toggle(opt.id)}
+                            className={[
+                                'group w-full flex items-center gap-4 rounded-xl border-2 px-4 py-3.5 text-left transition-all duration-150 select-none cursor-pointer',
+                                checked
+                                    ? 'border-primary bg-primary/8 shadow-md shadow-primary/10'
+                                    : 'border-border bg-card hover:border-primary/40 hover:bg-muted/40 hover:-translate-y-px hover:shadow-sm',
+                                'active:scale-[0.975] active:translate-y-0',
+                            ].join(' ')}
+                        >
+                            <span className={[
+                                'shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-150',
+                                checked ? 'bg-primary border-primary scale-105' : 'border-border group-hover:border-primary/50',
+                            ].join(' ')}>
+                                {checked && <span className="text-primary-foreground text-[10px] font-bold leading-none">✓</span>}
+                            </span>
+                            <span className="flex-1 text-sm font-medium leading-relaxed">{opt.label}</span>
+                        </button>
+                    );
+                })}
             </div>
         );
     }
@@ -324,8 +354,9 @@ function QuestionField({
     if (question.question_type === 'paragraph') {
         return (
             <textarea
-                rows={4}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-ring"
+                rows={5}
+                className="w-full rounded-xl border-2 border-input bg-background px-4 py-3.5 text-sm leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-150"
+                placeholder="Write your answer here…"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             />
@@ -372,24 +403,27 @@ function TestPreview({
             {/* Questions — look interactive but intercept clicks for guests */}
             <div className="relative space-y-3" onClick={isGuest ? handleInteraction : undefined}>
                 {questions.map((question, index) => (
-                    <div key={question.id} className="rounded-lg border border-border bg-card p-4">
-                        <div className="mb-1 flex items-start justify-between gap-2">
-                            <Label className="text-base font-medium leading-relaxed">
-                                {index + 1}. {question.body}
-                                {question.is_required && <span className="ml-1 text-destructive">*</span>}
-                            </Label>
-                            <span className="shrink-0 text-sm text-muted-foreground">
-                                {question.points} mark{question.points !== 1 ? 's' : ''}
+                    <div key={question.id} className="rounded-2xl border-2 border-border bg-card p-1 md:p-4 shadow-sm">
+                        <div className="mb-4 flex items-start justify-between gap-3">
+                            <div className="flex flex-1 items-start gap-3">
+                                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                                    {index + 1}
+                                </span>
+                                <Label className="text-base font-semibold leading-relaxed">
+                                    {question.body}
+                                    {question.is_required && <span className="ml-1 text-destructive">*</span>}
+                                </Label>
+                            </div>
+                            <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                {question.points} {question.points !== 1 ? 'marks' : 'mark'}
                             </span>
                         </div>
-                        {question.hint && <p className="mb-2 text-sm text-muted-foreground">{question.hint}</p>}
-                        {isGuest ? (
-                            <div className="pointer-events-none">
-                                <QuestionField question={question} value="" onChange={() => {}} />
-                            </div>
-                        ) : (
-                            <QuestionField question={question} value="" onChange={() => {}} />
+                        {question.hint && (
+                            <p className="mb-3 ml-11 text-sm italic text-muted-foreground">{question.hint}</p>
                         )}
+                        <div className="ml-11 pointer-events-none">
+                            <QuestionField question={question} value="" onChange={() => {}} />
+                        </div>
                     </div>
                 ))}
                 <Button disabled className="w-full opacity-50" onClick={isGuest ? handleInteraction : undefined}>
@@ -448,7 +482,7 @@ function TestPreview({
                             Enroll in this course to submit answers and track your progress.
                         </p>
                         <Link href={`/${locale}/courses/${courseSlug}`}>
-                            <Button size="sm">Enroll Now</Button>
+                            <Button size="compact">Enroll Now</Button>
                         </Link>
                     </>
                 )}
@@ -572,29 +606,62 @@ function TestForm({
         );
     }
 
+    const answeredCount = questions.filter((q) => (values[q.id] ?? '').length > 0).length;
+
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
-            <p className={`text-xs text-muted-foreground transition-opacity duration-300 ${saving ? 'opacity-100' : 'opacity-0'}`}>Saving…</p>
-            {questions.map((question, index) => (
-                <div key={question.id} className="rounded-lg border border-border bg-card p-4">
-                    <div className="mb-1 flex items-start justify-between gap-2">
-                        <Label className="text-base font-medium leading-relaxed">
-                            {index + 1}. {question.body}
-                            {question.is_required && <span className="ml-1 text-destructive">*</span>}
-                        </Label>
-                        <span className="shrink-0 text-sm text-muted-foreground">
-                            {question.points} mark{question.points !== 1 ? 's' : ''}
-                        </span>
-                    </div>
-                    {question.hint && <p className="mb-2 text-sm text-muted-foreground">{question.hint}</p>}
-                    <QuestionField
-                        question={question}
-                        value={values[question.id] ?? ''}
-                        onChange={(v) => updateValue(question.id, v)}
+            {/* Progress header */}
+            <div className="rounded-xl border border-border bg-muted/30 px-5 py-4">
+                <div className="mb-2 flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Progress
+                    </span>
+                    <span className={`text-xs font-medium text-primary transition-opacity duration-300 ${saving ? 'opacity-100' : 'opacity-0'}`}>
+                        Saving…
+                    </span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
+                    <div
+                        className="h-full rounded-full bg-primary transition-all duration-500 ease-out"
+                        style={{ width: `${questions.length > 0 ? (answeredCount / questions.length) * 100 : 0}%` }}
                     />
                 </div>
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                    {answeredCount} of {questions.length} answered
+                </p>
+            </div>
+
+            {/* Questions */}
+            {questions.map((question, index) => (
+                <div key={question.id} className="rounded-2xl border-2 border-border bg-card p-6 shadow-sm transition-shadow duration-200 hover:shadow-md">
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                        <div className="flex flex-1 items-start gap-3">
+                            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                                {index + 1}
+                            </span>
+                            <Label className="text-base font-semibold leading-relaxed">
+                                {question.body}
+                                {question.is_required && <span className="ml-1 text-destructive">*</span>}
+                            </Label>
+                        </div>
+                        <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                            {question.points} {question.points !== 1 ? 'pts' : 'pt'}
+                        </span>
+                    </div>
+                    {question.hint && (
+                        <p className="mb-3 ml-11 text-sm italic text-muted-foreground">{question.hint}</p>
+                    )}
+                    <div className="ml-11">
+                        <QuestionField
+                            question={question}
+                            value={values[question.id] ?? ''}
+                            onChange={(v) => updateValue(question.id, v)}
+                        />
+                    </div>
+                </div>
             ))}
-            <Button type="submit" className="w-full">
+
+            <Button type="submit" size="lg" className="w-full py-6 text-base font-bold">
                 Submit Test
             </Button>
         </form>
