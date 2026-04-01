@@ -12,6 +12,6 @@ return [
     |
     */
 
-    'og_image' => 'https://res.cloudinary.com/davntucnu/image/upload/v1774269239/skillevidence-og-image_pqevjj.png', // TODO: replace with real URL before deploy
+    'og_image' => 'https://res.cloudinary.com/davntucnu/image/upload/v1775034587/skillevidence-og-image_vlhv8g.png', // TODO: replace with real URL before deploy
 
 ];

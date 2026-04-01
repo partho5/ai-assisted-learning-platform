@@ -1,5 +1,19 @@
 import { useEffect, useRef } from 'react';
 
+function getColorLuminance(color: string): number {
+    const temp = document.createElement('div');
+    temp.style.color = color;
+    temp.style.position = 'absolute';
+    temp.style.visibility = 'hidden';
+    document.body.appendChild(temp);
+    const computed = getComputedStyle(temp).color;
+    document.body.removeChild(temp);
+
+    const rgb = computed.match(/\d+/g)?.map(Number) ?? [];
+    if (rgb.length < 3) return 0.5;
+    return (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
+}
+
 const HTML_TAG_RE = /<[a-z][\s\S]*?>/i;
 
 interface RichHtmlProps {
@@ -76,6 +90,37 @@ function AnimatedList({ items, type }: { items: string[]; type: 'ul' | 'ol' }) {
 
 export default function RichHtml({ content, className = '', size = 'sm', externalLinksNewTab = false }: RichHtmlProps) {
     const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!ref.current) return;
+
+        const fix = () => {
+            if (!ref.current) return;
+            const isDark = document.documentElement.classList.contains('dark');
+
+            ref.current.querySelectorAll<HTMLElement>('[style]').forEach((el) => {
+                if (!el.style.color && !el.dataset.originalColor) return;
+
+                if (!el.dataset.originalColor && el.style.color) {
+                    el.dataset.originalColor = el.style.color;
+                }
+
+                if (!el.dataset.originalColor) return;
+
+                if (isDark && getColorLuminance(el.dataset.originalColor) < 0.3) {
+                    el.style.removeProperty('color');
+                } else if (!isDark && el.dataset.originalColor) {
+                    el.style.color = el.dataset.originalColor;
+                }
+            });
+        };
+
+        fix();
+
+        const observer = new MutationObserver(fix);
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, [content]);
 
     useEffect(() => {
         if (!externalLinksNewTab || !ref.current) return;
