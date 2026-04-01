@@ -212,7 +212,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
                     )}
 
                     {/* Meta row */}
-                    <div className="ml-2 md:ml-0 mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                    <div className="ml-2 md:ml-0 mt-5 p-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground bg-gray-100 rounded">
                         {article.author && (
                             <Link href={`/${l}/u/${article.author.username}`} className="font-medium hover:text-foreground">
                                 {article.author.name}
