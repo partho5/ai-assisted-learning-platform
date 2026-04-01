@@ -282,6 +282,8 @@
     -webkit-overflow-scrolling: touch;
     border-collapse: collapse;
 }
+.prose td, .prose th { border: 1px solid var(--border); padding: 0.4rem 0.6rem; vertical-align: top; }
+.prose th { background-color: var(--muted); font-weight: 600; }
 
 /* Inline code — use themed muted background instead of typography default */
 .prose :not(pre) > code {
