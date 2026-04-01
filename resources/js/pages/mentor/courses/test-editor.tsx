@@ -190,7 +190,7 @@ function TestSettingsForm({
     locale: string;
 }) {
     const form = useForm({
-        title: test?.title ?? `Self-Test on ${resource.title}`,
+        title: test?.title ?? `${resource.title}`,
         description: test?.description ?? '',
         passing_score: String(test?.passing_score ?? ''),
         time_limit_minutes: String(test?.time_limit_minutes ?? ''),

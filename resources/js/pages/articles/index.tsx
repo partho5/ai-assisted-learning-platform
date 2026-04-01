@@ -272,7 +272,19 @@ function ArticleCard({ article, locale }: { article: Article; locale: string }) 
                 )}
                 <div className="mt-auto flex items-center justify-between pt-3 text-xs text-muted-foreground">
                     <span>{article.author?.name ?? ''}</span>
-                    <span>{article.read_time_minutes} min read</span>
+                    <span className="flex items-center gap-2">
+                        {article.published_at && (
+                            <span>
+                                {new Date(article.published_at).toLocaleDateString('en-GB', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric',
+                                }).replace(/(\d+) (\w+) (\d+)/, '$1 $2, $3')}
+                            </span>
+                        )}
+                        <span>•</span>
+                        <span>{article.read_time_minutes} min read</span>
+                    </span>
                 </div>
             </div>
         </Link>

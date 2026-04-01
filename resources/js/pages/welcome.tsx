@@ -207,7 +207,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
 
     return (
         <PublicLayout isLandingPage hidePlatformChat={false}>
-            <Head title={`${String(appName)} — Learn, Prove, Get Hired`}>
+            <Head title={`${String(appName)} - Learn, Prove, Get Hired`}>
                 <meta
                     name="description"
                     content="Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers actually trust. Free to start."
