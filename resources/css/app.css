@@ -283,7 +283,9 @@
     border-collapse: collapse;
 }
 .prose td, .prose th { border: 1px solid var(--border); padding: 0.4rem 0.6rem; vertical-align: top; }
-.prose th { background-color: var(--muted); font-weight: 600; }
+.prose th { background-color: oklch(96% 0.02 220); font-weight: 600; }
+.dark .prose th { background-color: oklch(30% 0.05 220); }
+.prose tbody tr:nth-child(odd) td { background-color: color-mix(in oklch, var(--muted) 50%, transparent); }
 
 /* Inline code — use themed muted background instead of typography default */
 .prose :not(pre) > code {
