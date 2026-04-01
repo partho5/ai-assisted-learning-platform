@@ -264,7 +264,7 @@ function ArticleCard({ article, locale }: { article: Article; locale: string }) 
             )}
             <div className="flex flex-1 flex-col gap-2 p-4">
                 {article.category && (
-                    <span className="text-xs font-medium uppercase tracking-wide text-primary">{article.category.name}</span>
+                    <span className="text-xs font-medium tracking-wide text-primary">{article.category.name}</span>
                 )}
                 <h2 className="line-clamp-2 font-semibold leading-snug group-hover:text-primary">{article.title}</h2>
                 {article.excerpt && (
