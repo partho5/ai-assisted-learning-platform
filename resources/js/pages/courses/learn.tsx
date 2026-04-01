@@ -414,7 +414,7 @@ function TestPreview({
                                     {question.is_required && <span className="ml-1 text-destructive">*</span>}
                                 </Label>
                             </div>
-                            <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                            <span className="shrink-0 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-bold text-sky-700 dark:bg-amber-900/30 dark:text-sky-400">
                                 {question.points} {question.points !== 1 ? 'marks' : 'mark'}
                             </span>
                         </div>
@@ -1079,7 +1079,13 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                         </div>
                     )}
 
-                    <h2 className="mb-3 text-sm font-semibold p-2">{course.title}</h2>
+                    <Link
+                        href={`/${l}/courses/${course.slug}`}
+                        className="group mb-3 block p-3 bg-gradient-to-br from-sky-700 to-sky-900 hover:from-sky-600 hover:to-sky-800 dark:from-sky-800 dark:to-sky-950 dark:hover:from-sky-700 dark:hover:to-sky-900 border border-sky-600/40 dark:border-sky-700/50 transition-all shadow-sm"
+                    >
+                        <p className="text-[10px] tracking-widest text-sky-200/70 mb-1">Course</p>
+                        <h2 className="text-sm font-bold leading-snug text-white group-hover:text-sky-100 transition-colors">{course.title}</h2>
+                    </Link>
 
                     {course.updated_at && (
                         <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-800/40 dark:text-gray-300 block mx-auto mb-3 w-fit">
