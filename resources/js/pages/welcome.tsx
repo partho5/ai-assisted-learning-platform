@@ -274,6 +274,13 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     0%, 100% { opacity: 1; transform: scale(1); }
                     50%       { opacity: 0.5; transform: scale(0.75); }
                 }
+                @media (min-width: 768px) {
+                    .hero-blob1        { animation: blobFloat1 20s ease-in-out infinite; }
+                    .hero-blob2        { animation: blobFloat2 25s ease-in-out infinite; }
+                    .hero-blob3        { animation: blobFloat3 17s ease-in-out infinite; }
+                    .hero-gradient-text{ animation: gradientFlow 6s ease-in-out infinite; }
+                    .hero-badge-dot    { animation: badgePulse 2s ease-in-out infinite; }
+                }
             `}</style>
             <section
                 aria-label="Hero"
@@ -287,18 +294,15 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 {/* ocean glow blobs — animated */}
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute -top-24 left-1/2 h-[440px] w-[640px] rounded-full blur-[110px]"
-                    style={{ animation: 'blobFloat1 20s ease-in-out infinite' }}
+                    className="hero-blob1 pointer-events-none absolute -top-24 left-1/2 h-[440px] w-[640px] rounded-full blur-[110px]"
                 />
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute right-10 bottom-0 h-72 w-72 rounded-full blur-[90px]"
-                    style={{ animation: 'blobFloat2 25s ease-in-out infinite' }}
+                    className="hero-blob2 pointer-events-none absolute right-10 bottom-0 h-72 w-72 rounded-full blur-[90px]"
                 />
                 <div
                     aria-hidden
-                    className="pointer-events-none absolute top-1/3 left-0 h-56 w-56 rounded-full blur-[80px]"
-                    style={{ animation: 'blobFloat3 17s ease-in-out infinite' }}
+                    className="hero-blob3 pointer-events-none absolute top-1/3 left-0 h-56 w-56 rounded-full blur-[80px]"
                 />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-transparent" />
 
@@ -306,11 +310,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     <div className="mx-auto max-w-3xl text-center">
                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-black px-4 py-1.5 text-sky-400 shadow-sm backdrop-blur-sm">
                             <span
-                                className="h-1.5 w-1.5 rounded-full bg-green-400"
-                                style={{
-                                    animation:
-                                        'badgePulse 2s ease-in-out infinite',
-                                }}
+                                className="hero-badge-dot h-1.5 w-1.5 rounded-full bg-green-400"
                             />
                             Recruiters don't care about your certificates
                         </div>
@@ -323,13 +323,11 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         >
                             Stop chasing certificates.{' '}
                             <span
-                                className="bg-clip-text text-transparent"
+                                className="hero-gradient-text bg-clip-text text-transparent"
                                 style={{
                                     backgroundImage:
                                         'linear-gradient(90deg, #0f172a, #2563eb, #0ea5e9, #6366f1, #0f172a)',
                                     backgroundSize: '300% auto',
-                                    animation:
-                                        'gradientFlow 6s ease-in-out infinite',
                                 }}
                             >
                                 Build real work that gets you hired.
