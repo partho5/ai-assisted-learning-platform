@@ -61,7 +61,7 @@ export default function SectionBlock({ node, updateAttributes }: NodeViewProps) 
                 background: colors.bg,
                 border: isBordered ? `2px solid ${colors.border}` : `1px solid ${colors.border}`,
                 borderRadius: '10px',
-                padding: '12px 14px',
+                padding: '14px',
                 margin: '16px 0',
                 color: colors.text,
             }}
