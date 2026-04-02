@@ -247,7 +247,7 @@
 
 .rich-html table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; min-width: 0 !important; }
 .rich-html td, .rich-html th { border: 1px solid var(--border); padding: 0.4rem 0.6rem; vertical-align: top; }
-.rich-html th { background-color: var(--muted); font-weight: 600; text-align: center; }
+.rich-html th { background-color: aliceblue; font-weight: 600; text-align: center; }
 @media (max-width: 640px) {
     .rich-html table { table-layout: fixed; }
 }
@@ -283,7 +283,7 @@
     border-collapse: collapse;
 }
 .prose td, .prose th { border: 1px solid var(--border); padding: 0.4rem 0.6rem; vertical-align: top; }
-.prose th { background-color: oklch(96% 0.02 220); font-weight: 600; }
+.prose th { background-color: #f0f8ff; font-weight: 600; }
 .dark .prose th { background-color: oklch(30% 0.05 220); }
 .prose tbody tr:nth-child(odd) td { background-color: color-mix(in oklch, var(--muted) 50%, transparent); }
 
@@ -615,7 +615,7 @@ ol[data-enhanced] > li::before, .prose ol[data-enhanced] > li::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 27px;
+    margin-top: 25px;
 }
 .dark .rich-ol-badge {
     background: rgba(56, 189, 248, 0.18);

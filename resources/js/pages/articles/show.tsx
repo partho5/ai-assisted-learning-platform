@@ -141,6 +141,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
     return (
         <PublicLayout>
             <Head title={article.title}>
+                <style>{`body { background-color: aliceblue !important; }`}</style>
                 {/* Core meta */}
                 <meta name="description" content={description} />
                 <link rel="canonical" href={ogUrl} />
@@ -249,7 +250,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
 
                     {/* Body */}
                     {article.body && (
-                        <div className="mt-8 bg-card px-2 py-6 md:rounded-xl md:border md:border-border/60 md:px-6 md:py-6 md:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08),0_1px_4px_-1px_rgba(0,0,0,0.04)] dark:md:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4),0_1px_4px_-1px_rgba(0,0,0,0.2)]">
+                        <div className="mt-8 bg-white px-2 py-6 md:rounded-xl md:border md:border-border/60 md:px-6 md:py-6 md:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08),0_1px_4px_-1px_rgba(0,0,0,0.04)] dark:bg-card dark:md:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.4),0_1px_4px_-1px_rgba(0,0,0,0.2)]">
                             <RichHtml content={article.body} size="base" externalLinksNewTab />
                         </div>
                     )}
