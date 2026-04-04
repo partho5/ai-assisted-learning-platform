@@ -148,3 +148,18 @@ The image should be **1200 × 630 px** for best results.
 View the raw HTML source (`Ctrl+U`) and search for `og:image` — the tags should appear in `<head>` before any `<script>`, with full absolute URLs.
 
 Use [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) or [OpenGraph.xyz](https://www.opengraph.xyz) to preview how a URL appears when shared.
+
+---
+
+## Article Drafting
+
+AI-assisted article drafting with SEO optimization, rich HTML formatting, and automatic internal linking to existing published articles.
+
+**Trigger:**
+```
+read article-instructions/draft-article.md and draft an article titled "Your Title Here"
+```
+
+Optionally append a `lesson chunk:` block to expand a specific lesson into an article.
+
+The process: skeleton with keyword strategy (waits for approval) → queries existing articles for internal link candidates → writes full HTML with links woven into prose → inserts as draft via tinker.

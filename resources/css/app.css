@@ -615,7 +615,7 @@ ol[data-enhanced] > li::before, .prose ol[data-enhanced] > li::before {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 28px;
+    margin-top: 25px;
 }
 .dark .rich-ol-badge {
     background: rgba(56, 189, 248, 0.18);
