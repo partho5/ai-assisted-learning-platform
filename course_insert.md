@@ -15,6 +15,9 @@ The final result must be a fully accessible, production-ready course.
 
 ---
 
+## Use rich text
+You will use rich-text-editor.tsx supported rich text content where fits.
+
 ## Pre-Flight: Resolve IDs
 
 Before inserting, resolve the real database IDs you will need.

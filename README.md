@@ -163,3 +163,37 @@ read article-instructions/draft-article.md and draft an article titled "Your Tit
 Optionally append a `lesson chunk:` block to expand a specific lesson into an article.
 
 The process: skeleton with keyword strategy (waits for approval) → queries existing articles for internal link candidates → writes full HTML with links woven into prose → inserts as draft via tinker.
+
+---
+
+## Programmatic Course Insertion
+
+Bulk insert complete courses (with modules, resources, quizzes, questions) from an outline in production or development.
+
+**How to use:**
+
+In terminal, tell Claude Code:
+```
+Here's my course outline: [paste outline]. Insert it following course_insert.md.
+```
+
+**What you provide:**
+- Course title, description, learning objectives
+- Module titles and key concepts
+- Lesson topics (resources) and types (video, text, article, assignment, etc.)
+- Quiz questions per module (reinforces key points)
+
+**What happens:**
+1. Claude reads `course_insert.md` for step-by-step insertion order
+2. Resolves mentor user ID and category (if needed)
+3. Inserts course → modules → resources → tests → questions in correct order
+4. Verifies course is published and accessible
+5. Returns public URL and course structure summary
+
+**Output:**
+- ✅ Production-ready course, immediately accessible
+- 📚 All modules with learning resources
+- 🧪 Quizzes with AI-graded and auto-graded questions
+- 🔗 Public learner URL for enrollment
+
+**Reference:** See `course_insert.md` for complete field mapping, enum values, and full example.
