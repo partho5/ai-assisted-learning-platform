@@ -23,7 +23,7 @@ You will use rich-text-editor.tsx supported rich text content where fits.
 Before inserting, resolve the real database IDs you will need.
 
 ### Find the mentor's user_id
-use userId 1 for mentor id.
+Always use userId 1 as the mentor.
 
 ### Find or create a category
 
@@ -43,7 +43,7 @@ echo $category->id;
 
 ## Enum Reference (use exact string values)
 
-### `courses.status` : draft
+### `courses.status` : always `draft`
 
 ### `courses.difficulty`: beginner
 
@@ -53,7 +53,7 @@ echo $category->id;
 | `en` |
 | `bn` |
 
-### `courses.billing_type` : leave null for free
+### `courses.billing_type` : always `one_time`, leave `price` null for free
 
 
 ### `resources.type`
@@ -108,13 +108,13 @@ Always insert in this exact order — each step depends on the previous IDs.
 ```php
 $course = \App\Models\Course::create([
     // --- REQUIRED ---
-    'user_id'            => 5,                     // mentor's user id (from pre-flight)
+    'user_id'            => 1,                     // always use mentor id 1
     'title'              => 'Course Title Here',
     'slug'               => \Illuminate\Support\Str::slug('Course Title Here'),
     'description'        => 'Full course description.',
     'what_you_will_learn'=> "Bullet 1\nBullet 2\nBullet 3",
     'difficulty'         => 'beginner',            // beginner | intermediate | advanced
-    'status'             => 'published',           // use 'published' for production
+    'status'             => 'draft',                // always insert as draft
     'language'           => 'en',                  // en | bn
     'currency'           => 'USD',
     'billing_type'       => 'one_time',            // one_time | subscription
@@ -345,7 +345,7 @@ Replace `{locale}` with `en` or `bn`. Replace `{slug}` with `$course->slug`.
 | Mistake | Fix |
 |---|---|
 | Duplicate slug | Append `-2`, `-3` etc. to slug |
-| `status = 'draft'` in production | Always use `'published'` for live inserts |
+| `status = 'published'` on insert | Always insert as `'draft'`; publish manually after review |
 | `testable_type` wrong | Must be the full class path: `App\Models\Resource` |
 | `correct_answer` doesn't match option label | Must be character-for-character identical to an option's `label` |
 | Missing options for `multiple_choice` | All types with `hasOptions() = true` need at least 2 options |
@@ -361,14 +361,12 @@ Copy-paste this entire block into tinker to create a complete test course:
 
 ```php
 use Illuminate\Support\Str;
-use App\Models\{Course, Module, Resource, Test, TestQuestion, TestQuestionOption, User, Category};
-
-$mentor = User::where('role', 'mentor')->firstOrFail();
+use App\Models\{Course, Module, Resource, Test, TestQuestion, TestQuestionOption, Category};
 
 $course = Course::create([
-    'user_id' => $mentor->id, 'title' => 'Sample Course', 'slug' => Str::slug('Sample Course'),
+    'user_id' => 1, 'title' => 'Sample Course', 'slug' => Str::slug('Sample Course'),
     'description' => 'A sample course.', 'what_you_will_learn' => "Point 1\nPoint 2",
-    'difficulty' => 'beginner', 'status' => 'published', 'language' => 'en',
+    'difficulty' => 'beginner', 'status' => 'draft', 'language' => 'en',
     'currency' => 'USD', 'billing_type' => 'one_time', 'is_featured' => false,
 ]);
 
