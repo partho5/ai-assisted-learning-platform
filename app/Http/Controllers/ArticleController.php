@@ -98,7 +98,7 @@ class ArticleController extends Controller
             abort(404);
         }
 
-        $article->load('author:id,name,username,avatar,headline,bio,created_at', 'category');
+        $article->load('author:id,name,username,avatar,headline,bio,social_links,created_at', 'category');
 
         $description = $article->excerpt
             ? mb_substr(trim($article->excerpt), 0, 160)
@@ -177,7 +177,7 @@ class ArticleController extends Controller
     {
         Gate::authorize('update', $article);
 
-        $article->load('author:id,name,username,avatar,headline,bio,created_at', 'category');
+        $article->load('author:id,name,username,avatar,headline,bio,social_links,created_at', 'category');
 
         $description = $article->excerpt
             ? mb_substr(trim($article->excerpt), 0, 160)
