@@ -10,8 +10,9 @@ The final result must be a fully accessible, production-ready course.
 
 1. User provides a course outline (title, description, modules, lessons, quizzes, etc.).
 2. You read this file fully before writing any code.
-3. You run all insertions via `php artisan tinker` or the MCP `tinker` tool.
-4. You verify the course is accessible via its URL before declaring done.
+3. You write all insertion PHP code into a **temporary file** (e.g. `/tmp/course_insert.php`), then execute it with `php artisan tinker < /tmp/course_insert.php`. **Never** pipe PHP code directly into tinker from the shell — it causes escaping issues on production VPS.
+4. After successful execution, delete the temp file: `rm /tmp/course_insert.php`.
+5. You verify the course is accessible via its URL before declaring done.
 
 ---
 
@@ -100,6 +101,25 @@ Always insert in this exact order — each step depends on the previous IDs.
 5. TestQuestions  (each needs test_id)
 6. TestQuestionOptions  (each needs test_question_id — only for multiple_choice/checkboxes/dropdown)
 ```
+
+### Execution Method: Temp PHP File
+
+**Do NOT run PHP code directly in the shell.** Shell escaping breaks on production VPS.
+
+Instead, combine all insertion code (Steps 1–6) into a single temp PHP file and execute it:
+
+```bash
+# 1. Write all PHP insertion code to a temp file (use the Write tool or cat <<'PHPEOF')
+#    The file must NOT include <?php tags — tinker runs raw PHP.
+
+# 2. Execute via tinker
+php artisan tinker < /tmp/course_insert.php
+
+# 3. Clean up
+rm /tmp/course_insert.php
+```
+
+The Pre-Flight lookups (finding category IDs, etc.) can still use the MCP `tinker` tool interactively since those are short, simple commands without special characters.
 
 ---
 
@@ -352,12 +372,13 @@ Replace `{locale}` with `en` or `bn`. Replace `{slug}` with `$course->slug`.
 | `is_free = false` on all resources | First lesson should be `is_free = true` so guests can preview |
 | Wrong `order` values | `order` is per-scope: modules share course scope; resources share module scope |
 | Using `env()` directly | Not relevant here, but never reference env in code outside config |
+| Running PHP directly in shell/tinker CLI | Always write to a temp file first, then `php artisan tinker < /tmp/course_insert.php` |
 
 ---
 
-## Full Example: Minimal Viable Course (Tinker-ready)
+## Full Example: Minimal Viable Course
 
-Copy-paste this entire block into tinker to create a complete test course:
+Write the following PHP code to `/tmp/course_insert.php`, then run `php artisan tinker < /tmp/course_insert.php`:
 
 ```php
 use Illuminate\Support\Str;
@@ -399,4 +420,11 @@ TestQuestionOption::create(['test_question_id' => $q->id, 'label' => '4', 'order
 TestQuestionOption::create(['test_question_id' => $q->id, 'label' => '5', 'order' => 2]);
 
 echo "Done! Course: /en/courses/{$course->slug}";
+```
+
+Then execute and clean up:
+
+```bash
+php artisan tinker < /tmp/course_insert.php
+rm /tmp/course_insert.php
 ```
