@@ -417,7 +417,7 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
                 {!auth?.user && (
                     <div className="rounded-xl border bg-card p-6 text-center text-muted-foreground">
                         <p>
-                            <Link href={`/${l}/login`} className="font-medium text-primary hover:underline">Sign in</Link>
+                            <Link href="/login" className="font-medium text-primary hover:underline">Sign in</Link>
                             {' '}to join the discussion.
                         </p>
                     </div>
