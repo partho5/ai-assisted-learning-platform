@@ -62,7 +62,7 @@ function excerpt(html: string, len = 160): string {
 function ContactModal({ open, onClose, username }: { open: boolean; onClose: () => void; username: string }) {
     const { locale } = usePage().props;
     const l = String(locale);
-    const form = useForm({ sender_name: '', sender_email: '', subject: '', body: '', confirm_human: false, honeypot: '' });
+    const form = useForm({ sender_name: '', sender_email: '', subject: '', body: '', honeypot: '' });
     const [sent, setSent] = useState(false);
 
     function submit(e: FormEvent) {
@@ -82,6 +82,7 @@ function ContactModal({ open, onClose, username }: { open: boolean; onClose: () 
                 {sent ? (
                     <div className="py-8 text-center">
                         <p className="text-lg font-semibold text-green-600">Message received !</p>
+                        <p>I will contact you soon - via email</p>
                         <Button className="mt-4" onClick={onClose}>Close</Button>
                     </div>
                 ) : (
@@ -103,10 +104,6 @@ function ContactModal({ open, onClose, username }: { open: boolean; onClose: () 
                             <Label htmlFor="body" className="text-sm font-semibold text-gray-700">Message *</Label>
                             <textarea id="body" className="mt-1 w-full rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" rows={4} value={form.data.body} onChange={(e) => form.setData('body', e.target.value)} required />
                         </div>
-                        <label className="flex items-center gap-2">
-                            <input type="checkbox" checked={form.data.confirm_human} onChange={(e) => form.setData('confirm_human', e.target.checked)} className="h-4 w-4 rounded border-gray-300" />
-                            <span className="text-sm text-gray-700">I am not a robot</span>
-                        </label>
                         <button type="submit" disabled={form.processing} className="w-full rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 font-semibold text-white transition-all hover:-translate-y-0.5 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg disabled:opacity-50">
                             {form.processing ? 'Sending...' : 'Send Message'}
                         </button>

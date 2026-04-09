@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Course;
 use App\Models\ForumCategory;
 use App\Models\ForumThread;
+use App\Models\Portfolio;
 use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Http\Response;
@@ -142,6 +143,32 @@ class SitemapController extends Controller
                 'changefreq' => 'weekly',
                 'priority' => '0.6',
             ];
+        }
+
+        // Portfolio builder pages and individual projects
+        $portfolios = Portfolio::query()
+            ->where('is_published', true)
+            ->with(['user:id,username', 'projects' => fn ($q) => $q->where('is_published', true)->select(['id', 'portfolio_id', 'slug', 'updated_at'])])
+            ->select(['id', 'user_id', 'updated_at'])
+            ->whereHas('user', fn ($q) => $q->whereNotNull('username'))
+            ->get();
+
+        foreach ($portfolios as $portfolio) {
+            $urls[] = [
+                'loc' => "{$baseUrl}/en/u/{$portfolio->user->username}/portfolio",
+                'lastmod' => $portfolio->updated_at->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.7',
+            ];
+
+            foreach ($portfolio->projects as $project) {
+                $urls[] = [
+                    'loc' => "{$baseUrl}/en/u/{$portfolio->user->username}/portfolio/{$project->slug}",
+                    'lastmod' => $project->updated_at->toAtomString(),
+                    'changefreq' => 'weekly',
+                    'priority' => '0.6',
+                ];
+            }
         }
 
         $xml = view('sitemap', compact('urls'))->render();
