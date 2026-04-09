@@ -6,10 +6,14 @@ use App\Contracts\AiProvider;
 use App\Listeners\MergeGuestChatHistory;
 use App\Models\Article;
 use App\Models\Course;
+use App\Models\PortfolioProject;
+use App\Models\PortfolioProjectMedia;
 use App\Models\Resource;
 use App\Models\User;
 use App\Observers\ArticleObserver;
 use App\Observers\CourseObserver;
+use App\Observers\PortfolioProjectMediaObserver;
+use App\Observers\PortfolioProjectObserver;
 use App\Observers\ResourceObserver;
 use App\Observers\UserObserver;
 use App\Services\OpenAiProvider;
@@ -45,6 +49,8 @@ class AppServiceProvider extends ServiceProvider
         Course::observe(CourseObserver::class);
         User::observe(UserObserver::class);
         Resource::observe(ResourceObserver::class);
+        PortfolioProject::observe(PortfolioProjectObserver::class);
+        PortfolioProjectMedia::observe(PortfolioProjectMediaObserver::class);
 
         RedirectIfAuthenticated::redirectUsing(
             fn ($request) => route('dashboard', ['locale' => $request->route('locale', config('app.locale', 'en'))]),

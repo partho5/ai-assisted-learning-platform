@@ -9,6 +9,7 @@ import { index as chatHistory } from '@/routes/chat/history';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
 import { index as articlesIndex } from '@/actions/App/Http/Controllers/ArticleController';
+import { index as portfolioLanding } from '@/actions/App/Http/Controllers/PortfolioLandingController';
 import { login, register } from '@/routes';
 
 interface NavLinkProps {
@@ -203,6 +204,7 @@ export default function PublicLayout({
                                     <li><Link href={forumIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Forum</Link></li>
                                     <li><Link href={articlesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Resources</Link></li>
                                     <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground hover:text-primary">About</Link></li>
+                                    <li><Link href={portfolioLanding.url({ locale: l })} className="text-sm text-muted-foreground hover:text-primary">Portfolio Builder</Link></li>
                                 </ul>
                             </div>
 

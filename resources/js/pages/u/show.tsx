@@ -114,11 +114,13 @@ export default function PublicPortfolio({ profile, stats, taughtCourses, enrolle
                     </MentorCard>
 
                     {/* Stats */}
-                    <div className="mt-8 grid grid-cols-3 gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-3">
-                        <StatItem value={stats.courses_enrolled} label="Enrolled" />
-                        <StatItem value={stats.courses_completed} label="Completed" />
-                        <StatItem value={stats.assignments_endorsed} label="Endorsed" />
-                    </div>
+                    {stats && (stats.courses_enrolled > 0 || stats.courses_completed > 0 || stats.assignments_endorsed > 0) && (
+                        <div className="mt-8 grid grid-cols-3 gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-3">
+                            <StatItem value={stats.courses_enrolled} label="Enrolled" />
+                            <StatItem value={stats.courses_completed} label="Completed" />
+                            <StatItem value={stats.assignments_endorsed} label="Endorsed" />
+                        </div>
+                    )}
                 </div>
             </section>
 

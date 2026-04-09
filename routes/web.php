@@ -39,7 +39,10 @@ use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PartnerReferralController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PersonalNotesController;
+use App\Http\Controllers\PortfolioBuilderController;
 use App\Http\Controllers\PortfolioController;
+use App\Http\Controllers\PortfolioLandingController;
+use App\Http\Controllers\PublicPortfolioController;
 use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\ResourceCompletionController;
 use App\Http\Controllers\ResourceController;
@@ -89,6 +92,8 @@ Route::prefix('{locale}')
             return Inertia::render('contact');
         })->name('contact');
 
+        Route::get('portfolio-builder', [PortfolioLandingController::class, 'index'])->name('portfolio-builder.landing');
+
         Route::get('dashboard', [DashboardController::class, 'index'])
             ->middleware(['auth', 'verified'])
             ->name('dashboard');
@@ -103,6 +108,27 @@ Route::prefix('{locale}')
         Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('dashboard/partner', [PartnerController::class, 'index'])->name('partner.index');
             Route::post('dashboard/partner', [PartnerController::class, 'store'])->name('partner.store');
+        });
+
+        // Portfolio builder dashboard — all authenticated roles
+        Route::middleware(['auth', 'verified'])->prefix('dashboard/portfolio-builder')->group(function () {
+            Route::get('/', [PortfolioBuilderController::class, 'index'])->name('portfolio-builder.index');
+            Route::get('settings', [PortfolioBuilderController::class, 'settings'])->name('portfolio-builder.settings');
+            Route::put('settings', [PortfolioBuilderController::class, 'updateSettings'])->name('portfolio-builder.settings.update');
+            Route::get('projects', [PortfolioBuilderController::class, 'projects'])->name('portfolio-builder.projects.index');
+            Route::get('projects/create', [PortfolioBuilderController::class, 'createProject'])->name('portfolio-builder.projects.create');
+            Route::post('projects', [PortfolioBuilderController::class, 'storeProject'])->name('portfolio-builder.projects.store');
+            Route::get('projects/{project:id}/edit', [PortfolioBuilderController::class, 'editProject'])->name('portfolio-builder.projects.edit');
+            Route::put('projects/{project:id}', [PortfolioBuilderController::class, 'updateProject'])->name('portfolio-builder.projects.update');
+            Route::delete('projects/{project:id}', [PortfolioBuilderController::class, 'destroyProject'])->name('portfolio-builder.projects.destroy');
+            Route::get('categories', [PortfolioBuilderController::class, 'categories'])->name('portfolio-builder.categories');
+            Route::post('categories', [PortfolioBuilderController::class, 'storeCategory'])->name('portfolio-builder.categories.store');
+            Route::put('categories/{category:id}', [PortfolioBuilderController::class, 'updateCategory'])->name('portfolio-builder.categories.update');
+            Route::delete('categories/{category:id}', [PortfolioBuilderController::class, 'destroyCategory'])->name('portfolio-builder.categories.destroy');
+            Route::get('messages', [PortfolioBuilderController::class, 'messages'])->name('portfolio-builder.messages.index');
+            Route::get('messages/{message}', [PortfolioBuilderController::class, 'showMessage'])->name('portfolio-builder.messages.show');
+            Route::delete('messages/{message}', [PortfolioBuilderController::class, 'destroyMessage'])->name('portfolio-builder.messages.destroy');
+            Route::get('analytics', [PortfolioBuilderController::class, 'analytics'])->name('portfolio-builder.analytics');
         });
 
         // Referral click tracking (works for guests and auth users — needs session)
@@ -330,6 +356,13 @@ Route::prefix('{locale}')
 
         // Public evidence portfolio
         Route::get('u/{username}', [PublicProfileController::class, 'show'])->name('portfolio.show');
+
+        // Public portfolio builder pages
+        Route::get('u/{username}/portfolio', [PublicPortfolioController::class, 'show'])->name('public-portfolio.show');
+        Route::get('u/{username}/portfolio/{project_slug}', [PublicPortfolioController::class, 'showProject'])->name('public-portfolio.project');
+        Route::post('u/{username}/portfolio/contact', [PublicPortfolioController::class, 'sendMessage'])
+            ->middleware('throttle:5,60')
+            ->name('public-portfolio.contact');
 
         // Portfolio showcase toggle (auth required)
         Route::post('portfolio/attempts/{attempt}/showcase', [PortfolioController::class, 'toggleShowcase'])

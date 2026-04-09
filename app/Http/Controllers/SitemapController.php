@@ -35,6 +35,7 @@ class SitemapController extends Controller
             'changefreq' => 'daily',
             'priority' => '0.8',
         ];
+        $urls[] = ['loc' => "{$baseUrl}/en/portfolio-builder", 'lastmod' => $staticLastmod, 'changefreq' => 'monthly', 'priority' => '0.7'];
         $urls[] = ['loc' => "{$baseUrl}/en/about-us", 'lastmod' => $staticLastmod, 'changefreq' => 'monthly', 'priority' => '0.5'];
         $urls[] = ['loc' => "{$baseUrl}/en/contact", 'lastmod' => $staticLastmod, 'changefreq' => 'yearly', 'priority' => '0.4'];
         $urls[] = ['loc' => "{$baseUrl}/en/privacy-policy", 'lastmod' => $staticLastmod, 'changefreq' => 'yearly', 'priority' => '0.3'];

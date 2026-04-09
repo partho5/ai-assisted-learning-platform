@@ -157,6 +157,12 @@ class User extends Authenticatable
         return $this->hasOne(AiMember::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<Portfolio, $this> */
+    public function portfolio(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Portfolio::class);
+    }
+
     /**
      * Computed reputation points total (0 if no record exists yet).
      *
