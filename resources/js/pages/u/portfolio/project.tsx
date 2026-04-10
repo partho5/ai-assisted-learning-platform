@@ -170,7 +170,7 @@ export default function PortfolioProjectPage({ owner, portfolio, project, catego
             </Head>
 
             {/* Floating back button */}
-            <div className="mb-8">
+            {/* <div className="mb-8">
                 <Link
                     href={`/${l}/u/${owner.username}/portfolio`}
                     className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl"
@@ -178,10 +178,10 @@ export default function PortfolioProjectPage({ owner, portfolio, project, catego
                     <ArrowLeft className="h-5 w-5" />
                     All Projects
                 </Link>
-            </div>
+            </div> */}
 
             {/* Project title */}
-            <h1 className="mb-16 text-center text-5xl font-black text-blue-700 md:text-7xl">
+            <h1 className="mb-16 text-center text-4xl font-black text-blue-700 md:text-5xl">
                 {project.title}
             </h1>
 
