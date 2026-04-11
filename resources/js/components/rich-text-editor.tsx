@@ -12,6 +12,7 @@ import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { Callout } from '@/extensions/callout-extension';
 import { SectionBlock as SectionBlockExt } from '@/extensions/section-block-extension';
+import { Youtube, extractYoutubeId } from '@/extensions/youtube-extension';
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string;
@@ -73,11 +74,27 @@ type ImgPanel = {
 };
 const IMG_PANEL_CLOSED: ImgPanel = { open: false, uploadedUrl: '', url: '', alt: '', fileName: '', uploading: false, error: null };
 
+type YtPanel = { open: boolean; input: string; videoId: string; error: string | null };
+const YT_PANEL_CLOSED: YtPanel = { open: false, input: '', videoId: '', error: null };
+
+const PANEL_CLASSES = 'border-b border-primary/40 border-l-4 border-l-primary bg-primary/5 dark:bg-primary/10 px-3 py-2 flex flex-wrap items-end gap-3 animate-in fade-in slide-in-from-top-1 duration-200';
+
 function Toolbar({ editor }: { editor: Editor }) {
     const colorRef = useRef<HTMLInputElement>(null);
     const highlightRef = useRef<HTMLInputElement>(null);
     const fileRef = useRef<HTMLInputElement>(null);
     const [imgPanel, setImgPanel] = useState<ImgPanel>(IMG_PANEL_CLOSED);
+    const [ytPanel, setYtPanel] = useState<YtPanel>(YT_PANEL_CLOSED);
+
+    const openImgPanel = useCallback(() => {
+        setYtPanel(YT_PANEL_CLOSED);
+        setImgPanel((p) => (p.open ? IMG_PANEL_CLOSED : { ...IMG_PANEL_CLOSED, open: true }));
+    }, []);
+
+    const openYtPanel = useCallback(() => {
+        setImgPanel(IMG_PANEL_CLOSED);
+        setYtPanel((p) => (p.open ? YT_PANEL_CLOSED : { ...YT_PANEL_CLOSED, open: true }));
+    }, []);
 
     const s = useEditorState({
         editor,
@@ -147,6 +164,20 @@ function Toolbar({ editor }: { editor: Editor }) {
         setImgPanel(IMG_PANEL_CLOSED);
         if (fileRef.current) { fileRef.current.value = ''; }
     }, [editor, imgPanel]);
+
+    const handleYtInput = useCallback((value: string) => {
+        setYtPanel((p) => ({ ...p, input: value, videoId: extractYoutubeId(value) ?? '', error: null }));
+    }, []);
+
+    const insertYoutube = useCallback(() => {
+        const id = ytPanel.videoId || extractYoutubeId(ytPanel.input);
+        if (!id) {
+            setYtPanel((p) => ({ ...p, error: 'Could not recognize a YouTube URL or video ID.' }));
+            return;
+        }
+        editor.chain().focus().insertYoutube(id).run();
+        setYtPanel(YT_PANEL_CLOSED);
+    }, [editor, ytPanel]);
 
     return (
         <>
@@ -265,9 +296,10 @@ function Toolbar({ editor }: { editor: Editor }) {
 
             <Sep />
 
-            {/* Link, image & code */}
+            {/* Link, image, video & code */}
             <ToolbarBtn onClick={setLink} active={s.isLink} title="Link">🔗</ToolbarBtn>
-            <ToolbarBtn onClick={() => setImgPanel((p) => ({ ...IMG_PANEL_CLOSED, open: !p.open }))} active={imgPanel.open} title="Insert image">🖼</ToolbarBtn>
+            <ToolbarBtn onClick={openImgPanel} active={imgPanel.open} title="Insert image">🖼</ToolbarBtn>
+            <ToolbarBtn onClick={openYtPanel} active={ytPanel.open} title="Insert YouTube video">▶</ToolbarBtn>
             <ToolbarBtn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={s.isCodeBlock} title="Code block">{`</>`}</ToolbarBtn>
 
             <Sep />
@@ -326,7 +358,7 @@ function Toolbar({ editor }: { editor: Editor }) {
 
         {/* Image insertion panel */}
         {imgPanel.open && (
-            <div className="border-b border-border bg-muted/30 px-3 py-2 flex flex-wrap items-end gap-3">
+            <div className={PANEL_CLASSES}>
                 {/* Hidden file input */}
                 <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={handleImgFile} disabled={imgPanel.uploading} />
 
@@ -406,6 +438,58 @@ function Toolbar({ editor }: { editor: Editor }) {
                 </div>
             </div>
         )}
+
+        {/* YouTube insertion panel */}
+        {ytPanel.open && (
+            <div className={PANEL_CLASSES}>
+                {/* URL / ID input */}
+                <div className="flex flex-col gap-0.5 flex-1 min-w-[240px]">
+                    <span className="text-[10px] text-muted-foreground">YouTube URL or video ID</span>
+                    <input
+                        type="text"
+                        placeholder="https://www.youtube.com/watch?v=... or dQw4w9WgXcQ"
+                        value={ytPanel.input}
+                        autoFocus
+                        onChange={(e) => handleYtInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); insertYoutube(); } }}
+                        className="h-6 rounded border border-border bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
+                    {ytPanel.error && <span className="text-[10px] text-destructive">{ytPanel.error}</span>}
+                    {ytPanel.videoId && !ytPanel.error && (
+                        <span className="text-[10px] text-muted-foreground">Detected ID: {ytPanel.videoId}</span>
+                    )}
+                </div>
+
+                {/* Thumbnail preview */}
+                {ytPanel.videoId && (
+                    <img
+                        src={`https://i.ytimg.com/vi/${ytPanel.videoId}/mqdefault.jpg`}
+                        alt="YouTube thumbnail"
+                        className="h-12 w-[72px] rounded border border-border object-cover shadow-sm"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                )}
+
+                {/* Actions */}
+                <div className="flex items-end gap-1.5 self-end">
+                    <button
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); insertYoutube(); }}
+                        disabled={!ytPanel.videoId}
+                        className="rounded bg-primary px-3 py-0.5 text-xs text-primary-foreground disabled:opacity-40 transition-opacity"
+                    >
+                        Insert
+                    </button>
+                    <button
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); setYtPanel(YT_PANEL_CLOSED); }}
+                        className="rounded border border-border px-2 py-0.5 text-xs hover:bg-muted transition-colors"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        )}
         </>
     );
 }
@@ -438,6 +522,7 @@ export default function RichTextEditor({ value, onChange, disabled = false, plac
             TableCell,
             Callout,
             SectionBlockExt,
+            Youtube,
         ],
         content: value,
         editable: !disabled,
