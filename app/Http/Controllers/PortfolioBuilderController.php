@@ -230,6 +230,30 @@ class PortfolioBuilderController extends Controller
     }
 
     /**
+     * Reorder projects by updating their sort_order from a client-provided id list.
+     */
+    public function reorderProjects(Request $request): RedirectResponse
+    {
+        $portfolio = $this->getOrCreatePortfolio($request);
+
+        $validated = $request->validate([
+            'order' => ['required', 'array'],
+            'order.*' => ['integer'],
+        ]);
+
+        $ownedIds = $portfolio->projects()->pluck('id')->all();
+
+        foreach ($validated['order'] as $position => $projectId) {
+            if (! in_array($projectId, $ownedIds, true)) {
+                continue;
+            }
+            $portfolio->projects()->where('id', $projectId)->update(['sort_order' => $position]);
+        }
+
+        return back()->with('success', 'Projects reordered.');
+    }
+
+    /**
      * Manage categories (inline CRUD).
      */
     public function categories(Request $request): Response

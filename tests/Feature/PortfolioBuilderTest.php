@@ -264,6 +264,47 @@ class PortfolioBuilderTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_reorder_projects_updates_sort_order(): void
+    {
+        $user = User::factory()->create();
+        $portfolio = Portfolio::factory()->create(['user_id' => $user->id]);
+
+        $projectA = PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id, 'sort_order' => 0]);
+        $projectB = PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id, 'sort_order' => 1]);
+        $projectC = PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id, 'sort_order' => 2]);
+
+        $this->actingAs($user)
+            ->post(route('portfolio-builder.projects.reorder', ['locale' => 'en']), [
+                'order' => [$projectC->id, $projectA->id, $projectB->id],
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('portfolio_projects', ['id' => $projectC->id, 'sort_order' => 0]);
+        $this->assertDatabaseHas('portfolio_projects', ['id' => $projectA->id, 'sort_order' => 1]);
+        $this->assertDatabaseHas('portfolio_projects', ['id' => $projectB->id, 'sort_order' => 2]);
+    }
+
+    public function test_reorder_projects_ignores_other_users_project_ids(): void
+    {
+        $user = User::factory()->create();
+        $portfolio = Portfolio::factory()->create(['user_id' => $user->id]);
+        $mine = PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id, 'sort_order' => 0]);
+
+        $otherPortfolio = Portfolio::factory()->create();
+        $theirs = PortfolioProject::factory()->create(['portfolio_id' => $otherPortfolio->id, 'sort_order' => 5]);
+
+        $this->actingAs($user)
+            ->post(route('portfolio-builder.projects.reorder', ['locale' => 'en']), [
+                'order' => [$theirs->id, $mine->id],
+            ])
+            ->assertRedirect();
+
+        // Their project's sort_order is untouched
+        $this->assertDatabaseHas('portfolio_projects', ['id' => $theirs->id, 'sort_order' => 5]);
+        // Mine moves to position 1 (0-based), since position 0 is their ignored id
+        $this->assertDatabaseHas('portfolio_projects', ['id' => $mine->id, 'sort_order' => 1]);
+    }
+
     // ──────────────────────────────────────────────────────────────────────────
     // Messages
     // ──────────────────────────────────────────────────────────────────────────

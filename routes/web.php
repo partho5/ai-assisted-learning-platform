@@ -118,6 +118,7 @@ Route::prefix('{locale}')
             Route::get('projects', [PortfolioBuilderController::class, 'projects'])->name('portfolio-builder.projects.index');
             Route::get('projects/create', [PortfolioBuilderController::class, 'createProject'])->name('portfolio-builder.projects.create');
             Route::post('projects', [PortfolioBuilderController::class, 'storeProject'])->name('portfolio-builder.projects.store');
+            Route::post('projects/reorder', [PortfolioBuilderController::class, 'reorderProjects'])->name('portfolio-builder.projects.reorder');
             Route::get('projects/{project:id}/edit', [PortfolioBuilderController::class, 'editProject'])->name('portfolio-builder.projects.edit');
             Route::put('projects/{project:id}', [PortfolioBuilderController::class, 'updateProject'])->name('portfolio-builder.projects.update');
             Route::delete('projects/{project:id}', [PortfolioBuilderController::class, 'destroyProject'])->name('portfolio-builder.projects.destroy');
