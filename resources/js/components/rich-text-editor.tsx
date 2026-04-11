@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';
@@ -12,6 +12,9 @@ import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { Callout } from '@/extensions/callout-extension';
 import { SectionBlock as SectionBlockExt } from '@/extensions/section-block-extension';
+
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string;
 
 // ─── Toolbar button ───────────────────────────────────────────────────────────
 
@@ -59,9 +62,22 @@ const SECTION_VARIANTS: Record<string, { label: string; bg: string; border: stri
     bordered: { label: 'Bordered', bg: '#fff7ed', border: '#f97316' },
 };
 
+type ImgPanel = {
+    open: boolean;
+    uploadedUrl: string;
+    url: string;
+    alt: string;
+    fileName: string;
+    uploading: boolean;
+    error: string | null;
+};
+const IMG_PANEL_CLOSED: ImgPanel = { open: false, uploadedUrl: '', url: '', alt: '', fileName: '', uploading: false, error: null };
+
 function Toolbar({ editor }: { editor: Editor }) {
     const colorRef = useRef<HTMLInputElement>(null);
     const highlightRef = useRef<HTMLInputElement>(null);
+    const fileRef = useRef<HTMLInputElement>(null);
+    const [imgPanel, setImgPanel] = useState<ImgPanel>(IMG_PANEL_CLOSED);
 
     const s = useEditorState({
         editor,
@@ -96,14 +112,44 @@ function Toolbar({ editor }: { editor: Editor }) {
         }
     }, [editor]);
 
-    const addImage = useCallback(() => {
-        const url = window.prompt('Image URL');
-        if (url) {
-            editor.chain().focus().setImage({ src: url }).run();
+    const handleImgFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) { return; }
+
+        setImgPanel((p) => ({ ...p, uploading: true, error: null, fileName: file.name, url: '', uploadedUrl: '' }));
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', UPLOAD_PRESET);
+
+            const res = await fetch(
+                `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+                { method: 'POST', body: formData },
+            );
+
+            if (!res.ok) { throw new Error('Upload failed'); }
+
+            const data = await res.json();
+            setImgPanel((p) => ({ ...p, uploading: false, uploadedUrl: data.secure_url as string }));
+        } catch {
+            setImgPanel((p) => ({ ...p, uploading: false, error: 'Upload failed. Please try again.' }));
+        } finally {
+            if (fileRef.current) { fileRef.current.value = ''; }
         }
-    }, [editor]);
+    }, []);
+
+    const insertImage = useCallback(() => {
+        const src = imgPanel.uploadedUrl || imgPanel.url.trim();
+        if (src) {
+            editor.chain().focus().setImage({ src, alt: imgPanel.alt.trim() || undefined } as any).run();
+        }
+        setImgPanel(IMG_PANEL_CLOSED);
+        if (fileRef.current) { fileRef.current.value = ''; }
+    }, [editor, imgPanel]);
 
     return (
+        <>
         <div className="flex flex-wrap items-center gap-0.5 rounded-t-md border-b border-border bg-muted/50 px-2 py-1.5">
             {/* Heading */}
             <select
@@ -221,7 +267,7 @@ function Toolbar({ editor }: { editor: Editor }) {
 
             {/* Link, image & code */}
             <ToolbarBtn onClick={setLink} active={s.isLink} title="Link">🔗</ToolbarBtn>
-            <ToolbarBtn onClick={addImage} title="Insert image">🖼</ToolbarBtn>
+            <ToolbarBtn onClick={() => setImgPanel((p) => ({ ...IMG_PANEL_CLOSED, open: !p.open }))} active={imgPanel.open} title="Insert image">🖼</ToolbarBtn>
             <ToolbarBtn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={s.isCodeBlock} title="Code block">{`</>`}</ToolbarBtn>
 
             <Sep />
@@ -277,6 +323,90 @@ function Toolbar({ editor }: { editor: Editor }) {
                 ))}
             </div>
         </div>
+
+        {/* Image insertion panel */}
+        {imgPanel.open && (
+            <div className="border-b border-border bg-muted/30 px-3 py-2 flex flex-wrap items-end gap-3">
+                {/* Hidden file input */}
+                <input ref={fileRef} type="file" accept="image/*" className="sr-only" onChange={handleImgFile} disabled={imgPanel.uploading} />
+
+                {/* Upload button + filename */}
+                <div className="flex flex-col gap-0.5">
+                    <span className="text-[10px] text-muted-foreground">Upload</span>
+                    <div className="flex items-center gap-1.5">
+                        <button
+                            type="button"
+                            disabled={imgPanel.uploading}
+                            onMouseDown={(e) => { e.preventDefault(); fileRef.current?.click(); }}
+                            className="rounded border border-border bg-background px-2 py-0.5 text-xs hover:bg-muted transition-colors disabled:opacity-50"
+                        >
+                            {imgPanel.uploading ? 'Uploading…' : 'Choose file'}
+                        </button>
+                        <span className="text-xs text-muted-foreground max-w-[120px] truncate">
+                            {imgPanel.fileName || 'No file chosen'}
+                        </span>
+                    </div>
+                    {imgPanel.error && <span className="text-[10px] text-destructive">{imgPanel.error}</span>}
+                </div>
+
+                {/* OR separator */}
+                <span className="text-xs text-muted-foreground self-end pb-0.5">or</span>
+
+                {/* URL input */}
+                <div className="flex flex-col gap-0.5 flex-1 min-w-[160px]">
+                    <span className="text-[10px] text-muted-foreground">Image URL</span>
+                    <input
+                        type="url"
+                        placeholder="https://..."
+                        value={imgPanel.url}
+                        onChange={(e) => setImgPanel((p) => ({ ...p, url: e.target.value, uploadedUrl: '', fileName: '' }))}
+                        className="h-6 rounded border border-border bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
+                </div>
+
+                {/* Alt text */}
+                <div className="flex flex-col gap-0.5 min-w-[140px]">
+                    <span className="text-[10px] text-muted-foreground">Alt text</span>
+                    <input
+                        type="text"
+                        placeholder="Describe the image"
+                        value={imgPanel.alt}
+                        onChange={(e) => setImgPanel((p) => ({ ...p, alt: e.target.value }))}
+                        className="h-6 rounded border border-border bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
+                </div>
+
+                {/* Preview thumbnail */}
+                {(imgPanel.uploadedUrl || imgPanel.url) && (
+                    <img
+                        src={imgPanel.uploadedUrl || imgPanel.url}
+                        alt="preview"
+                        className="h-10 w-10 rounded border border-border object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                )}
+
+                {/* Actions */}
+                <div className="flex items-end gap-1.5 self-end">
+                    <button
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); insertImage(); }}
+                        disabled={imgPanel.uploading || (!imgPanel.uploadedUrl && !imgPanel.url.trim())}
+                        className="rounded bg-primary px-3 py-0.5 text-xs text-primary-foreground disabled:opacity-40 transition-opacity"
+                    >
+                        Insert
+                    </button>
+                    <button
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); setImgPanel(IMG_PANEL_CLOSED); if (fileRef.current) { fileRef.current.value = ''; } }}
+                        className="rounded border border-border px-2 py-0.5 text-xs hover:bg-muted transition-colors"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        )}
+        </>
     );
 }
 

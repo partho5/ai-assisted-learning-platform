@@ -59,6 +59,10 @@ function excerpt(html: string, len = 160): string {
     return plain.length > len ? plain.slice(0, len) + '...' : plain;
 }
 
+function lazyLoadImages(html: string): string {
+    return html.replace(/<img(?![^>]*\bloading=)/gi, '<img loading="lazy"');
+}
+
 
 function ContactModal({ open, onClose, username }: { open: boolean; onClose: () => void; username: string }) {
     const { locale } = usePage().props;
@@ -201,10 +205,15 @@ export default function PortfolioProjectPage({ owner, portfolio, project, catego
                                     transition: 'transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                                 }}
                             >
-                                {allSlides.map((slide) => (
+                                {allSlides.map((slide, i) => (
                                     <div key={slide.id} className="h-full flex-shrink-0" style={{ width: `${100 / slideCount}%` }}>
                                         {slide.type === 'image' ? (
-                                            <img src={slide.url} alt={`${project.title}`} className="h-full w-full object-cover" />
+                                            <img
+                                                src={slide.url}
+                                                alt={project.title}
+                                                loading={i === 0 ? 'eager' : 'lazy'}
+                                                className="h-full w-full object-cover"
+                                            />
                                         ) : (
                                             <iframe src={slide.url} className="h-full w-full" allowFullScreen title="video" />
                                         )}
@@ -245,7 +254,7 @@ export default function PortfolioProjectPage({ owner, portfolio, project, catego
             {/* Description */}
             <div className="mb-16 rounded-3xl bg-white p-4 md:p-8 shadow-xl md:p-12">
                 <h3 className="mb-6 text-center text-2xl font-bold text-gray-800 md:text-3xl">About This Project</h3>
-                <div className="prose prose-lg max-w-none text-gray-700 md:prose-xl" dangerouslySetInnerHTML={{ __html: project.description }} />
+                <div className="prose prose-lg max-w-none text-gray-700 md:prose-xl" dangerouslySetInnerHTML={{ __html: lazyLoadImages(project.description) }} />
             </div>
 
             {/* CTA section */}
