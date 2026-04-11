@@ -31,6 +31,7 @@ interface Props {
     categories?: Category[];
     activeCategory?: Category | null;
     onContactClick?: () => void;
+    showSidebar?: boolean;
 }
 
 const SERVICE_GRADIENTS = [
@@ -45,7 +46,7 @@ const SERVICE_GRADIENTS = [
     'from-teal-50 to-green-50 border-teal-100',
 ];
 
-export default function PortfolioLayout({ children, owner, portfolio, categories = [], activeCategory, onContactClick }: Props) {
+export default function PortfolioLayout({ children, owner, portfolio, categories = [], activeCategory, onContactClick, showSidebar = true }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -85,7 +86,7 @@ export default function PortfolioLayout({ children, owner, portfolio, categories
                                     !activeCategory ? 'text-blue-400' : 'text-zinc-300 hover:text-blue-400',
                                 )}
                             >
-                                All
+                                All Projects
                             </Link>
                             {categories.map((cat) => (
                                 <Link
@@ -237,7 +238,7 @@ export default function PortfolioLayout({ children, owner, portfolio, categories
             {/* Main layout */}
             <div className="flex pt-16">
                 {/* Left sidebar (desktop only) */}
-                <aside className="hidden h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r border-gray-200 bg-white md:fixed md:block">
+                <aside className={`hidden h-[calc(100vh-4rem)] w-80 shrink-0 overflow-y-auto border-r border-gray-200 bg-white ${showSidebar ? 'md:fixed md:block' : 'md:hidden'}`}>
                     <div className="space-y-6 p-6">
                         {/* Avatar */}
                         {owner.avatar && (
@@ -332,15 +333,15 @@ export default function PortfolioLayout({ children, owner, portfolio, categories
                 </aside>
 
                 {/* Main content */}
-                <main className="min-w-0 flex-1 p-4 md:ml-80 md:p-8">
-                    <div className="container mx-auto max-w-7xl">
+                <main className={`min-w-0 flex-1 p-2 md:p-8 ${showSidebar ? 'md:ml-80' : ''}`}>
+                    <div className="container mx-auto max-w-5xl">
                         {children}
                     </div>
                 </main>
             </div>
 
             {/* Footer */}
-            <footer className="border-t bg-white py-6 text-center text-xs text-gray-400 md:ml-80">
+            <footer className={`border-t bg-white py-6 text-center text-xs text-gray-400 ${showSidebar ? 'md:ml-80' : ''}`}>
                 {/* &copy; {new Date().getFullYear()} {owner.name} */}
             </footer>
         </div>

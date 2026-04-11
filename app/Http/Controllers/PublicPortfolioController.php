@@ -104,6 +104,7 @@ class PublicPortfolioController extends Controller
             'portfolio' => $portfolio,
             'project' => $project,
             'categories' => $portfolio->categories()->get(),
+            'showSidebar' => false,
         ]);
     }
 

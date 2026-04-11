@@ -51,6 +51,7 @@ interface Props {
     portfolio: Portfolio;
     project: Project;
     categories: Category[];
+    showSidebar: boolean;
 }
 
 function excerpt(html: string, len = 160): string {
@@ -114,7 +115,7 @@ function ContactModal({ open, onClose, username }: { open: boolean; onClose: () 
     );
 }
 
-export default function PortfolioProjectPage({ owner, portfolio, project, categories }: Props) {
+export default function PortfolioProjectPage({ owner, portfolio, project, categories, showSidebar }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
     const [contactOpen, setContactOpen] = useState(false);
@@ -158,6 +159,7 @@ export default function PortfolioProjectPage({ owner, portfolio, project, catego
             portfolio={portfolio}
             categories={categories}
             onContactClick={() => setContactOpen(true)}
+            showSidebar={showSidebar}
         >
             <Head>
                 <title>{`${project.title} — ${owner.name}`}</title>
@@ -241,14 +243,14 @@ export default function PortfolioProjectPage({ owner, portfolio, project, catego
             )}
 
             {/* Description */}
-            <div className="mb-16 rounded-3xl bg-white p-8 shadow-xl md:p-12">
+            <div className="mb-16 rounded-3xl bg-white p-4 md:p-8 shadow-xl md:p-12">
                 <h3 className="mb-6 text-center text-2xl font-bold text-gray-800 md:text-3xl">About This Project</h3>
                 <div className="prose prose-lg max-w-none text-gray-700 md:prose-xl" dangerouslySetInnerHTML={{ __html: project.description }} />
             </div>
 
             {/* CTA section */}
             <div
-                className="rounded-3xl p-8 text-center text-white shadow-2xl md:p-12"
+                className="rounded-3xl p-4 text-center text-white shadow-2xl md:p-12"
                 style={{
                     background: 'linear-gradient(135deg, #1a6dff 0%, #0a3cff 30%, #6a0dff 70%, #a020f0 100%)',
                     boxShadow: '0 20px 60px rgba(26, 109, 255, 0.4), 0 0 0 1px rgba(255,255,255,0.1) inset',
