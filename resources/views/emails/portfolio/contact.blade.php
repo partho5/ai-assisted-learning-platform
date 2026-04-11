@@ -4,16 +4,16 @@
 
     <div class="detail-box">
         <div class="detail-row">
-            <span class="detail-label">From</span>
+            <span class="detail-label">From: </span>
             <span class="detail-value">{{ $senderName }}</span>
         </div>
         <div class="detail-row">
-            <span class="detail-label">Email</span>
+            <span class="detail-label">Email: </span>
             <span class="detail-value">{{ $senderEmail }}</span>
         </div>
         @if($messageSubject)
         <div class="detail-row">
-            <span class="detail-label">Subject</span>
+            <span class="detail-label">Subject: </span>
             <span class="detail-value">{{ $messageSubject }}</span>
         </div>
         @endif

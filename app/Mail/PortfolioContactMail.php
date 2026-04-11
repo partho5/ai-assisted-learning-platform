@@ -28,6 +28,7 @@ class PortfolioContactMail extends Mailable implements ShouldQueue
 
         return new Envelope(
             to: $this->portfolioOwner->email,
+            replyTo: [$this->message->sender_email],
             subject: $subject,
         );
     }
