@@ -373,6 +373,38 @@ Replace `{locale}` with `en` or `bn`. Replace `{slug}` with `$course->slug`.
 | Wrong `order` values | `order` is per-scope: modules share course scope; resources share module scope |
 | Using `env()` directly | Not relevant here, but never reference env in code outside config |
 | Running PHP directly in shell/tinker CLI | Always write to a temp file first, then `php artisan tinker < /tmp/course_insert.php` |
+| Adding `use` statements for `Str` or any `App\Models\*` | **Do NOT add any `use` statements.** Tinker auto-aliases all `App\Models\*` classes and `Illuminate\Support\Str`. Adding `use` lines causes `FATAL ERROR: Cannot use X as Y because the name is already in use`. Simply write `Course::create(...)`, `Module::create(...)` etc. with no imports at the top of the file. |
+
+---
+
+## Tinker `use` Statement Behavior (Confirmed from Real Insertion)
+
+**Problem encountered:** The first insertion attempt included these lines at the top of the temp file:
+
+```php
+use Illuminate\Support\Str;
+use App\Models\{Course, Module, Resource, Test, TestQuestion, TestQuestionOption, Category};
+```
+
+**Error produced:**
+
+```
+FATAL ERROR  Cannot use Illuminate\Support\Str as Str because the name is already in use
+FATAL ERROR  Cannot use App\Models\Course as Course because the name is already in use
+```
+
+**Why it happens:** When `php artisan tinker` starts, it automatically aliases every class in `App\Models\*` and common framework classes like `Illuminate\Support\Str` into the session scope. Any `use` statement that re-declares an already-aliased name causes a fatal PHP error and aborts the entire script — leaving the database in a partial state.
+
+**Correct approach:** Write zero `use` statements. Use short model names directly (`Course::`, `Module::`, `Resource::` etc.) — tinker resolves them automatically. Confirmed working output:
+
+```
+[!] Aliasing 'Course' to 'App\Models\Course' for this Tinker session.
+[!] Aliasing 'Module' to 'App\Models\Module' for this Tinker session.
+[!] Aliasing 'Resource' to 'App\Models\Resource' for this Tinker session.
+...
+```
+
+**Rule:** The temp file must start directly with executable PHP — no `<?php` tag, no `use` statements.
 
 ---
 
@@ -381,11 +413,10 @@ Replace `{locale}` with `en` or `bn`. Replace `{slug}` with `$course->slug`.
 Write the following PHP code to `/tmp/course_insert.php`, then run `php artisan tinker < /tmp/course_insert.php`:
 
 ```php
-use Illuminate\Support\Str;
-use App\Models\{Course, Module, Resource, Test, TestQuestion, TestQuestionOption, Category};
+// No use statements — tinker auto-aliases all App\Models\* classes
 
 $course = Course::create([
-    'user_id' => 1, 'title' => 'Sample Course', 'slug' => Str::slug('Sample Course'),
+    'user_id' => 1, 'title' => 'Sample Course', 'slug' => \Illuminate\Support\Str::slug('Sample Course'),
     'description' => 'A sample course.', 'what_you_will_learn' => "Point 1\nPoint 2",
     'difficulty' => 'beginner', 'status' => 'draft', 'language' => 'en',
     'currency' => 'USD', 'billing_type' => 'one_time', 'is_featured' => false,
