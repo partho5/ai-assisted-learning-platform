@@ -19,20 +19,31 @@ The `body` field is a single HTML string. Use only the patterns below — no cla
 Also use colors like
 `<span style="color: rgb(239, 68, 68);">noticeable phrase</span>`
 
-**Callout — no label as applicable** (use for definitions, key rules, warnings, named tips, copy-ready templates, examples etc)
-`<div data-variant="purple" data-label="" data-type="callout">text</div>`
+**Callout** — use for definitions, key rules, warnings, named tips, copy-ready templates, examples etc. All variants have dark accent backgrounds; text inside must be `color: #fff`.
 
-or with label:
-`<div data-variant="amber" data-label="Label text" data-type="callout">text</div>`
-Variant options: `purple` · `amber` · `green` · `teal`
+| Variant | Color | Best for |
+|---------|-------|----------|
+| `purple` | #7F77DD — muted violet | definitions, explanations, concept callouts |
+| `amber` | #EF9F27 — warm amber | warnings, cautions, "watch out" tips |
+| `teal` | #1D9E75 — deep teal | success notes, recommended practices |
+| `green` | #639922 — earthy green | positive outcomes, green-flag rules |
 
-> **Text color rule for callouts:** all callout variants have dark accent backgrounds — use `color: #fff` for text inside callouts.
+No label: `<div data-variant="purple" data-label="" data-type="callout">text</div>`
+With label: `<div data-variant="amber" data-label="Label text" data-type="callout">text</div>`
 
-**Section block — hero-dark / hero-light** (dark backgrounds — use for summaries, framing statements, "before" examples; text must be #fff)
+**Section block** — full-width emphasis blocks. Choose variant by the mood of the content:
+
+| Variant | Color | Best for |
+|---------|-------|----------|
+| `hero-dark` | #093464 — deep navy bg | summaries, framing statements, "before" examples, closing takeaways |
+| `hero-light` | #1709ed — vivid blue bg | calls to action, key insights, pro tips, featured quotes, important announcements |
+| `accent` | #eff6ff — pale blue bg, #3b82f6 border | supplementary notes, light emphasis, side context |
+| `bordered` | #fff7ed — warm cream bg, #f97316 border | examples, "after" contrast, warm-tone callouts |
+
+Dark backgrounds (`hero-dark`, `hero-light`) → text must be `#fff`. Light backgrounds (`accent`, `bordered`) → text must be `#000`.
+
 `<div data-variant="hero-dark" data-label="Optional Label" data-type="section-block"><p style="color: #fff;">content</p></div>`
 `<div data-variant="hero-light" data-label="Optional Label" data-type="section-block"><p style="color: #fff;">content</p></div>`
-
-**Section block — accent / bordered** (light backgrounds — text must be #000)
 `<div data-variant="accent" data-type="section-block"><p style="color: #000;">content</p></div>`
 `<div data-variant="bordered" data-type="section-block"><p style="color: #000;">content</p></div>`
 
