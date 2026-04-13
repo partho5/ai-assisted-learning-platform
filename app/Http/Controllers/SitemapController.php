@@ -24,7 +24,7 @@ class SitemapController extends Controller
         $staticLastmod = '2026-03-01T00:00:00+00:00';
 
         // /en/ home and static pages — /bn/ is only for Bengali-audience courses, not a locale mirror
-        $latestCourse = Course::query()->published()->max('updated_at');
+        $latestCourse = Course::query()->published()->notLinkOnly()->max('updated_at');
         $courseLastmod = $latestCourse ? Carbon::parse($latestCourse)->toAtomString() : $staticLastmod;
 
         $urls[] = ['loc' => "{$baseUrl}/en/", 'lastmod' => $staticLastmod, 'changefreq' => 'weekly', 'priority' => '1.0'];
@@ -46,6 +46,7 @@ class SitemapController extends Controller
         // Published courses — each course under its own language locale only
         $courses = Course::query()
             ->published()
+            ->notLinkOnly()
             ->select(['id', 'slug', 'language', 'updated_at'])
             ->get();
 

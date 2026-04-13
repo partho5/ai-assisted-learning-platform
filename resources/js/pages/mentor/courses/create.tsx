@@ -39,6 +39,7 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
         category_id: '',
         thumbnail: '',
         is_featured: false,
+        is_link_only: false,
         billing_type: 'one_time' as BillingType,
         price: '',
         currency: 'USD',
@@ -254,6 +255,24 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
                                 </span>
                             </label>
                         )}
+
+                        <label className="flex cursor-pointer items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={form.data.is_link_only}
+                                onChange={(e) =>
+                                    form.setData('is_link_only', e.target.checked)
+                                }
+                                disabled={form.processing}
+                                className="h-4 w-4 rounded border-input accent-primary"
+                            />
+                            <span className="text-sm font-medium">
+                                Access by link only
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                — hidden from course listings and sitemap
+                            </span>
+                        </label>
                     </div>
 
                     {/* ── Pricing ────────────────────────────────────────── */}

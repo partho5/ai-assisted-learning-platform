@@ -40,6 +40,7 @@ class Course extends Model
         'subscription_duration_months',
         'paypal_plan_id',
         'partner_commission_rate',
+        'is_link_only',
     ];
 
     /** @return array<string, string> */
@@ -51,6 +52,7 @@ class Course extends Model
             'status' => CourseStatus::class,
             'is_featured' => 'boolean',
             'is_free' => 'boolean',
+            'is_link_only' => 'boolean',
             'price' => 'decimal:2',
             'subscription_duration_months' => 'integer',
             'partner_commission_rate' => 'decimal:2',
@@ -203,5 +205,11 @@ class Course extends Model
     public function scopeByLanguage(Builder $query, string $language): void
     {
         $query->where('language', $language);
+    }
+
+    /** @param Builder<Course> $query */
+    public function scopeNotLinkOnly(Builder $query): void
+    {
+        $query->where('is_link_only', false);
     }
 }

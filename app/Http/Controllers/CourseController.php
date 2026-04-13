@@ -54,6 +54,7 @@ class CourseController extends Controller
     {
         $query = Course::query()
             ->published()
+            ->notLinkOnly()
             ->with(['mentor:id,name,username,avatar,headline', 'category'])
             ->withCount(['modules', 'resources'])
             ->latest();
@@ -222,9 +223,9 @@ class CourseController extends Controller
         }
 
         // edit slug with title changing. prevent it currently. reason: SEO impact concern.
-//        if (isset($data['title']) && $data['title'] !== $course->title) {
-//            $data['slug'] = $this->uniqueSlug($data['title'], $course->id);
-//        }
+        //        if (isset($data['title']) && $data['title'] !== $course->title) {
+        //            $data['slug'] = $this->uniqueSlug($data['title'], $course->id);
+        //        }
 
         $course->update($data);
 

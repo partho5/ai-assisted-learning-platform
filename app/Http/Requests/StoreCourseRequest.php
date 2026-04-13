@@ -34,6 +34,7 @@ class StoreCourseRequest extends FormRequest
             'billing_type' => ['nullable', Rule::in(['one_time', 'subscription'])],
             'subscription_duration_months' => ['nullable', 'integer', 'min:1', 'max:120'],
             'partner_commission_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'is_link_only' => ['sometimes', 'boolean'],
         ];
     }
 }

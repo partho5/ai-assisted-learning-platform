@@ -89,6 +89,7 @@ export type Course = {
     status: CourseStatus;
     rejection_reason: string | null;
     is_featured: boolean;
+    is_link_only: boolean;
     // Pricing
     price: string | null;
     currency: string;
