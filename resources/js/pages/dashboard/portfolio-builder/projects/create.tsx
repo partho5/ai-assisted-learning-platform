@@ -179,7 +179,12 @@ export default function CreateProject({ categories }: Props) {
                                         {m.type === 'image' ? (
                                             <img src={m.url} alt="" className="aspect-video w-full rounded-md object-cover" />
                                         ) : (
-                                            <div className="flex aspect-video items-center justify-center rounded-md bg-muted text-xs">YouTube</div>
+                                            <iframe
+                                                src={m.url}
+                                                className="aspect-video w-full rounded-md"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            />
                                         )}
                                         <button
                                             type="button"
