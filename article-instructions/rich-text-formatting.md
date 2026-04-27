@@ -31,6 +31,8 @@ Also use colors like
 No label: `<div data-variant="purple" data-label="" data-type="callout">text</div>`
 With label: `<div data-variant="amber" data-label="Label text" data-type="callout">text</div>`
 
+> **CRITICAL:** Do NOT wrap callout content in `<p>` tags. The app's sanitizer strips `<p>` inside callout divs, leaving them empty. Put text directly inside the `<div>`. Use `<br>` for line breaks and `<span>` for inline styling.
+
 **Section block** — full-width emphasis blocks. Choose variant by the mood of the content:
 
 | Variant | Color | Best for |
@@ -42,12 +44,16 @@ With label: `<div data-variant="amber" data-label="Label text" data-type="callou
 
 Dark backgrounds (`hero-dark`, `hero-light`) → text must be `#fff`. Light backgrounds (`accent`, `bordered`) → text must be `#000`.
 
-`<div data-variant="hero-dark" data-label="Optional Label" data-type="section-block"><p style="color: #fff;">content</p></div>`
-`<div data-variant="hero-light" data-label="Optional Label" data-type="section-block"><p style="color: #fff;">content</p></div>`
-`<div data-variant="accent" data-type="section-block"><p style="color: #000;">content</p></div>`
-`<div data-variant="bordered" data-type="section-block"><p style="color: #000;">content</p></div>`
+> **CRITICAL — inline styles on `<p>` are stripped.** The app removes `style` attributes from `<p>` tags. To color text inside a section block, wrap the text in a `<span>` with the color style, not the `<p>` itself.
+
+`<div data-variant="hero-dark" data-label="Optional Label" data-type="section-block"><p><span style="color: rgb(255, 255, 255);">content</span></p></div>`
+`<div data-variant="hero-light" data-label="Optional Label" data-type="section-block"><p><span style="color: rgb(255, 255, 255);">content</span></p></div>`
+`<div data-variant="accent" data-type="section-block"><p><span style="color: rgb(0, 0, 0);">content</span></p></div>`
+`<div data-variant="bordered" data-type="section-block"><p><span style="color: rgb(0, 0, 0);">content</span></p></div>`
 
 Phrases inside a section block can be highlighted — apply `<mark>` inline within the `<p>` content. The same text-color rules apply.
+
+> **WARNING — marks inside dark blocks.** The app converts all mark `color` values to `color: inherit`. Inside `hero-dark` and `hero-light` blocks, inherited text color is always white — a bright-background mark (yellow, cyan, green) will render as white text on a bright background, making it unreadable. **Do not place marks inside dark section blocks.** Use `<strong>` for emphasis inside dark blocks instead.
 
 
 **Lists** — `<p>` inside `<li>` is required

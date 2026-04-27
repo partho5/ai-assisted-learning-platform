@@ -33,8 +33,22 @@ Follow these steps **in strict order**. Do not skip or merge steps.
 
 ## Step 3: Database Insert (use `article-insert-reference.md`)
 
+### Pre-insert: Verify HTML format from an existing article
+Before writing the insert script, query one recent article's `body` field to confirm the exact callout, section-block, and mark format used in the database. Do this even if you have the formatting guide — the live data is the ground truth.
+
+```sql
+SELECT body FROM articles ORDER BY created_at DESC LIMIT 1;
+```
+
+Compare the callout `<div>` structure, section-block `<div>` structure, and any `<mark>` usage against what you plan to write. Fix discrepancies before inserting.
+
+### Temp file naming
+When writing a PHP script to `/tmp/`, use a session-unique name to avoid collisions with files from previous sessions:
+- Use `/tmp/insert_article_<slug>.php` (e.g. `/tmp/insert_article_git_for_beginners.php`).
+- Before writing, check if the file exists with `ls /tmp/insert_article_*.php 2>/dev/null`. If it does, Read it first before overwriting.
+
 ### Query existing tags and categories first
-Before choosing tags or a category, run these queries using the `database-query` MCP tool:
+Before choosing tags or a category, run these queries using the `database-query` MCP tool (or fall back to Bash tinker if MCP is unavailable):
 
 ```sql
 -- Get all existing categories

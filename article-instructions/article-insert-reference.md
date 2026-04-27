@@ -1,5 +1,63 @@
 ## Article Insert Reference
 
+---
+
+### Running Code in Tinker (Critical — read before writing any insert script)
+
+PsySH (Laravel Tinker) auto-aliases common classes at startup: `Article`, `Category`, `Str`, `DB`, `ArticleStatus`, `User`, and others. Declaring `use` for these again causes a fatal name-collision error.
+
+**Rules for tinker-compatible scripts:**
+
+1. **No `<?php` opening tag.** PsySH evaluates raw PHP expressions, not files. The `<?php` tag causes a parse error when piped via stdin.
+2. **No `use` statements.** PsySH auto-aliases the common app classes. Any `use` statement for an already-aliased class is a fatal error.
+3. **Use fully qualified names only for non-auto-aliased classes** (e.g. `\Carbon\Carbon::now()`). Common app models and `Str`/`DB` do not need qualification.
+
+**Correct tinker-ready script template:**
+
+```php
+$title = 'My Article Title';
+$body  = '<p>Body HTML here</p>';
+
+$slug = Str::slug($title);
+$i    = 2;
+while (Article::where('slug', $slug)->exists()) {
+    $slug = "{$slug}-{$i}";
+    $i++;
+}
+
+$category = Category::firstOrCreate(
+    ['slug' => 'my-category'],
+    ['name' => 'My Category', 'description' => null]
+);
+
+Article::create([
+    'author_id'          => 1,
+    'category_id'        => $category->id,
+    'title'              => $title,
+    'slug'               => $slug,
+    'excerpt'            => 'Short summary.',
+    'body'               => $body,
+    'featured_image'     => null,
+    'featured_image_alt' => null,
+    'tags'               => ['tag1', 'tag2'],
+    'status'             => ArticleStatus::Draft->value,
+    'read_time_minutes'  => Article::calculateReadTime($body),
+    'published_at'       => null,
+]);
+
+echo "Done.\n";
+```
+
+**How to execute:**
+
+```bash
+php artisan tinker --no-interaction < /tmp/insert_article_my_slug.php
+```
+
+The file must have **no `<?php`** and **no `use` statements** at the top. The command pipes it directly as raw expressions — this works in one shot.
+
+---
+
 ### Model & Table
 - Model: `App\Models\Article`, table: `articles`
 - Category model: `App\Models\Category`, table: `categories` (NOT `article_categories` — that table is unused legacy)
@@ -8,11 +66,9 @@
 
 ### Minimal Programmatic Insert
 
-```php
-use App\Models\Article;
-use App\Enums\ArticleStatus;
-use Illuminate\Support\Str;
+> **Note:** This example shows all fields. When running in tinker, omit `use` statements — see the "Running Code in Tinker" section above.
 
+```php
 $title = 'My Article Title';
 $body  = '<p>Body HTML here</p>';
 

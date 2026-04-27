@@ -74,6 +74,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 - You should use the `tinker` tool when you need to execute PHP to debug code or query Eloquent models directly.
 - Use the `database-query` tool when you only need to read from the database.
 - Use the `database-schema` tool to inspect table structure before writing migrations or models.
+- **If Boost MCP tools are unavailable** (ToolSearch returns no results for them), fall back to `php artisan tinker --no-interaction` via Bash. Do not attempt to use an unrelated tool returned by ToolSearch — if the result clearly does not match intent, skip it and proceed with the Bash fallback immediately.
 
 ## Reading Browser Logs With the `browser-logs` Tool
 
