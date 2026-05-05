@@ -2,6 +2,7 @@
 @plugin '@tailwindcss/typography';
 
 @import 'tw-animate-css';
+@import 'highlight.js/styles/github-dark.css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -216,8 +217,9 @@
     h3 { font-size: 1.1rem; font-weight: 600; }
     a { color: var(--primary); text-decoration: underline; }
     code { background-color: var(--muted); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.875em; }
-    pre { background-color: var(--muted); padding: 0.75rem; border-radius: 6px; overflow-x: auto; }
+    pre { padding: 0.75rem; border-radius: 6px; overflow-x: auto; }
     pre code { background: none; padding: 0; }
+    pre code.hljs { display: block; padding: 0; background: transparent; }
 
     table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
     td, th { border: 1px solid var(--border); padding: 0.4rem 0.6rem; vertical-align: top; min-width: 2rem; }
@@ -257,9 +259,12 @@
 .rich-html span[style*="color"] b,
 .rich-html span[style*="color"] i { color: inherit; }
 
-/* Article body text — 2× font size for paragraph/span/div, not headings */
-.rich-html p, .rich-html span, .rich-html div,
-.article-body p, .article-body span, .article-body div { font-size: 1.2rem; }
+/* Article body text — larger font for paragraph/span/div, not headings or code */
+.rich-html p, .rich-html div,
+.article-body p, .article-body div { font-size: 1.2rem; }
+.rich-html span, .article-body span { font-size: 1.2rem; }
+.rich-html pre span, .rich-html code span,
+.article-body pre span, .article-body code span { font-size: inherit; }
 
 /* ─── Prose content (forum / course learn pages) ─────────────────────────── */
 

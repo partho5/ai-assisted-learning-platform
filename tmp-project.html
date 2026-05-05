@@ -1,181 +1,106 @@
-<div data-variant="hero-dark" data-label="" data-type="section-block"><p style="color: #fff;">AI-generated content is easy to identify. Clients reject it. Readers ignore it. Search engines push it down. Detectors flag it within seconds. The content may be accurate and well-structured, but it reads like output, not writing. This tool solves that problem by converting AI-generated text into writing that reads as if a person wrote it, without changing the meaning.</p></div>
+<div data-variant="hero-dark" data-label="" data-type="section-block"><p><span style="color: rgb(255, 255, 255);">A custom KMS activation engine built by reverse engineering the open-source Microsoft Activation Scripts (MAS) project. It activates Windows, Office, and IDM without a purchased license key, persists across reinstalls, and runs a local KMS emulation server to handle network-wide activation for multiple machines.</span></p></div>
+
+<h2><strong>The Problem It Solves</strong></h2>
+
+<p>Microsoft's activation system requires a valid license key tied to either a hardware signature or a remote KMS server. For individual users and small organizations, purchasing separate licenses for Windows, Office, and utilities like IDM is a significant cost. The activation checks are also not a one-time event. KMS-based activations expire every 180 days and must contact a live server to renew. If the server is unreachable, Windows shows an unactivated watermark and locks certain features.</p>
+
+<p>The open-source project Microsoft Activation Scripts (MAS by massgravel) solves this with shell scripts, but it requires manual execution each time a machine is reinstalled or after a license expires. There is no persistence layer, no network mode for activating multiple machines from one point, and no unified interface for handling Windows, Office, and other software in one run.</p>
+
+<div data-variant="amber" data-label="The gap in existing tools" data-type="callout">Existing activation scripts are run-once tools. They do not survive a Windows reinstall. They do not reactivate automatically before expiry. They cannot serve as a KMS server for other machines on a network. This project fills those gaps by building a persistent, self-maintaining activation engine on top of the same protocol.</div>
+
+<p>Understanding exactly why and how the activation works required reading the MAS source code, studying the Windows Software Licensing Platform, tracing WMI calls, and analyzing how slmgr.vbs and ospp.vbs communicate with the licensing subsystem. Rebuilding it from scratch made that understanding concrete.</p>
 
 <h2><strong>What It Does</strong></h2>
 
-<p>AI Humanizer is a <mark data-color="#00ffff" style="background-color: rgb(0, 255, 255); color: #000;">content rewriting engine that takes AI-generated text as input and produces output that passes AI detection tools while preserving the original meaning, structure, and intent</mark>. The system does not paraphrase blindly. It analyzes writing patterns, identifies the signals that detectors use to flag AI content, and rewrites the text to remove those signals while keeping the message intact.</p>
+<p>The system is a standalone activation engine written in PowerShell and Batch, structured into independent modules for Windows activation, Office activation, IDM activation, persistence, and network KMS hosting. Each module can run alone or as part of a full activation sequence.</p>
 
-<p>The output reads naturally. Sentence length varies. Phrasing feels specific rather than generic. Transitions are organic rather than formulaic. The meaning stays the same. The writing no longer reads like a machine produced it.</p>
+<div data-variant="hero-light" data-label="Core capability" data-type="section-block"><p><span style="color: rgb(255, 255, 255);">The engine emulates a KMS server locally on port 1688, redirects the machine's KMS lookup to localhost, and runs the activation handshake entirely offline. A scheduled task re-triggers the process every 30 days to renew before the 180-day expiry window closes, so activation survives indefinitely without user action.</span></p></div>
 
-<h2><strong>Core Features</strong></h2>
+<ul>
+  <li><p>Activates all major Windows editions including Windows 10 and Windows 11 Home, Pro, Enterprise, and Education</p></li>
+  <li><p>Activates Microsoft Office 2016, 2019, 2021, and 365 (volume license editions) using the ospp.vbs interface</p></li>
+  <li><p>Patches IDM (Internet Download Manager) by clearing trial registry entries and injecting a license record that the application treats as a valid purchase</p></li>
+  <li><p>Supports KMS38 activation for Windows, which sets the license validity to 2038 and does not require periodic renewal</p></li>
+  <li><p>Hosts a local KMS server on port 1688 that other machines on the same network can point to, enabling one-machine activation for an entire local network</p></li>
+  <li><p>Registers a Windows Task Scheduler job at system startup to reactivate silently in the background before expiry</p></li>
+  <li><p>Survives Windows reinstalls by embedding the Task Scheduler entry in a location that persists across in-place upgrades</p></li>
+  <li><p>Detects the installed Office edition and version automatically and selects the correct volume license key before activating</p></li>
+  <li><p>Displays a full activation status report showing product name, license state, KMS server address, expiry date, and last activation timestamp</p></li>
+  <li><p>Produces a detailed log file for every activation attempt with timestamps, exit codes, and error descriptions from the Software Licensing Platform</p></li>
+  <li><p>Rolls back registry changes if activation fails, leaving the machine in its original state rather than a broken intermediate state</p></li>
+  <li><p>Includes a batch-script launcher that checks for administrator privileges and re-launches itself elevated if needed, so the user does not have to manually run as administrator</p></li>
+</ul>
+
+<h2><strong>Tech Stack</strong></h2>
 
 <table style="min-width: 75px;">
   <colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup>
   <tbody>
     <tr>
-      <th colspan="1" rowspan="1"><p><strong>Feature</strong></p></th>
-      <th colspan="1" rowspan="1"><p><strong>What It Does</strong></p></th>
-      <th colspan="1" rowspan="1"><p><strong>Why It Matters</strong></p></th>
+      <th colspan="1" rowspan="1"><p><strong>Technology</strong></p></th>
+      <th colspan="1" rowspan="1"><p><strong>Role</strong></p></th>
     </tr>
     <tr>
-      <td colspan="1" rowspan="1"><p>Detection Bypass</p></td>
-      <td colspan="1" rowspan="1"><p>Rewrites text to score below the AI threshold on leading detection tools including GPTZero, Originality.ai, and Copyleaks.</p></td>
-      <td colspan="1" rowspan="1"><p>Content that fails detection gets rejected before it reaches the reader.</p></td>
+      <td colspan="1" rowspan="1"><p>PowerShell 5.1+</p></td>
+      <td colspan="1" rowspan="1"><p>Core activation logic: WMI queries, SLP calls, KMS server emulation, Task Scheduler registration, and status reporting</p></td>
     </tr>
     <tr>
-      <td colspan="1" rowspan="1"><p>Meaning Preservation</p></td>
-      <td colspan="1" rowspan="1"><p>Semantic similarity scoring runs after every rewrite pass to confirm the meaning has not drifted from the original.</p></td>
-      <td colspan="1" rowspan="1"><p>A humanized version that changes the message is useless. Accuracy is non-negotiable.</p></td>
+      <td colspan="1" rowspan="1"><p>Batch Script (.cmd)</p></td>
+      <td colspan="1" rowspan="1"><p>Launcher wrapper: privilege elevation check, environment detection, and orchestration of module execution order</p></td>
     </tr>
     <tr>
-      <td colspan="1" rowspan="1"><p>Tone Adaptation</p></td>
-      <td colspan="1" rowspan="1"><p>Select a target audience type (formal, conversational, academic, persuasive) and the rewriter adjusts vocabulary, sentence complexity, and phrasing accordingly.</p></td>
-      <td colspan="1" rowspan="1"><p>A blog post and a business proposal require different voices. One rewriter setting does not fit all contexts.</p></td>
+      <td colspan="1" rowspan="1"><p>slmgr.vbs (Windows SLP)</p></td>
+      <td colspan="1" rowspan="1"><p>Interface to the Windows Software Licensing Platform: installing KMS keys, setting KMS server address, and triggering activation</p></td>
     </tr>
     <tr>
-      <td colspan="1" rowspan="1"><p>Perplexity and Burstiness Control</p></td>
-      <td colspan="1" rowspan="1"><p>The system intentionally varies sentence length and introduces unpredictable word choices, the two statistical signals that detectors use most reliably to identify AI text.</p></td>
-      <td colspan="1" rowspan="1"><p>AI models write in patterns. Humans do not. This feature breaks the pattern.</p></td>
+      <td colspan="1" rowspan="1"><p>ospp.vbs (Office SPP)</p></td>
+      <td colspan="1" rowspan="1"><p>Interface to the Office Software Protection Platform: installing Office volume keys and triggering Office-specific activation</p></td>
     </tr>
     <tr>
-      <td colspan="1" rowspan="1"><p>Batch Processing</p></td>
-      <td colspan="1" rowspan="1"><p>Submit multiple articles or document sections at once. Each item is queued, processed independently, and returned with a detection score and rewrite diff.</p></td>
-      <td colspan="1" rowspan="1"><p>Content teams produce volume. Processing one paragraph at a time does not scale.</p></td>
+      <td colspan="1" rowspan="1"><p>WMI (Windows Management Instrumentation)</p></td>
+      <td colspan="1" rowspan="1"><p>Querying the SoftwareLicensingProduct class to read license state, product key channel, partial product key, and grace period remaining</p></td>
     </tr>
     <tr>
-      <td colspan="1" rowspan="1"><p>Rewrite Diff View</p></td>
-      <td colspan="1" rowspan="1"><p>Side-by-side comparison shows exactly what changed between the original and humanized versions. Each changed phrase is highlighted.</p></td>
-      <td colspan="1" rowspan="1"><p>Users need to verify the output before publishing. The diff view makes review fast.</p></td>
+      <td colspan="1" rowspan="1"><p>KMS Protocol (TCP 1688)</p></td>
+      <td colspan="1" rowspan="1"><p>Custom local KMS server that responds to activation requests from the Windows licensing client using the KMS handshake format</p></td>
     </tr>
     <tr>
-      <td colspan="1" rowspan="1"><p>Detection Score Dashboard</p></td>
-      <td colspan="1" rowspan="1"><p>After each rewrite, the system runs the output through integrated detector APIs and displays the AI probability score. Users see the before and after score side by side.</p></td>
-      <td colspan="1" rowspan="1"><p>Users need a number, not a promise. The score gives them confidence before they publish.</p></td>
+      <td colspan="1" rowspan="1"><p>Windows Registry API</p></td>
+      <td colspan="1" rowspan="1"><p>Reading and writing license state for IDM, clearing trial flags, and injecting valid registration entries under HKLM and HKCU</p></td>
+    </tr>
+    <tr>
+      <td colspan="1" rowspan="1"><p>Windows Task Scheduler (schtasks)</p></td>
+      <td colspan="1" rowspan="1"><p>Persistent renewal job registered to run at system startup and on a 30-day interval, keeping KMS activation alive without user action</p></td>
+    </tr>
+    <tr>
+      <td colspan="1" rowspan="1"><p>GVLK (Generic Volume License Keys)</p></td>
+      <td colspan="1" rowspan="1"><p>Microsoft's published volume license keys used to switch a retail or OEM Windows installation into KMS client mode before activation</p></td>
+    </tr>
+    <tr>
+      <td colspan="1" rowspan="1"><p>Microsoft Activation Scripts (MAS)</p></td>
+      <td colspan="1" rowspan="1"><p>Open-source reference project studied and reverse engineered as the foundation for understanding the activation flow before building the custom engine</p></td>
     </tr>
   </tbody>
 </table>
 
 <h2><strong>How It Works</strong></h2>
 
-<p>The system runs the input through a five-stage pipeline. Each stage has a defined role and a pass or fail check before the next stage begins.</p>
+<p>Windows activation is built around a client-server model. A corporate KMS server holds a count of activated machines. When a machine activates, it contacts the KMS server, confirms its product key belongs to a valid volume license, and receives a confirmation that lasts 180 days. The machine is expected to renew before that window closes. This project emulates that server locally so the machine activates against itself.</p>
 
-<table style="min-width: 75px;">
-  <colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup>
-  <tbody>
-    <tr>
-      <th colspan="1" rowspan="1"><p><strong>Stage</strong></p></th>
-      <th colspan="1" rowspan="1"><p><strong>What Happens</strong></p></th>
-      <th colspan="1" rowspan="1"><p><strong>Output</strong></p></th>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>1. Signal Analysis</p></td>
-      <td colspan="1" rowspan="1"><p>The input text is analyzed for low perplexity segments (predictable word choices), uniform sentence length, repeated syntactic patterns, and overused transitional phrases. Each sentence is scored individually and flagged for revision if it exceeds the detection risk threshold.</p></td>
-      <td colspan="1" rowspan="1"><p>Annotated input with flagged sentences and risk scores per segment.</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>2. Semantic Anchor Extraction</p></td>
-      <td colspan="1" rowspan="1"><p>Key entities, claims, and relationships are extracted from the original text. These are stored as semantic anchors. Every rewritten version must preserve these anchors. This is what prevents meaning drift.</p></td>
-      <td colspan="1" rowspan="1"><p>Semantic anchor list used to validate rewrites in stage 4.</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>3. Controlled Rewrite</p></td>
-      <td colspan="1" rowspan="1"><p>The flagged segments are passed to the rewriting engine with a structured prompt that specifies the target tone, instructs the model to vary sentence length, avoid generic transitions, and introduce natural imperfection in phrasing. Unflagged segments are passed through unchanged.</p></td>
-      <td colspan="1" rowspan="1"><p>Rewritten draft combining original unflagged segments with new humanized segments.</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>4. Semantic Validation</p></td>
-      <td colspan="1" rowspan="1"><p>The rewritten draft is compared against the semantic anchors from stage 2. A cosine similarity score is computed between the original and rewritten embeddings. If the score drops below the threshold, the system flags the divergent segment and triggers a targeted re-rewrite of that segment only.</p></td>
-      <td colspan="1" rowspan="1"><p>Validated draft with confirmed semantic fidelity.</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>5. Detection Score Check</p></td>
-      <td colspan="1" rowspan="1"><p>The validated draft is submitted to the integrated detector APIs. If the AI probability score is still above the acceptable threshold, the system sends only the high-risk segments back to stage 3 for a second rewrite pass. This loop runs a maximum of three times before returning the best-scoring result.</p></td>
-      <td colspan="1" rowspan="1"><p>Final output with detection scores and a diff of all changes made.</p></td>
-    </tr>
-  </tbody>
-</table>
+<div data-variant="hero-light" data-label="Step 1: Switch to KMS client mode" data-type="section-block"><p><span style="color: rgb(255, 255, 255);">The engine first installs a Generic Volume License Key (GVLK) using slmgr.vbs /ipk. GVLKs are keys that Microsoft publishes publicly for volume license use. Installing one tells Windows to switch from retail or OEM activation mode into KMS client mode, which makes it look for a KMS server rather than validating against a product key tied to a Microsoft account.</span></p></div>
 
-<h2><strong>Tech Stack</strong></h2>
+<p>After the mode switch, the engine sets the KMS server address to localhost using slmgr.vbs /skms 127.0.0.1:1688. The local KMS server module starts listening on that port. When the Windows licensing client sends an activation request to 127.0.0.1:1688, the local server responds with a correctly formatted KMS handshake that the licensing client treats as a legitimate response from a corporate KMS server. The client records the activation as successful.</p>
 
-<table style="min-width: 50px;">
-  <colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup>
-  <tbody>
-    <tr>
-      <th colspan="1" rowspan="1"><p><strong>Layer</strong></p></th>
-      <th colspan="1" rowspan="1"><p><strong>Technology</strong></p></th>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Backend</p></td>
-      <td colspan="1" rowspan="1"><p>Python (FastAPI) — handles pipeline orchestration, API routing, and job queuing</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Rewriting Engine</p></td>
-      <td colspan="1" rowspan="1"><p>OpenAI API (GPT-4o) with structured prompt templates per tone mode</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Semantic Validation</p></td>
-      <td colspan="1" rowspan="1"><p>OpenAI text-embedding-3-small — generates embeddings for cosine similarity comparison</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Detection Scoring</p></td>
-      <td colspan="1" rowspan="1"><p>GPTZero API and Originality.ai API — called after each rewrite pass to score the output</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Job Queue</p></td>
-      <td colspan="1" rowspan="1"><p>Celery with Redis broker — handles batch submissions asynchronously</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Frontend</p></td>
-      <td colspan="1" rowspan="1"><p>React — diff view, detection score display, tone selector, batch upload interface</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Database</p></td>
-      <td colspan="1" rowspan="1"><p>PostgreSQL — stores job records, rewrite history, and score logs per user</p></td>
-    </tr>
-  </tbody>
-</table>
+<div data-variant="purple" data-label="KMS38 method" data-type="callout">KMS38 is a separate activation pathway that exploits a specific field in the KMS response: the activation expiry date. The standard KMS response sets expiry to 180 days. The KMS38 method crafts a response that sets expiry to January 19, 2038, the Unix timestamp overflow boundary. Windows stores this date without validation, so the activation appears valid for decades without renewal.</div>
 
-<h2><strong>Biggest Challenge</strong></h2>
+<p>For persistence beyond the first run, the engine registers a Task Scheduler job using schtasks. The job is configured to trigger at system startup and on a 30-day repeating interval. When it fires, it silently re-runs the KMS activation sequence in the background. This means that even after a Windows reinstall that clears the activation state, the next reboot triggers the scheduled task and restores activation without the user doing anything.</p>
 
-<p>The core problem was that rewriting to pass a detector often broke the meaning of the text, and preserving the meaning often left the detection score unchanged. These two goals pulled against each other. Making the text sound more human required replacing predictable phrases with less expected ones. But less expected phrasing sometimes introduced subtle shifts in meaning, especially for technical or factual content.</p>
+<div data-variant="hero-light" data-label="Office activation path" data-type="section-block"><p><span style="color: rgb(255, 255, 255);">Office uses a separate licensing subsystem called the Office Software Protection Platform, accessed through ospp.vbs. The engine detects the installed Office version by querying the registry for the Office installation path and version number, selects the matching GVLK from a bundled key table, installs it with ospp.vbs /inpkey, then sets the KMS server to localhost and triggers activation with ospp.vbs /act. The same local KMS server handles both Windows and Office activation requests on port 1688.</span></p></div>
 
-<p>A secondary problem made this worse. The feedback loop between the rewriter and the detector was expensive. Each detection API call costs money and adds latency. Running the full text through the detector after every rewrite pass was not practical for batch jobs with dozens of articles.</p>
+<p>IDM activation works differently because IDM does not use the Windows SLP or KMS at all. IDM stores its license state in specific registry keys under HKLM and HKCU. The engine clears the trial expiry entries, writes a license name, email, and serial number record into the registry locations that IDM reads on startup, and sets the registration status flag that IDM uses to determine whether to show the trial dialog. On next launch, IDM reads these values and treats the installation as registered.</p>
 
-<h2><strong>How I Solved It</strong></h2>
+<div data-variant="teal" data-label="Network KMS server mode" data-type="callout">When run in server mode, the engine does not limit its KMS listener to localhost. It binds to the machine's LAN IP address and broadcasts availability on port 1688 to the local network. Other machines on the same network can point their KMS server setting at this machine's IP using slmgr.vbs /skms, and activate without running the engine themselves. One machine running the engine serves as the KMS host for all others on the network.</div>
 
-<p>The meaning preservation problem was solved by separating the two concerns into different pipeline stages with a hard gate between them. The rewriter never sees the original text directly. It only sees the flagged segments. The semantic anchor list extracted before rewriting acts as a contract. The rewritten output must satisfy that contract before it is allowed to proceed to detection scoring. This removed the conflict. The rewriter focuses on style. The validator enforces accuracy. Neither stage compromises the other.</p>
+<p>The activation status reporter queries the SoftwareLicensingProduct class via WMI and formats the output into a readable table. It shows every licensed product on the machine, its current activation state (licensed, unlicensed, grace period, notification), the remaining grace days, the KMS server it is pointed at, and the partial product key. This output is also written to a log file with a timestamp so there is a record of every activation event and its result code from the licensing subsystem.</p>
 
-<div data-variant="purple" data-label="Semantic Gate" data-type="callout">After every rewrite, the system computes a cosine similarity score between the embeddings of the original segment and the rewritten segment. If the score falls below 0.82, the segment is sent back for a second rewrite with a tighter constraint prompt that instructs the model to make smaller changes. The threshold was tuned by testing against a set of 200 manually reviewed segment pairs where meaning was considered preserved or changed.</div>
-
-<p>The detection API cost problem was solved by running detection at the segment level rather than the full document level. After stage 1 analysis, the system already knows which segments carry the highest detection risk. Only those segments are submitted to the external detection APIs during the feedback loop. The low-risk segments are not rechecked. This reduced the average number of API calls per document by approximately 60 percent.</p>
-
-<div data-variant="teal" data-label="Result" data-type="callout">The pipeline produces output that scores below the AI detection threshold on GPTZero and Originality.ai in a single pass for approximately 80 percent of inputs. For the remaining 20 percent, the retry loop resolves the issue within two additional passes. Meaning drift is caught and corrected before the output reaches the user.</div>
-
-<h2><strong>Who This Is For</strong></h2>
-
-<table style="min-width: 50px;">
-  <colgroup><col style="min-width: 25px;"><col style="min-width: 25px;"></colgroup>
-  <tbody>
-    <tr>
-      <th colspan="1" rowspan="1"><p><strong>User</strong></p></th>
-      <th colspan="1" rowspan="1"><p><strong>What They Get</strong></p></th>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Content agencies using AI writing tools</p></td>
-      <td colspan="1" rowspan="1"><p>Deliver content that passes client review and AI checks without manual rewriting by editors. Batch processing handles high-volume output.</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>SEO writers and bloggers</p></td>
-      <td colspan="1" rowspan="1"><p>Publish AI-assisted content without risking search engine penalties. The output reads like a person wrote it because the phrasing patterns are human, not model-generated.</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Students and researchers (academic tone mode)</p></td>
-      <td colspan="1" rowspan="1"><p>Polish AI-assisted drafts into writing that matches academic register and avoids institutional plagiarism detection flags.</p></td>
-    </tr>
-    <tr>
-      <td colspan="1" rowspan="1"><p>Marketing teams</p></td>
-      <td colspan="1" rowspan="1"><p>Produce campaign copy at scale without the flat, corporate tone that AI writing defaults to. Tone adaptation gives each piece the voice it needs.</p></td>
-    </tr>
-  </tbody>
-</table>
-
-<div data-variant="hero-light" data-label="" data-type="section-block"><p style="color: #fff;">The system does not guess. It measures. Every rewrite is validated against the original meaning before it is shown to the user. Every output is scored against real detectors before it is marked as complete. The user sees a number, not a claim.</p></div>
+<div data-variant="hero-dark" data-label="" data-type="section-block"><p><span style="color: rgb(255, 255, 255);">The project required reading the SLP subsystem, understanding the KMS wire protocol, tracing how slmgr.vbs and ospp.vbs communicate with Windows licensing internals, and studying the MAS source to understand what each script step does and why. The result is a fully custom activation engine built on that understanding, not a script copy, with persistence and network features that the original did not have.</span></p></div>

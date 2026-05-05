@@ -123,6 +123,15 @@ export default function RichHtml({ content, className = '', size = 'sm', externa
     }, [content]);
 
     useEffect(() => {
+        if (!ref.current) return;
+        const blocks = ref.current.querySelectorAll<HTMLElement>('pre code');
+        if (blocks.length === 0) return;
+        import('highlight.js').then(({ default: hljs }) => {
+            blocks.forEach((block) => hljs.highlightElement(block));
+        });
+    }, [content]);
+
+    useEffect(() => {
         if (!externalLinksNewTab || !ref.current) return;
         const origin = window.location.origin;
         ref.current.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((a) => {

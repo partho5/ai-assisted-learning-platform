@@ -13,6 +13,10 @@ import { TableCell } from '@tiptap/extension-table-cell';
 import { Callout } from '@/extensions/callout-extension';
 import { SectionBlock as SectionBlockExt } from '@/extensions/section-block-extension';
 import { Youtube, extractYoutubeId } from '@/extensions/youtube-extension';
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import { common, createLowlight } from 'lowlight';
+
+const lowlight = createLowlight(common);
 
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string;
 const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string;
@@ -508,7 +512,12 @@ export default function RichTextEditor({ value, onChange, disabled = false, plac
     const editor = useEditor({
         autofocus: autoFocus ? 'end' : false,
         extensions: [
-            StarterKit,
+            StarterKit.configure({ codeBlock: false }),
+            CodeBlockLowlight.configure({
+                lowlight,
+                defaultLanguage: null,
+                HTMLAttributes: { class: 'hljs' },
+            }),
             Underline,
             TextStyle,
             FontSize,
