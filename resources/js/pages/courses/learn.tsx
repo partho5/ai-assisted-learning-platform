@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { resource as resourceChatAction } from '@/actions/App/Http/Controllers/AiChatController';
 import { index as chatHistory } from '@/routes/chat/history';
 import { complete as markComplete } from '@/actions/App/Http/Controllers/ResourceCompletionController';
@@ -1206,9 +1206,10 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                 {resources.map((resource, index) => {
                     const lessonNumber = resources.slice(0, index).filter(r => r.module_id === resource.module_id).length + 1;
                     const moduleNumber = [...new Set(resources.slice(0, index + 1).map(r => r.module_id))].indexOf(resource.module_id) + 1;
+                    const isLastResource = index === resources.length - 1;
                     return (
+                    <Fragment key={resource.id}>
                     <section
-                        key={resource.id}
                         id={`r-${resource.id}`}
                         ref={(el) => {
                             if (el) resourceRefs.current.set(resource.id, el);
@@ -1226,6 +1227,17 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                             moduleNumber={moduleNumber}
                         />
                     </section>
+                    {!isLastResource && (
+                        <div className="my-8 flex justify-center">
+                            <img
+                                src="https://res.cloudinary.com/davntucnu/image/upload/v1778047409/next-lesson_mccwpf.png"
+                                alt="an opened book, written next on left page and lesson on right page"
+                                className="max-w-xs w-full h-auto"
+                                loading="lazy"
+                            />
+                        </div>
+                    )}
+                    </Fragment>
                     );
                 })}
             </main>
