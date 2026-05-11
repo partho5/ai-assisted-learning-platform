@@ -41,6 +41,7 @@ class Course extends Model
         'paypal_plan_id',
         'partner_commission_rate',
         'is_link_only',
+        'enrolled_count',
     ];
 
     /** @return array<string, string> */
@@ -53,6 +54,7 @@ class Course extends Model
             'is_featured' => 'boolean',
             'is_free' => 'boolean',
             'is_link_only' => 'boolean',
+            'enrolled_count' => 'integer',
             'price' => 'decimal:2',
             'subscription_duration_months' => 'integer',
             'partner_commission_rate' => 'decimal:2',
@@ -166,6 +168,11 @@ class Course extends Model
         }
 
         return $model ? $model : abort(404);
+    }
+
+    public function setEnrolledCount(int $count): void
+    {
+        $this->update(['enrolled_count' => $count]);
     }
 
     public function isPublished(): bool

@@ -18,6 +18,13 @@ Schedule::command('articles:publish-scheduled')->everyMinute()->withoutOverlappi
 // Check for unanswered forum threads and dispatch AI replies every 30 minutes.
 Schedule::command('forum:trigger-unanswered')->everyThirtyMinutes()->withoutOverlapping();
 
+// Nudge enrolled_count up by 1 on a random 1-in-3 subset of published courses every 6 hours.
+// Offset to 1:12/7:12/13:12/19:12 to avoid contention with heavier scheduled jobs.
+Schedule::command('bots:enroll-count')
+    ->cron('12 1,7,13,19 * * *')
+    ->withoutOverlapping(300)   // 5-hour TTL — auto-releases before next 6-hour run if process crashes
+    ->runInBackground();
+
 // Back up the PostgreSQL database and upload to Dropbox every N hours (DB_BACKUP_INTERVAL_HOURS).
 // Keeps only the last 2 copies on Dropbox; local dump is deleted after upload.
 Schedule::command('backup:database')

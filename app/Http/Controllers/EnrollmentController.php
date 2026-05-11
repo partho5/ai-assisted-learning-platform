@@ -31,6 +31,7 @@ class EnrollmentController extends Controller
         }
 
         if ($enrollment->wasRecentlyCreated) {
+            $course->increment('enrolled_count');
             $course->loadMissing('mentor');
 
             if ($course->mentor) {

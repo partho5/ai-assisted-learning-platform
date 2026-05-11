@@ -103,6 +103,7 @@ export type Course = {
     modules_count?: number;
     resources_count?: number;
     enrollments_count?: number;
+    enrolled_count?: number;
     coupon_codes?: CouponCode[];
     updated_at?: string;
 };

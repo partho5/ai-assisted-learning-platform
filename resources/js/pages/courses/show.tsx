@@ -221,9 +221,9 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                                     {durationText} total
                                 </span>
                             )}
-                            {course.enrollments_count !== undefined && (
+                            {course.enrolled_count !== undefined && (
                                 <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                                    {course.enrollments_count} enrolled
+                                    {course.enrolled_count} enrolled
                                 </span>
                             )}
                             {course.updated_at && (
