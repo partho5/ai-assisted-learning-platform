@@ -133,6 +133,17 @@ export default function PortfolioLanding() {
         },
     ];
 
+    const accents = [
+        { tile: 'from-indigo-500 to-violet-500', glow: 'shadow-indigo-500/30', hoverRing: 'group-hover:ring-indigo-400/50', hoverShadow: 'hover:shadow-indigo-500/20', bar: 'from-indigo-400 via-violet-500 to-fuchsia-500' },
+        { tile: 'from-fuchsia-500 to-rose-500', glow: 'shadow-fuchsia-500/30', hoverRing: 'group-hover:ring-fuchsia-400/50', hoverShadow: 'hover:shadow-fuchsia-500/20', bar: 'from-fuchsia-400 via-rose-500 to-pink-500' },
+        { tile: 'from-emerald-500 to-teal-500', glow: 'shadow-emerald-500/30', hoverRing: 'group-hover:ring-emerald-400/50', hoverShadow: 'hover:shadow-emerald-500/20', bar: 'from-emerald-400 via-teal-500 to-cyan-500' },
+        { tile: 'from-amber-500 to-orange-500', glow: 'shadow-amber-500/30', hoverRing: 'group-hover:ring-amber-400/50', hoverShadow: 'hover:shadow-amber-500/20', bar: 'from-amber-400 via-orange-500 to-rose-500' },
+        { tile: 'from-sky-500 to-cyan-500', glow: 'shadow-sky-500/30', hoverRing: 'group-hover:ring-sky-400/50', hoverShadow: 'hover:shadow-sky-500/20', bar: 'from-sky-400 via-cyan-500 to-blue-500' },
+        { tile: 'from-rose-500 to-pink-500', glow: 'shadow-rose-500/30', hoverRing: 'group-hover:ring-rose-400/50', hoverShadow: 'hover:shadow-rose-500/20', bar: 'from-rose-400 via-pink-500 to-fuchsia-500' },
+        { tile: 'from-violet-500 to-purple-500', glow: 'shadow-violet-500/30', hoverRing: 'group-hover:ring-violet-400/50', hoverShadow: 'hover:shadow-violet-500/20', bar: 'from-violet-400 via-purple-500 to-indigo-500' },
+        { tile: 'from-cyan-500 to-blue-500', glow: 'shadow-cyan-500/30', hoverRing: 'group-hover:ring-cyan-400/50', hoverShadow: 'hover:shadow-cyan-500/20', bar: 'from-cyan-400 via-blue-500 to-indigo-500' },
+    ];
+
     const steps = [
         { step: '1', title: 'Set Up Your Profile', desc: 'Add your bio, skills, and services. Takes two minutes.' },
         { step: '2', title: 'Add Your Projects', desc: 'Upload images, write descriptions, embed videos, tag technologies.' },
@@ -199,39 +210,58 @@ export default function PortfolioLanding() {
             <section className="border-b bg-gray-50 px-4 py-16 text-center dark:bg-gray-900">
                 <div className="mx-auto max-w-2xl">
                     <h2 className="mb-4 text-2xl font-bold text-foreground sm:text-3xl">
-                        Most Portfolios Are Missing the Important Parts
+                        Talented People Keep Losing Jobs to Worse Candidates
                     </h2>
+                    <p className="mb-4 text-base font-medium leading-relaxed text-foreground/80">
+                        Not because they're less skilled. Because they can't <em className='text-blue-600'>show</em> the skill.
+                    </p>
                     <p className="text-base leading-relaxed text-muted-foreground">
-                        A simple page with some images is not enough. You need analytics to see who visits, a contact form so clients can reach you,
-                        and SEO so search engines can find your work. This portfolio builder includes all of that.
+                        A resume bullet says "built X." A portfolio with video, screenshots, and a live link <em>proves</em> it.
+                        You need analytics to see who visits, a contact form so recruiters can reach you, and SEO so search engines can find your work.
+                        This portfolio builder gives you that proof layer — free.
                     </p>
                 </div>
             </section>
 
             {/* ── Features Grid ── */}
-            <section id="features" className="mx-auto max-w-6xl px-4 py-20">
-                <div className="mb-14 text-center">
-                    <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">What You Get</p>
-                    <h2 className="text-3xl font-bold sm:text-4xl">
-                        All the Features Your Portfolio Builder Needs
-                    </h2>
-                    <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-                        This is not a limited free plan. Every feature of the portfolio builder is available to every user, with no paywall.
-                    </p>
+            <section id="features" className="relative overflow-hidden px-4 py-20">
+                {/* Decorative backdrop */}
+                <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute left-1/2 top-0 h-[500px] w-[800px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,rgba(139,92,246,0.12),transparent_60%)]" />
+                    <div className="absolute inset-0 [background-image:radial-gradient(circle_at_1px_1px,rgba(120,120,120,0.08)_1px,transparent_0)] [background-size:24px_24px]" />
                 </div>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {coreFeatures.map((f) => (
-                        <div
-                            key={f.title}
-                            className="group rounded-xl border bg-card p-6 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
-                        >
-                            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                                <f.icon className="h-5 w-5" />
-                            </div>
-                            <h3 className="mb-2 text-base font-semibold">{f.title}</h3>
-                            <p className="text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
-                        </div>
-                    ))}
+                <div className="relative mx-auto max-w-6xl">
+                    <div className="mb-14 text-center">
+                        <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-primary">What You Get</p>
+                        <h2 className="text-3xl font-bold sm:text-4xl">
+                            All the Features Your{' '}
+                            <span className="bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+                                Portfolio Builder
+                            </span>{' '}
+                            Needs
+                        </h2>
+                        <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+                            This is not a limited free plan. Every feature of the portfolio builder is available to every user. No payment required.
+                        </p>
+                    </div>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {coreFeatures.map((f, i) => {
+                            const a = accents[i % accents.length];
+                            return (
+                                <div
+                                    key={f.title}
+                                    className={`group relative overflow-hidden rounded-2xl bg-gradient-to-b from-card to-card/60 p-6 ring-1 ring-border/60 backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:ring-2 ${a.hoverRing} ${a.hoverShadow}`}
+                                >
+                                    <div className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${a.bar} opacity-70`} />
+                                    <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-lg transition-transform duration-300 group-hover:scale-110 ${a.tile} ${a.glow}`}>
+                                        <f.icon className="h-5 w-5" />
+                                    </div>
+                                    <h3 className="mb-2 text-[15px] font-semibold tracking-tight">{f.title}</h3>
+                                    <p className="text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </section>
 
