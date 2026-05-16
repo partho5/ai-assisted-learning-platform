@@ -51,6 +51,9 @@ interface Props {
     projects: Project[];
     categories: Category[];
     activeCategory: Category | null;
+    appUrl: string;
+    canonicalUrl: string;
+    hasCourses: boolean;
 }
 
 function MediaCarousel({ media, featured_image }: { media: MediaItem[]; featured_image: string | null }) {
@@ -206,13 +209,68 @@ function ContactModal({ open, onClose, username }: { open: boolean; onClose: () 
     );
 }
 
-export default function PortfolioShow({ owner, portfolio, projects, categories, activeCategory }: Props) {
-    const { locale } = usePage().props;
+export default function PortfolioShow({ owner, portfolio, projects, categories, activeCategory, appUrl, canonicalUrl, hasCourses }: Props) {
+    const { locale, name } = usePage().props as Record<string, any>;
     const l = String(locale);
+    const appName = String(name);
     const [contactOpen, setContactOpen] = useState(false);
 
     const pageTitle = `${owner.name}'s Portfolio`;
     const pageDescription = portfolio.bio ? portfolio.bio.slice(0, 160) : `Portfolio of ${owner.name}`;
+
+    // The person's canonical identity lives on the profile page, not here
+    const profileUrl = `${appUrl}/${l}/u/${owner.username}`;
+
+    const personJsonLd = {
+        '@type': 'Person',
+        name: owner.name,
+        url: profileUrl,
+        mainEntityOfPage: profileUrl,
+        ...(owner.avatar ? { image: owner.avatar } : {}),
+        ...(owner.headline ? { jobTitle: owner.headline } : {}),
+        ...(portfolio.bio ? { description: portfolio.bio } : {}),
+        ...(portfolio.skill_tags && portfolio.skill_tags.length > 0
+            ? { knowsAbout: portfolio.skill_tags.map((t) => t.name) }
+            : {}),
+        worksFor: {
+            '@type': 'Organization',
+            name: appName,
+            logo: { '@type': 'ImageObject', url: `${appUrl}/logo.png` },
+        },
+    };
+
+    const collectionPageJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        url: canonicalUrl,
+        name: pageTitle,
+        description: pageDescription,
+        inLanguage: l,
+        about: personJsonLd,
+        mainEntity: {
+            '@type': 'ItemList',
+            numberOfItems: projects.length,
+            itemListElement: projects.map((p, i) => ({
+                '@type': 'ListItem',
+                position: i + 1,
+                item: {
+                    '@type': 'CreativeWork',
+                    name: p.title,
+                    url: `${appUrl}/${l}/u/${owner.username}/portfolio/${p.slug}`,
+                    ...(p.featured_image ? { image: p.featured_image } : {}),
+                },
+            })),
+        },
+    };
+
+    const breadcrumbJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: appName, item: `${appUrl}/${l}/` },
+            { '@type': 'ListItem', position: 2, name: pageTitle, item: canonicalUrl },
+        ],
+    };
 
     return (
         <PortfolioLayout
@@ -221,6 +279,7 @@ export default function PortfolioShow({ owner, portfolio, projects, categories, 
             categories={categories}
             activeCategory={activeCategory}
             onContactClick={() => setContactOpen(true)}
+            hasCourses={hasCourses}
         >
             <Head>
                 <title>{pageTitle}</title>
@@ -228,10 +287,17 @@ export default function PortfolioShow({ owner, portfolio, projects, categories, 
                 <meta property="og:title" content={pageTitle} />
                 <meta property="og:description" content={pageDescription} />
                 {owner.avatar && <meta property="og:image" content={owner.avatar} />}
-                <link rel="canonical" href={`${window.location.origin}/${l}/u/${owner.username}/portfolio`} />
+                <link rel="canonical" href={canonicalUrl} />
+                <script type="application/ld+json">{JSON.stringify(collectionPageJsonLd)}</script>
+                <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
             </Head>
 
-            <h1 className="mb-8 text-center text-3xl font-bold text-blue-600">Some of My Projects</h1>
+            <div className="mb-8 text-center">
+                <h1 className="text-3xl font-bold text-blue-600">{owner.name}'s Portfolio</h1>
+                {owner.headline && (
+                    <p className="mt-2 text-lg text-gray-600">{owner.headline}</p>
+                )}
+            </div>
 
             {projects.length === 0 ? (
                 <div className="py-16 text-center text-gray-400">

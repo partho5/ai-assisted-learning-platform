@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SendPortfolioMessageRequest;
 use App\Mail\PortfolioContactMail;
+use App\Models\Course;
 use App\Models\Portfolio;
 use App\Models\PortfolioVisit;
 use App\Models\User;
@@ -47,6 +48,9 @@ class PublicPortfolioController extends Controller
         // Track visit
         $this->trackVisit($portfolio, null, $request);
 
+        $appUrl = rtrim(config('app.url'), '/');
+        $locale = app()->getLocale();
+
         return Inertia::render('u/portfolio/show', [
             'owner' => [
                 'name' => $user->name,
@@ -58,6 +62,10 @@ class PublicPortfolioController extends Controller
             'projects' => $projects,
             'categories' => $portfolio->categories,
             'activeCategory' => $activeCategory,
+            'appUrl' => $appUrl,
+            // Self-referential canonical per locale: /bn/ is its own indexable URL
+            'canonicalUrl' => "{$appUrl}/{$locale}/u/{$user->username}/portfolio",
+            'hasCourses' => Course::query()->where('user_id', $user->id)->published()->exists(),
         ]);
     }
 
@@ -94,6 +102,9 @@ class PublicPortfolioController extends Controller
 
         $portfolio->load('skillTags');
 
+        $appUrl = rtrim(config('app.url'), '/');
+        $locale = app()->getLocale();
+
         return Inertia::render('u/portfolio/project', [
             'owner' => [
                 'name' => $user->name,
@@ -105,6 +116,10 @@ class PublicPortfolioController extends Controller
             'project' => $project,
             'categories' => $portfolio->categories()->get(),
             'showSidebar' => false,
+            'appUrl' => $appUrl,
+            // Self-referential canonical per locale: /bn/ is its own indexable URL
+            'canonicalUrl' => "{$appUrl}/{$locale}/u/{$user->username}/portfolio/{$project->slug}",
+            'hasCourses' => Course::query()->where('user_id', $user->id)->published()->exists(),
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\AttemptStatus;
 use App\Models\Course;
+use App\Models\Portfolio;
 use App\Models\TestAttempt;
 use App\Models\User;
 use Inertia\Inertia;
@@ -14,6 +15,11 @@ class PublicProfileController extends Controller
     public function show(string $username): Response
     {
         $user = User::where('username', $username)->firstOrFail();
+
+        $appUrl = rtrim(config('app.url'), '/');
+        // Self-referential canonical per locale: /bn/ is its own indexable URL
+        $locale = app()->getLocale();
+        $canonicalUrl = "{$appUrl}/{$locale}/u/{$user->username}";
 
         if ($user->portfolio_visibility === 'private') {
             return Inertia::render('u/show', [
@@ -31,6 +37,8 @@ class PublicProfileController extends Controller
                 'taughtCourses' => [],
                 'enrolledCourses' => [],
                 'showcasedAttempts' => [],
+                'appUrl' => $appUrl,
+                'canonicalUrl' => $canonicalUrl,
             ]);
         }
 
@@ -38,7 +46,7 @@ class PublicProfileController extends Controller
         $enrollments = $user->enrollments()
             ->with([
                 'course' => fn ($q) => $q
-                    ->with(['category:id,name,slug', 'mentor:id,name,username'])
+                    ->with(['category:id,name,slug', 'mentor:id,name,username,avatar'])
                     ->withCount('resources'),
             ])
             ->get()
@@ -154,6 +162,12 @@ class PublicProfileController extends Controller
                 'mentor_feedback' => $attempt->mentor_feedback,
                 'endorsed_at' => $attempt->endorsed_at?->toDateString(),
             ])->values(),
+            'appUrl' => $appUrl,
+            'canonicalUrl' => $canonicalUrl,
+            'hasPortfolio' => Portfolio::query()
+                ->where('user_id', $user->id)
+                ->where('is_published', true)
+                ->exists(),
         ]);
     }
 }

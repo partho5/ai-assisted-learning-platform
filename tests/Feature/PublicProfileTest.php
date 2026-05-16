@@ -6,6 +6,7 @@ use App\Enums\AttemptStatus;
 use App\Enums\EnrollmentAccess;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Portfolio;
 use App\Models\TestAttempt;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -277,5 +278,75 @@ class PublicProfileTest extends TestCase
                 'portfolio_visibility' => 'secret',
             ])
             ->assertSessionHasErrors('portfolio_visibility');
+    }
+
+    // ─── SEO props (F1): self-referential per-locale canonical ────────────────
+
+    public function test_profile_exposes_self_referential_canonical_per_locale(): void
+    {
+        $appUrl = rtrim(config('app.url'), '/');
+        $user = User::factory()->create(['portfolio_visibility' => 'public']);
+
+        $this->get(route('portfolio.show', ['locale' => 'en', 'username' => $user->username]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('u/show')
+                ->where('appUrl', $appUrl)
+                ->where('canonicalUrl', "{$appUrl}/en/u/{$user->username}")
+            );
+
+        $this->get(route('portfolio.show', ['locale' => 'bn', 'username' => $user->username]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('canonicalUrl', "{$appUrl}/bn/u/{$user->username}")
+            );
+    }
+
+    public function test_private_profile_still_emits_canonical(): void
+    {
+        $appUrl = rtrim(config('app.url'), '/');
+        $user = User::factory()->create(['portfolio_visibility' => 'private']);
+
+        $this->get($this->portfolioRoute($user->username))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('isPrivate', true)
+                ->where('canonicalUrl', "{$appUrl}/en/u/{$user->username}")
+            );
+    }
+
+    // ─── F3 schema data: taught published courses surface ─────────────────────
+
+    public function test_profile_exposes_only_published_taught_courses(): void
+    {
+        $user = User::factory()->create(['portfolio_visibility' => 'public']);
+        Course::factory()->published()->create(['user_id' => $user->id]);
+        Course::factory()->draft()->create(['user_id' => $user->id]);
+
+        $this->get($this->portfolioRoute($user->username))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->has('taughtCourses', 1));
+    }
+
+    // ─── Cross-link plumbing (F4): hasPortfolio ───────────────────────────────
+
+    public function test_has_portfolio_true_when_published_portfolio_exists(): void
+    {
+        $user = User::factory()->create(['portfolio_visibility' => 'public']);
+        Portfolio::factory()->create(['user_id' => $user->id, 'is_published' => true]);
+
+        $this->get($this->portfolioRoute($user->username))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('hasPortfolio', true));
+    }
+
+    public function test_has_portfolio_false_without_published_portfolio(): void
+    {
+        $user = User::factory()->create(['portfolio_visibility' => 'public']);
+        Portfolio::factory()->create(['user_id' => $user->id, 'is_published' => false]);
+
+        $this->get($this->portfolioRoute($user->username))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('hasPortfolio', false));
     }
 }

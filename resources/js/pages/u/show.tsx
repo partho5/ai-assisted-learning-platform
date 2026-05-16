@@ -32,7 +32,7 @@ interface EnrolledCourse {
         slug: string;
         thumbnail: string | null;
         category: Category | null;
-        mentor: { id: number; name: string; username: string } | null;
+        mentor: { id: number; name: string; username: string; avatar: string | null } | null;
     };
     progress_percent: number;
     completed: boolean;
@@ -56,18 +56,78 @@ interface Props {
     enrolledCourses: EnrolledCourse[];
     showcasedAttempts: ShowcasedAttempt[];
     isPrivate?: boolean;
+    appUrl: string;
+    canonicalUrl: string;
+    hasPortfolio?: boolean;
 }
 
-export default function PublicPortfolio({ profile, stats, taughtCourses, enrolledCourses, showcasedAttempts, isPrivate = false }: Props) {
+export default function PublicPortfolio({ profile, stats, taughtCourses, enrolledCourses, showcasedAttempts, isPrivate = false, appUrl, canonicalUrl, hasPortfolio = false }: Props) {
     const { locale, auth } = usePage().props;
     const l = String(locale);
+    const appName = String((usePage().props as Record<string, any>).name);
 
     const isOwner = auth?.user && (auth.user as { username?: string }).username === profile.username;
+
+    const orgJsonLd = {
+        '@type': 'Organization',
+        name: appName,
+        logo: { '@type': 'ImageObject', url: `${appUrl}/logo.png` },
+    };
+
+    const personJsonLd = {
+        '@type': 'Person',
+        name: profile.name,
+        url: canonicalUrl,
+        mainEntityOfPage: canonicalUrl,
+        ...(profile.avatar ? { image: profile.avatar } : {}),
+        ...(profile.headline ? { jobTitle: profile.headline } : {}),
+        ...(profile.bio ? { description: profile.bio } : {}),
+        ...(profile.social_links && profile.social_links.length > 0
+            ? { sameAs: profile.social_links.map((s) => s.url) }
+            : {}),
+        worksFor: orgJsonLd,
+    };
+
+    const profilePageJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'ProfilePage',
+        url: canonicalUrl,
+        name: `${profile.name} — Profile`,
+        description: profile.headline ?? `${profile.name} on ${appName}.`,
+        inLanguage: l,
+        mainEntity: personJsonLd,
+    };
+
+    const coursesJsonLd =
+        taughtCourses.length > 0
+            ? {
+                  '@context': 'https://schema.org',
+                  '@type': 'ItemList',
+                  name: `Courses by ${profile.name}`,
+                  numberOfItems: taughtCourses.length,
+                  itemListElement: taughtCourses.map((c, i) => ({
+                      '@type': 'ListItem',
+                      position: i + 1,
+                      item: {
+                          '@type': 'Course',
+                          name: c.title,
+                          description: c.description.replace(/<[^>]*>/g, '').slice(0, 300),
+                          url: `${appUrl}/${l}/courses/${c.slug}`,
+                          inLanguage: l,
+                          provider: orgJsonLd,
+                          author: { '@type': 'Person', name: profile.name, url: canonicalUrl },
+                          ...(c.thumbnail ? { image: c.thumbnail } : {}),
+                      },
+                  })),
+              }
+            : null;
 
     if (isPrivate) {
         return (
             <PublicLayout>
-                <Head title={`${profile.name} — Portfolio`} />
+                <Head title={`${profile.name} — Portfolio`}>
+                    <link rel="canonical" href={canonicalUrl} />
+                </Head>
                 <div className="flex min-h-[40vh] flex-col items-center justify-center px-4 py-16 text-center">
                     <div className="mb-3 text-4xl font-bold text-muted-foreground/30">🔒</div>
                     <h1 className="text-xl font-semibold">{profile.name}</h1>
@@ -86,7 +146,12 @@ export default function PublicPortfolio({ profile, stats, taughtCourses, enrolle
     return (
         <PublicLayout>
             <Head title={`${profile.name} — Portfolio`}>
-                <meta name="description" content={profile.headline ?? `${profile.name}'s learning portfolio on ${import.meta.env.VITE_APP_NAME}.`} />
+                <meta name="description" content={profile.headline ?? `${profile.name}'s learning portfolio on ${appName}.`} />
+                <link rel="canonical" href={canonicalUrl} />
+                <script type="application/ld+json">{JSON.stringify(profilePageJsonLd)}</script>
+                {coursesJsonLd && (
+                    <script type="application/ld+json">{JSON.stringify(coursesJsonLd)}</script>
+                )}
             </Head>
 
             {/* Profile header */}
@@ -112,6 +177,19 @@ export default function PublicPortfolio({ profile, stats, taughtCourses, enrolle
                             </div>
                         )}
                     </MentorCard>
+
+                    {hasPortfolio && (
+                        <div className="mt-6 text-center">
+                            <Link
+                                href={`/${l}/u/${profile.username}/portfolio`}
+                                title={`View ${profile.name}'s project portfolio`}
+                                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                            >
+                                <ExternalLink className="h-4 w-4" />
+                                View {profile.name}'s project portfolio
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Stats */}
                     {stats && (stats.courses_enrolled > 0 || stats.courses_completed > 0 || stats.assignments_endorsed > 0) && (

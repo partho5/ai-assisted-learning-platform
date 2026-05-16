@@ -32,6 +32,7 @@ interface Props {
     activeCategory?: Category | null;
     onContactClick?: () => void;
     showSidebar?: boolean;
+    hasCourses?: boolean;
 }
 
 const SERVICE_GRADIENTS = [
@@ -46,7 +47,7 @@ const SERVICE_GRADIENTS = [
     'from-teal-50 to-green-50 border-teal-100',
 ];
 
-export default function PortfolioLayout({ children, owner, portfolio, categories = [], activeCategory, onContactClick, showSidebar = true }: Props) {
+export default function PortfolioLayout({ children, owner, portfolio, categories = [], activeCategory, onContactClick, showSidebar = true, hasCourses = false }: Props) {
     const { locale } = usePage().props;
     const l = String(locale);
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -161,6 +162,19 @@ export default function PortfolioLayout({ children, owner, portfolio, categories
                                 <Mail className="mr-2 inline-block h-4 w-4" /> Contact Me
                             </button>
                         </div>
+                    )}
+
+                    {hasCourses && (
+                        <p className="mb-4 text-sm text-gray-600">
+                            <Link
+                                href={`/${l}/u/${owner.username}`}
+                                title={`Courses mentored by ${owner.name}`}
+                                className="font-medium text-blue-600 hover:underline"
+                            >
+                                courses
+                            </Link>{' '}
+                            mentored by me
+                        </p>
                     )}
 
                     {/* Skills */}
@@ -278,6 +292,19 @@ export default function PortfolioLayout({ children, owner, portfolio, categories
                                     <Mail className="mr-2 inline-block h-4 w-4" /> Contact Me
                                 </button>
                             </div>
+                        )}
+
+                        {hasCourses && (
+                            <p className="mb-4 text-sm text-gray-600">
+                                <Link
+                                    href={`/${l}/u/${owner.username}`}
+                                    title={`Courses mentored by ${owner.name}`}
+                                    className="font-medium text-blue-600 hover:underline"
+                                >
+                                    courses
+                                </Link>{' '}
+                                mentored by me
+                            </p>
                         )}
 
                         {/* Skills */}

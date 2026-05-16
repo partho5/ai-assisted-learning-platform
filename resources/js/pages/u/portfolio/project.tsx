@@ -29,6 +29,8 @@ interface Project {
     meta_description: string | null;
     category: Category | null;
     media: MediaItem[];
+    created_at: string;
+    updated_at: string;
 }
 
 interface Owner {
@@ -52,6 +54,9 @@ interface Props {
     project: Project;
     categories: Category[];
     showSidebar: boolean;
+    appUrl: string;
+    canonicalUrl: string;
+    hasCourses: boolean;
 }
 
 function excerpt(html: string, len = 160): string {
@@ -119,23 +124,59 @@ function ContactModal({ open, onClose, username }: { open: boolean; onClose: () 
     );
 }
 
-export default function PortfolioProjectPage({ owner, portfolio, project, categories, showSidebar }: Props) {
-    const { locale } = usePage().props;
+export default function PortfolioProjectPage({ owner, portfolio, project, categories, showSidebar, appUrl, canonicalUrl, hasCourses }: Props) {
+    const { locale, name } = usePage().props as Record<string, any>;
     const l = String(locale);
+    const appName = String(name);
     const [contactOpen, setContactOpen] = useState(false);
     const [slideIndex, setSlideIndex] = useState(0);
 
     const metaDesc = project.meta_description || excerpt(project.description);
     const ogImage = project.featured_image || (project.media.find((m) => m.type === 'image')?.url) || owner.avatar;
+    const portfolioUrl = `${appUrl}/${l}/u/${owner.username}/portfolio`;
+    const publishedDate = new Date(project.created_at).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
 
     const jsonLd = {
         '@context': 'https://schema.org',
         '@type': 'CreativeWork',
         name: project.title,
         description: metaDesc,
-        author: { '@type': 'Person', name: owner.name },
+        url: canonicalUrl,
+        inLanguage: l,
+        author: {
+            '@type': 'Person',
+            name: owner.name,
+            url: portfolioUrl,
+            ...(owner.avatar ? { image: owner.avatar } : {}),
+            ...(owner.headline ? { jobTitle: owner.headline } : {}),
+        },
+        publisher: {
+            '@type': 'Organization',
+            name: appName,
+            logo: { '@type': 'ImageObject', url: `${appUrl}/logo.png` },
+        },
+        datePublished: project.created_at,
+        dateModified: project.updated_at,
         ...(ogImage ? { image: ogImage } : {}),
-        ...(project.external_url ? { url: project.external_url } : {}),
+        ...(project.category ? { genre: project.category.name } : {}),
+        ...(project.tech_tags && project.tech_tags.length > 0 ? { keywords: project.tech_tags.join(', ') } : {}),
+        ...(project.external_url ? { sameAs: project.external_url } : {}),
+    };
+
+    const breadcrumbJsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            { '@type': 'ListItem', position: 1, name: `${owner.name}'s Portfolio`, item: portfolioUrl },
+            ...(project.category
+                ? [{ '@type': 'ListItem', position: 2, name: project.category.name, item: `${portfolioUrl}?category=${project.category.slug}` }]
+                : []),
+            { '@type': 'ListItem', position: project.category ? 3 : 2, name: project.title, item: canonicalUrl },
+        ],
     };
 
     // Build unified carousel: featured_image first, then media in order (dedup images vs featured)
@@ -164,6 +205,7 @@ export default function PortfolioProjectPage({ owner, portfolio, project, catego
             categories={categories}
             onContactClick={() => setContactOpen(true)}
             showSidebar={showSidebar}
+            hasCourses={hasCourses}
         >
             <Head>
                 <title>{`${project.title} — ${owner.name}`}</title>
@@ -171,8 +213,9 @@ export default function PortfolioProjectPage({ owner, portfolio, project, catego
                 <meta property="og:title" content={project.title} />
                 <meta property="og:description" content={metaDesc} />
                 {ogImage && <meta property="og:image" content={ogImage} />}
-                <link rel="canonical" href={`${window.location.origin}/${l}/u/${owner.username}/portfolio/${project.slug}`} />
+                <link rel="canonical" href={canonicalUrl} />
                 <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+                <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
             </Head>
 
             {/* Floating back button */}
@@ -187,9 +230,13 @@ export default function PortfolioProjectPage({ owner, portfolio, project, catego
             </div> */}
 
             {/* Project title */}
-            <h1 className="mb-16 text-center text-4xl font-black text-blue-700 md:text-5xl">
+            <h1 className="mb-3 text-center text-4xl font-black text-blue-700 md:text-5xl">
                 {project.title}
             </h1>
+            <p className="mb-16 text-center text-sm text-gray-500">
+                Published{' '}
+                <time dateTime={project.created_at}>{publishedDate}</time>
+            </p>
 
             {/* Unified media carousel */}
             {slideCount > 0 && (

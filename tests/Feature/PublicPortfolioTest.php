@@ -117,6 +117,79 @@ class PublicPortfolioTest extends TestCase
     }
 
     // ──────────────────────────────────────────────────────────────────────────
+    // SEO props (canonical built server-side, not from window.location)
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function test_portfolio_show_exposes_server_built_seo_props(): void
+    {
+        $appUrl = rtrim(config('app.url'), '/');
+        $user = User::factory()->create();
+        Portfolio::factory()->create(['user_id' => $user->id, 'is_published' => true]);
+
+        $this->get(route('public-portfolio.show', ['locale' => 'en', 'username' => $user->username]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('appUrl', $appUrl)
+                ->where('canonicalUrl', "{$appUrl}/en/u/{$user->username}/portfolio")
+            );
+    }
+
+    public function test_project_page_exposes_server_built_seo_props(): void
+    {
+        $appUrl = rtrim(config('app.url'), '/');
+        $user = User::factory()->create();
+        $portfolio = Portfolio::factory()->create(['user_id' => $user->id, 'is_published' => true]);
+        $project = PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id, 'is_published' => true]);
+
+        $this->get(route('public-portfolio.project', ['locale' => 'en', 'username' => $user->username, 'project_slug' => $project->slug]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('appUrl', $appUrl)
+                ->where('canonicalUrl', "{$appUrl}/en/u/{$user->username}/portfolio/{$project->slug}")
+            );
+    }
+
+    public function test_robots_txt_serves_absolute_sitemap_url(): void
+    {
+        $expected = rtrim(config('app.url'), '/').'/sitemap.xml';
+
+        $this->get('/robots.txt')
+            ->assertOk()
+            ->assertSee("Sitemap: {$expected}", false);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Cross-link plumbing (F4): hasCourses drives the "courses mentored by me" link
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function test_portfolio_has_courses_is_true_when_user_teaches_published_course(): void
+    {
+        $user = User::factory()->create();
+        $portfolio = Portfolio::factory()->create(['user_id' => $user->id, 'is_published' => true]);
+        $project = PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id, 'is_published' => true]);
+        \App\Models\Course::factory()->published()->create(['user_id' => $user->id]);
+
+        $this->get(route('public-portfolio.show', ['locale' => 'en', 'username' => $user->username]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('hasCourses', true));
+
+        $this->get(route('public-portfolio.project', ['locale' => 'en', 'username' => $user->username, 'project_slug' => $project->slug]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('hasCourses', true));
+    }
+
+    public function test_portfolio_has_courses_is_false_without_published_course(): void
+    {
+        $user = User::factory()->create();
+        Portfolio::factory()->create(['user_id' => $user->id, 'is_published' => true]);
+        \App\Models\Course::factory()->draft()->create(['user_id' => $user->id]);
+
+        $this->get(route('public-portfolio.show', ['locale' => 'en', 'username' => $user->username]))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('hasCourses', false));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
     // Contact form
     // ──────────────────────────────────────────────────────────────────────────
 
