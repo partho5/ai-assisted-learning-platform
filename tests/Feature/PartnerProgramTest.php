@@ -19,17 +19,17 @@ class PartnerProgramTest extends TestCase
 
     private function partnerRoute(): string
     {
-        return route('partner.index', ['locale' => 'en']);
+        return route('partner.index');
     }
 
     private function partnerStoreRoute(): string
     {
-        return route('partner.store', ['locale' => 'en']);
+        return route('partner.store');
     }
 
     private function referralTrackRoute(): string
     {
-        return route('referral.track', ['locale' => 'en']);
+        return route('referral.track');
     }
 
     private function createPaidCourseWithCommission(float $price = 29.99, float $rate = 10.0): Course
@@ -389,7 +389,7 @@ class PartnerProgramTest extends TestCase
         $course->authors()->syncWithoutDetaching([$mentor->id => ['role' => 'lead', 'added_by' => $mentor->id]]);
 
         $this->actingAs($mentor)
-            ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
+            ->put(route('courses.update', ['course' => $course->slug]), [
                 'language' => $course->language->value,
                 'title' => $course->title,
                 'description' => $course->description,
@@ -410,7 +410,7 @@ class PartnerProgramTest extends TestCase
         $course->authors()->syncWithoutDetaching([$mentor->id => ['role' => 'lead', 'added_by' => $mentor->id]]);
 
         $this->actingAs($mentor)
-            ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
+            ->put(route('courses.update', ['course' => $course->slug]), [
                 'language' => $course->language->value,
                 'title' => $course->title,
                 'description' => $course->description,
@@ -544,7 +544,7 @@ class PartnerProgramTest extends TestCase
 
     private function adminPartnersRoute(): string
     {
-        return route('admin.partners.index', ['locale' => 'en']);
+        return route('admin.partners.index');
     }
 
     public function test_non_admin_cannot_access_admin_partners(): void
@@ -602,7 +602,7 @@ class PartnerProgramTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->post(route('admin.partners.commissions.confirm', ['locale' => 'en', 'commission' => $commission->id]))
+            ->post(route('admin.partners.commissions.confirm', ['commission' => $commission->id]))
             ->assertRedirect();
 
         $this->assertEquals('confirmed', $commission->fresh()->status);
@@ -638,7 +638,7 @@ class PartnerProgramTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->post(route('admin.partners.commissions.revoke', ['locale' => 'en', 'commission' => $commission->id]))
+            ->post(route('admin.partners.commissions.revoke', ['commission' => $commission->id]))
             ->assertRedirect();
 
         $this->assertEquals('revoked', $commission->fresh()->status);
@@ -674,7 +674,7 @@ class PartnerProgramTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->post(route('admin.partners.commissions.confirm', ['locale' => 'en', 'commission' => $commission->id]))
+            ->post(route('admin.partners.commissions.confirm', ['commission' => $commission->id]))
             ->assertRedirect()
             ->assertSessionHas('error');
     }

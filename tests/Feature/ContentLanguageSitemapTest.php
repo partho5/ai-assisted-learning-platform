@@ -170,15 +170,16 @@ class ContentLanguageSitemapTest extends TestCase
         $response->assertSee("/en/resources/{$english->slug}", false);
     }
 
-    public function test_robots_disallows_private_paths_in_every_supported_locale(): void
+    /**
+     * Back-office carries no locale prefix, so a single entry each covers it.
+     */
+    public function test_robots_disallows_back_office_paths(): void
     {
-        $response = $this->get('/robots.txt')->assertOk();
-
-        foreach (config('app.supported_locales') as $locale) {
-            $response->assertSee("Disallow: /{$locale}/dashboard", false);
-            $response->assertSee("Disallow: /{$locale}/admin/", false);
-            $response->assertSee("Disallow: /{$locale}/mentor/", false);
-        }
+        $this->get('/robots.txt')
+            ->assertOk()
+            ->assertSee('Disallow: /dashboard', false)
+            ->assertSee('Disallow: /admin/', false)
+            ->assertSee('Disallow: /mentor/', false);
     }
 
     private function priorityFor(string $xml, string $path): ?string

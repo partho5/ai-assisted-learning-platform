@@ -18,11 +18,11 @@ class DashboardController extends Controller
         $locale = app()->getLocale();
 
         if ($user->isAdmin()) {
-            return redirect()->route('admin.dashboard', ['locale' => $locale]);
+            return redirect()->route('admin.dashboard');
         }
 
         if ($user->isMentor()) {
-            return redirect()->route('mentor.dashboard', ['locale' => $locale]);
+            return redirect()->route('mentor.dashboard');
         }
 
         $enrollments = Enrollment::query()

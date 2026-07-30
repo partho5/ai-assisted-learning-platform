@@ -136,7 +136,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
 
     function handleDelete() {
         if (prompt('Type "delete" to confirm') !== 'delete') return;
-        router.delete(articleDestroy.url({ locale: l, article: article.slug }));
+        router.delete(articleDestroy.url({ article: article.slug }));
     }
 
     return (
@@ -232,7 +232,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
                     {canEdit && (
                         <div className="mt-4 flex gap-2">
                             <Button variant="ghost" size="compact" asChild>
-                                <Link href={articleEdit.url({ locale: l, article: article.slug })}>Edit</Link>
+                                <Link href={articleEdit.url({ article: article.slug })}>Edit</Link>
                             </Button>
                             <Button variant="danger" size="compact" onClick={handleDelete}>Delete</Button>
                         </div>

@@ -50,7 +50,7 @@ export default function ForumCategoriesAdmin({ categories }: Props) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Admin', href: `/${l}/admin/dashboard` },
-        { title: 'Forum Categories', href: index.url(l) },
+        { title: 'Forum Categories', href: index.url() },
     ];
 
     function openCreate() {
@@ -67,11 +67,11 @@ export default function ForumCategoriesAdmin({ categories }: Props) {
 
     function handleSubmit() {
         if (editing) {
-            router.put(update.url({ locale: l, forumCategory: editing.slug }), form, {
+            router.put(update.url({ forumCategory: editing.slug }), form, {
                 onSuccess: () => setEditing(null),
             });
         } else {
-            router.post(store.url(l), form, {
+            router.post(store.url(), form, {
                 onSuccess: () => setCreating(false),
             });
         }
@@ -79,7 +79,7 @@ export default function ForumCategoriesAdmin({ categories }: Props) {
 
     function handleDestroy(cat: CategoryWithCount) {
         if (!confirm(`Delete "${cat.name}"? Threads will be orphaned.`)) return;
-        router.delete(destroy.url({ locale: l, forumCategory: cat.slug }));
+        router.delete(destroy.url({ forumCategory: cat.slug }));
     }
 
     const showForm = creating || editing !== null;

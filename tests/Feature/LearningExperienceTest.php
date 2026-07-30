@@ -32,32 +32,32 @@ class LearningExperienceTest extends TestCase
 
     private function attemptStoreRoute(Course $course, Resource $resource): string
     {
-        return route('learn.attempts.store', ['locale' => 'en', 'course' => $course->slug, 'resource' => $resource->id]);
+        return route('learn.attempts.store', ['course' => $course->slug, 'resource' => $resource->id]);
     }
 
     private function attemptSubmitRoute(TestAttempt $attempt): string
     {
-        return route('learn.attempts.submit', ['locale' => 'en', 'attempt' => $attempt->id]);
+        return route('learn.attempts.submit', ['attempt' => $attempt->id]);
     }
 
     private function attemptAnswersRoute(TestAttempt $attempt): string
     {
-        return route('learn.attempts.answers', ['locale' => 'en', 'attempt' => $attempt->id]);
+        return route('learn.attempts.answers', ['attempt' => $attempt->id]);
     }
 
     private function completeRoute(Course $course, Resource $resource): string
     {
-        return route('learn.complete', ['locale' => 'en', 'course' => $course->slug, 'resource' => $resource->id]);
+        return route('learn.complete', ['course' => $course->slug, 'resource' => $resource->id]);
     }
 
     private function endorseRoute(TestAttempt $attempt): string
     {
-        return route('test-attempts.endorse', ['locale' => 'en', 'attempt' => $attempt->id]);
+        return route('test-attempts.endorse', ['attempt' => $attempt->id]);
     }
 
     private function attemptResultRoute(TestAttempt $attempt): string
     {
-        return route('learn.attempts.result', ['locale' => 'en', 'attempt' => $attempt->id]);
+        return route('learn.attempts.result', ['attempt' => $attempt->id]);
     }
 
     private function setupCourseWithResource(string $resourceType = 'text', bool $isFree = false): array

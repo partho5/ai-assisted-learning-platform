@@ -94,8 +94,8 @@ export default function Dashboard({ enrolledCourses, payments, stats }: Props) {
     const chatContext = {
         type: 'platform' as const,
         key: 'dashboard',
-        endpoint: platform.url(l),
-        historyEndpoint: chatHistory.url(l),
+        endpoint: platform.url(),
+        historyEndpoint: chatHistory.url(),
         locale: l,
         autoTrigger: true,
         pageContext: 'Learner dashboard — shows enrolled courses, progress percentages, and payment history.',

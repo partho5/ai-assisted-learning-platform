@@ -59,9 +59,7 @@ class ForumAiMemberAdminController extends Controller
             'trigger_constraints' => $validated['trigger_constraints'] ?? null,
         ]);
 
-        return redirect()->route('admin.forum.ai-members.index', [
-            'locale' => app()->getLocale(),
-        ]);
+        return redirect()->route('admin.forum.ai-members.index');
     }
 
     public function update(Request $request, AiMember $aiMember): RedirectResponse
@@ -85,9 +83,7 @@ class ForumAiMemberAdminController extends Controller
             'trigger_constraints' => $validated['trigger_constraints'] ?? null,
         ]);
 
-        return redirect()->route('admin.forum.ai-members.index', [
-            'locale' => app()->getLocale(),
-        ]);
+        return redirect()->route('admin.forum.ai-members.index');
     }
 
     public function destroy(Request $request, AiMember $aiMember): RedirectResponse
@@ -96,9 +92,7 @@ class ForumAiMemberAdminController extends Controller
         $aiMember->delete();
         $user->delete();
 
-        return redirect()->route('admin.forum.ai-members.index', [
-            'locale' => app()->getLocale(),
-        ]);
+        return redirect()->route('admin.forum.ai-members.index');
     }
 
     private function uniqueUsername(string $name): string

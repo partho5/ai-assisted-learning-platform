@@ -23,13 +23,13 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
     const l = String(locale);
 
     function approveCourse(slug: string) {
-        router.post(courseApprove.url({ locale: l, course: slug }), {}, { preserveScroll: true });
+        router.post(courseApprove.url({ course: slug }), {}, { preserveScroll: true });
     }
 
     function rejectCourse(slug: string) {
         const reason = prompt('Rejection reason (required):');
         if (!reason?.trim()) { return; }
-        router.post(courseReject.url({ locale: l, course: slug }), { rejection_reason: reason }, { preserveScroll: true });
+        router.post(courseReject.url({ course: slug }), { rejection_reason: reason }, { preserveScroll: true });
     }
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -45,7 +45,7 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
                     <h1 className="text-2xl font-semibold tracking-tight">
                         {isAdmin ? 'All Courses' : 'My Courses'}
                     </h1>
-                    <Link href={courseCreate.url(l)}>
+                    <Link href={courseCreate.url()}>
                         <Button variant="enroll">New Course</Button>
                     </Link>
                 </div>
@@ -54,7 +54,7 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
                     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-sidebar-border py-20 text-center">
                         <p className="text-sm text-muted-foreground">No courses yet.</p>
                         {!isAdmin && (
-                            <Link href={courseCreate.url(l)} className="mt-3">
+                            <Link href={courseCreate.url()} className="mt-3">
                                 <Button variant="secondary" size="compact">
                                     Create your first course
                                 </Button>
@@ -115,7 +115,7 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
                                     <div className="mt-auto flex flex-col gap-2 pt-2">
                                         <div className="flex gap-2">
                                             <Link
-                                                href={courseEdit.url({ locale: l, course: course.slug })}
+                                                href={courseEdit.url({ course: course.slug })}
                                                 className="flex-1"
                                             >
                                                 <Button variant="secondary" size="compact" className="w-full">
@@ -123,7 +123,7 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
                                                 </Button>
                                             </Link>
                                             <Link
-                                                href={submissionsIndex.url({ locale: l, course: course.slug })}
+                                                href={submissionsIndex.url({ course: course.slug })}
                                                 className="flex-1"
                                             >
                                                 <Button variant="utility" size="compact" className="w-full">
@@ -140,7 +140,7 @@ export default function CoursesIndex({ courses, isAdmin }: Props) {
                                             </Link>
                                         ) : (
                                             <Link
-                                                href={coursePreview.url({ locale: l, course: course.slug })}
+                                                href={coursePreview.url({ course: course.slug })}
                                                 className="text-center text-xs text-amber-600 hover:underline dark:text-amber-400"
                                             >
                                                 Preview course →

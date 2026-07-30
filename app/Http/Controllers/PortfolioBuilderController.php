@@ -155,7 +155,7 @@ class PortfolioBuilderController extends Controller
             }
         }
 
-        return redirect()->route('portfolio-builder.projects.index', ['locale' => app()->getLocale()])
+        return redirect()->route('portfolio-builder.projects.index')
             ->with('success', 'Project created.');
     }
 
@@ -215,7 +215,7 @@ class PortfolioBuilderController extends Controller
             }
         }
 
-        return redirect()->route('portfolio-builder.projects.index', ['locale' => app()->getLocale()])
+        return redirect()->route('portfolio-builder.projects.index')
             ->with('success', 'Project updated.');
     }
 
@@ -350,7 +350,7 @@ class PortfolioBuilderController extends Controller
 
         $message->delete();
 
-        return redirect()->route('portfolio-builder.messages.index', ['locale' => app()->getLocale()])
+        return redirect()->route('portfolio-builder.messages.index')
             ->with('success', 'Message deleted.');
     }
 

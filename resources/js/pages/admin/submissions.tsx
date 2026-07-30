@@ -54,11 +54,11 @@ export default function AdminSubmissions({ submissions, filters }: Props) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Admin', href: `/${l}/admin/dashboard` },
-        { title: 'Submissions', href: adminSubmissions.url(l) },
+        { title: 'Submissions', href: adminSubmissions.url() },
     ];
 
     function filterByStatus(status: string | undefined) {
-        router.get(adminSubmissions.url(l), { status: status ?? '' });
+        router.get(adminSubmissions.url(), { status: status ?? '' });
     }
 
     return (
@@ -150,7 +150,7 @@ export default function AdminSubmissions({ submissions, filters }: Props) {
                                         <td className="px-4 py-3">
                                             <button
                                                 onClick={() =>
-                                                    router.get(showAttempt.url({ locale: l, attempt: row.id }))
+                                                    router.get(showAttempt.url({ attempt: row.id }))
                                                 }
                                                 className="text-xs text-primary hover:underline"
                                             >

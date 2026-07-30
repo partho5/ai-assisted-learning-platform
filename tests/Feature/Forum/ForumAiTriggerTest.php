@@ -238,7 +238,7 @@ class ForumAiTriggerTest extends TestCase
         $category = $thread->category;
 
         $this->actingAs($user)
-            ->post(route('forum.threads.store', ['locale' => 'en']), [
+            ->post(route('forum.threads.store'), [
                 'category_id' => $category->id,
                 'title' => 'Test thread for AI trigger',
                 'body' => '<p>Hello world</p>',

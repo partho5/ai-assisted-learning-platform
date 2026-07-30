@@ -22,7 +22,7 @@ class AiChatTest extends TestCase
     {
         $this->mockAiStreamChat('Hello! I can help you with SkillEvidence.');
 
-        $this->postJson(route('chat.platform', ['locale' => 'en']), [
+        $this->postJson(route('chat.platform'), [
             'message' => 'What is SkillEvidence?',
         ])->assertOk()
             ->assertHeaderContains('Content-Type', 'text/event-stream');
@@ -33,21 +33,21 @@ class AiChatTest extends TestCase
         $this->mockAiStreamChat('Happy to help!');
 
         $this->actingAs(User::factory()->learner()->create())
-            ->postJson(route('chat.platform', ['locale' => 'en']), [
+            ->postJson(route('chat.platform'), [
                 'message' => 'How do I enroll in a course?',
             ])->assertOk();
     }
 
     public function test_platform_chat_validates_message_is_required(): void
     {
-        $this->postJson(route('chat.platform', ['locale' => 'en']), [])
+        $this->postJson(route('chat.platform'), [])
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['message']);
     }
 
     public function test_platform_chat_validates_message_max_length(): void
     {
-        $this->postJson(route('chat.platform', ['locale' => 'en']), [
+        $this->postJson(route('chat.platform'), [
             'message' => str_repeat('a', 2001),
         ])->assertUnprocessable()
             ->assertJsonValidationErrors(['message']);
@@ -55,7 +55,7 @@ class AiChatTest extends TestCase
 
     public function test_platform_chat_validates_history_role_enum(): void
     {
-        $this->postJson(route('chat.platform', ['locale' => 'en']), [
+        $this->postJson(route('chat.platform'), [
             'message' => 'Hello',
             'history' => [
                 ['role' => 'invalid_role', 'content' => 'Hi'],
@@ -68,7 +68,7 @@ class AiChatTest extends TestCase
     {
         $this->mockAiStreamChat('Follow-up response.');
 
-        $this->postJson(route('chat.platform', ['locale' => 'en']), [
+        $this->postJson(route('chat.platform'), [
             'message' => 'Tell me more',
             'history' => [
                 ['role' => 'user', 'content' => 'What is SkillEvidence?'],
@@ -88,7 +88,7 @@ class AiChatTest extends TestCase
         $course = Course::factory()->create();
 
         $this->postJson(
-            route('chat.course', ['locale' => 'en', 'course' => $course]),
+            route('chat.course', ['course' => $course]),
             ['message' => 'What is this course about?'],
         )->assertOk()
             ->assertHeaderContains('Content-Type', 'text/event-stream');
@@ -102,7 +102,7 @@ class AiChatTest extends TestCase
 
         $this->actingAs(User::factory()->learner()->create())
             ->postJson(
-                route('chat.course', ['locale' => 'en', 'course' => $course]),
+                route('chat.course', ['course' => $course]),
                 ['message' => 'Who is this course for?'],
             )->assertOk();
     }
@@ -110,7 +110,7 @@ class AiChatTest extends TestCase
     public function test_course_chat_returns_404_for_nonexistent_course(): void
     {
         $this->postJson(
-            route('chat.course', ['locale' => 'en', 'course' => 99999]),
+            route('chat.course', ['course' => 99999]),
             ['message' => 'Hello'],
         )->assertNotFound();
     }
@@ -120,7 +120,7 @@ class AiChatTest extends TestCase
         $course = Course::factory()->create();
 
         $this->postJson(
-            route('chat.course', ['locale' => 'en', 'course' => $course]),
+            route('chat.course', ['course' => $course]),
             [],
         )->assertUnprocessable()
             ->assertJsonValidationErrors(['message']);
@@ -137,7 +137,7 @@ class AiChatTest extends TestCase
         [$course, $resource] = $this->createCourseWithResource(isFree: true);
 
         $this->postJson(
-            route('chat.resource', ['locale' => 'en', 'course' => $course, 'resource' => $resource]),
+            route('chat.resource', ['course' => $course, 'resource' => $resource]),
             ['message' => 'Can you explain this topic?'],
         )->assertOk()
             ->assertHeaderContains('Content-Type', 'text/event-stream');
@@ -151,7 +151,7 @@ class AiChatTest extends TestCase
 
         $this->actingAs(User::factory()->learner()->create())
             ->postJson(
-                route('chat.resource', ['locale' => 'en', 'course' => $course, 'resource' => $resource]),
+                route('chat.resource', ['course' => $course, 'resource' => $resource]),
                 ['message' => 'I am confused about this.'],
             )->assertOk();
     }
@@ -161,7 +161,7 @@ class AiChatTest extends TestCase
         [$course, $resource] = $this->createCourseWithResource();
 
         $this->postJson(
-            route('chat.resource', ['locale' => 'en', 'course' => $course, 'resource' => $resource]),
+            route('chat.resource', ['course' => $course, 'resource' => $resource]),
             [],
         )->assertUnprocessable()
             ->assertJsonValidationErrors(['message']);
@@ -172,7 +172,7 @@ class AiChatTest extends TestCase
         $course = Course::factory()->create();
 
         $this->postJson(
-            route('chat.resource', ['locale' => 'en', 'course' => $course, 'resource' => 99999]),
+            route('chat.resource', ['course' => $course, 'resource' => 99999]),
             ['message' => 'Hello'],
         )->assertNotFound();
     }
@@ -188,7 +188,7 @@ class AiChatTest extends TestCase
         $user = User::factory()->learner()->create();
 
         $this->actingAs($user)
-            ->postJson(route('chat.platform', ['locale' => 'en']), [
+            ->postJson(route('chat.platform'), [
                 'message' => '__coach_open__',
                 'is_trigger' => true,
                 'context_key' => 'dashboard',
@@ -210,7 +210,7 @@ class AiChatTest extends TestCase
 
         $this->actingAs(User::factory()->learner()->create())
             ->postJson(
-                route('chat.resource', ['locale' => 'en', 'course' => $course, 'resource' => $resource]),
+                route('chat.resource', ['course' => $course, 'resource' => $resource]),
                 [
                     'message' => '__coach_open__',
                     'is_trigger' => true,

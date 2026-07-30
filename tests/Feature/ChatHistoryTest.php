@@ -20,7 +20,7 @@ class ChatHistoryTest extends TestCase
 
     public function test_guest_gets_empty_history_when_no_session_exists(): void
     {
-        $this->getJson(route('chat.history.index', ['locale' => 'en']).'?context_key=platform&guest_user_id='.self::GUEST_ID)
+        $this->getJson(route('chat.history.index').'?context_key=platform&guest_user_id='.self::GUEST_ID)
             ->assertOk()
             ->assertJson(['messages' => [], 'has_more' => false]);
     }
@@ -36,7 +36,7 @@ class ChatHistoryTest extends TestCase
         ChatMessage::factory()->for($session, 'session')->create(['role' => 'user', 'content' => 'Hello']);
         ChatMessage::factory()->for($session, 'session')->create(['role' => 'assistant', 'content' => 'Hi there!']);
 
-        $this->getJson(route('chat.history.index', ['locale' => 'en']).'?context_key=platform&guest_user_id='.self::GUEST_ID)
+        $this->getJson(route('chat.history.index').'?context_key=platform&guest_user_id='.self::GUEST_ID)
             ->assertOk()
             ->assertJsonCount(2, 'messages')
             ->assertJsonFragment(['content' => 'Hello'])
@@ -53,7 +53,7 @@ class ChatHistoryTest extends TestCase
 
         ChatMessage::factory()->for($session, 'session')->create(['content' => 'Secret']);
 
-        $this->getJson(route('chat.history.index', ['locale' => 'en']).'?context_key=platform&guest_user_id='.self::GUEST_ID)
+        $this->getJson(route('chat.history.index').'?context_key=platform&guest_user_id='.self::GUEST_ID)
             ->assertOk()
             ->assertJsonCount(0, 'messages');
     }
@@ -69,7 +69,7 @@ class ChatHistoryTest extends TestCase
         ChatMessage::factory()->for($session, 'session')->create(['role' => 'user', 'content' => 'Auth message']);
 
         $this->actingAs($user)
-            ->getJson(route('chat.history.index', ['locale' => 'en']).'?context_key=platform')
+            ->getJson(route('chat.history.index').'?context_key=platform')
             ->assertOk()
             ->assertJsonCount(1, 'messages')
             ->assertJsonFragment(['content' => 'Auth message']);
@@ -84,7 +84,7 @@ class ChatHistoryTest extends TestCase
         ChatMessage::factory()->for($session, 'session')->create(['content' => 'User A secret']);
 
         $this->actingAs($userB)
-            ->getJson(route('chat.history.index', ['locale' => 'en']).'?context_key=platform')
+            ->getJson(route('chat.history.index').'?context_key=platform')
             ->assertOk()
             ->assertJsonCount(0, 'messages');
     }
@@ -105,7 +105,7 @@ class ChatHistoryTest extends TestCase
         $second = ChatMessage::factory()->for($session, 'session')->create(['content' => 'Second']);
 
         $data = $this->getJson(
-            route('chat.history.index', ['locale' => 'en']).'?context_key=platform&guest_user_id='.self::GUEST_ID,
+            route('chat.history.index').'?context_key=platform&guest_user_id='.self::GUEST_ID,
         )->assertOk()->json();
 
         $this->assertSame('First', $data['messages'][0]['content']);
@@ -126,7 +126,7 @@ class ChatHistoryTest extends TestCase
 
         // First page (latest 20)
         $page1 = $this->getJson(
-            route('chat.history.index', ['locale' => 'en']).'?context_key=platform&guest_user_id='.self::GUEST_ID,
+            route('chat.history.index').'?context_key=platform&guest_user_id='.self::GUEST_ID,
         )->assertOk()->json();
 
         $this->assertCount(20, $page1['messages']);
@@ -135,7 +135,7 @@ class ChatHistoryTest extends TestCase
         // Load older using the first message's id as cursor
         $cursor = $page1['messages'][0]['id'];
         $page2 = $this->getJson(
-            route('chat.history.index', ['locale' => 'en']).'?context_key=platform&guest_user_id='.self::GUEST_ID.'&before_id='.$cursor,
+            route('chat.history.index').'?context_key=platform&guest_user_id='.self::GUEST_ID.'&before_id='.$cursor,
         )->assertOk()->json();
 
         $this->assertCount(5, $page2['messages']);
@@ -145,7 +145,7 @@ class ChatHistoryTest extends TestCase
 
     public function test_history_requires_context_key(): void
     {
-        $this->getJson(route('chat.history.index', ['locale' => 'en']).'?guest_user_id='.self::GUEST_ID)
+        $this->getJson(route('chat.history.index').'?guest_user_id='.self::GUEST_ID)
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['context_key']);
     }
@@ -165,7 +165,7 @@ class ChatHistoryTest extends TestCase
         ChatMessage::factory()->for($session, 'session')->count(3)->create();
 
         $this->deleteJson(
-            route('chat.history.destroy', ['locale' => 'en']).'?context_key=platform&guest_user_id='.self::GUEST_ID,
+            route('chat.history.destroy').'?context_key=platform&guest_user_id='.self::GUEST_ID,
         )->assertOk()->assertJson(['ok' => true]);
 
         $this->assertDatabaseCount('chat_messages', 0);
@@ -178,7 +178,7 @@ class ChatHistoryTest extends TestCase
         ChatMessage::factory()->for($session, 'session')->count(2)->create();
 
         $this->actingAs($user)
-            ->deleteJson(route('chat.history.destroy', ['locale' => 'en']).'?context_key=platform')
+            ->deleteJson(route('chat.history.destroy').'?context_key=platform')
             ->assertOk();
 
         $this->assertDatabaseCount('chat_messages', 0);
@@ -192,7 +192,7 @@ class ChatHistoryTest extends TestCase
     {
         $this->mockAiStreamChat('Hello!');
 
-        $response = $this->postJson(route('chat.platform', ['locale' => 'en']), [
+        $response = $this->postJson(route('chat.platform'), [
             'message' => 'Hi there',
             'guest_user_id' => self::GUEST_ID,
             'context_key' => 'platform',
@@ -210,7 +210,7 @@ class ChatHistoryTest extends TestCase
     {
         $this->mockAiStreamChat('Hello!');
 
-        $response = $this->postJson(route('chat.platform', ['locale' => 'en']), [
+        $response = $this->postJson(route('chat.platform'), [
             'message' => 'Hi there',
         ]);
 
@@ -225,7 +225,7 @@ class ChatHistoryTest extends TestCase
         $this->mockAiStreamChat('Welcome!');
         $user = User::factory()->learner()->create();
 
-        $response = $this->actingAs($user)->postJson(route('chat.platform', ['locale' => 'en']), [
+        $response = $this->actingAs($user)->postJson(route('chat.platform'), [
             'message' => 'Hello',
             'context_key' => 'platform',
             'context_url' => 'http://localhost/en/',

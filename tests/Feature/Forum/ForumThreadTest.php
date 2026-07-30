@@ -19,7 +19,7 @@ class ForumThreadTest extends TestCase
 
     public function test_guest_cannot_create_thread(): void
     {
-        $this->get(route('forum.threads.create', ['locale' => 'en']))
+        $this->get(route('forum.threads.create'))
             ->assertRedirect();
     }
 
@@ -29,7 +29,7 @@ class ForumThreadTest extends TestCase
         ForumCategory::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('forum.threads.create', ['locale' => 'en']))
+            ->get(route('forum.threads.create'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('forum/create-thread'));
     }
@@ -40,7 +40,7 @@ class ForumThreadTest extends TestCase
         $category = ForumCategory::factory()->create();
 
         $this->actingAs($user)
-            ->post(route('forum.threads.store', ['locale' => 'en']), [
+            ->post(route('forum.threads.store'), [
                 'title' => 'How do I learn PHP?',
                 'body' => '<p>I am a beginner, help!</p>',
                 'category_id' => $category->id,
@@ -61,7 +61,7 @@ class ForumThreadTest extends TestCase
         $category = ForumCategory::factory()->create(['thread_count' => 0]);
 
         $this->actingAs($user)
-            ->post(route('forum.threads.store', ['locale' => 'en']), [
+            ->post(route('forum.threads.store'), [
                 'title' => 'Test thread',
                 'body' => '<p>body</p>',
                 'category_id' => $category->id,
@@ -76,7 +76,7 @@ class ForumThreadTest extends TestCase
         $category = ForumCategory::factory()->create();
 
         $this->actingAs($user)
-            ->post(route('forum.threads.store', ['locale' => 'en']), [
+            ->post(route('forum.threads.store'), [
                 'title' => '',
                 'body' => '<p>body</p>',
                 'category_id' => $category->id,
@@ -89,7 +89,7 @@ class ForumThreadTest extends TestCase
         $user = User::factory()->paid()->create();
 
         $this->actingAs($user)
-            ->post(route('forum.threads.store', ['locale' => 'en']), [
+            ->post(route('forum.threads.store'), [
                 'title' => 'Test',
                 'body' => '<p>body</p>',
                 'category_id' => 9999,
@@ -108,14 +108,12 @@ class ForumThreadTest extends TestCase
 
         $this->actingAs($user)
             ->put(route('forum.threads.update', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]), [
-                'title' => 'Updated Title',
-                'body' => '<p>Updated body</p>',
-                'category_id' => $thread->category_id,
-            ])
+                'forumThread' => $thread->slug]), [
+                    'title' => 'Updated Title',
+                    'body' => '<p>Updated body</p>',
+                    'category_id' => $thread->category_id,
+                ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('forum_threads', ['title' => 'Updated Title']);
@@ -129,14 +127,12 @@ class ForumThreadTest extends TestCase
 
         $this->actingAs($other)
             ->put(route('forum.threads.update', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]), [
-                'title' => 'Hacked Title',
-                'body' => '<p>body</p>',
-                'category_id' => $thread->category_id,
-            ])
+                'forumThread' => $thread->slug]), [
+                    'title' => 'Hacked Title',
+                    'body' => '<p>body</p>',
+                    'category_id' => $thread->category_id,
+                ])
             ->assertForbidden();
     }
 
@@ -147,14 +143,12 @@ class ForumThreadTest extends TestCase
 
         $this->actingAs($admin)
             ->put(route('forum.threads.update', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]), [
-                'title' => 'Admin Edited Title',
-                'body' => '<p>body</p>',
-                'category_id' => $thread->category_id,
-            ])
+                'forumThread' => $thread->slug]), [
+                    'title' => 'Admin Edited Title',
+                    'body' => '<p>body</p>',
+                    'category_id' => $thread->category_id,
+                ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('forum_threads', ['title' => 'Admin Edited Title']);
@@ -171,10 +165,8 @@ class ForumThreadTest extends TestCase
 
         $this->actingAs($user)
             ->delete(route('forum.threads.destroy', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]))
+                'forumThread' => $thread->slug]))
             ->assertRedirect();
 
         $this->assertSoftDeleted('forum_threads', ['id' => $thread->id]);
@@ -188,10 +180,8 @@ class ForumThreadTest extends TestCase
 
         $this->actingAs($other)
             ->delete(route('forum.threads.destroy', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]))
+                'forumThread' => $thread->slug]))
             ->assertForbidden();
 
         $this->assertDatabaseHas('forum_threads', ['id' => $thread->id, 'deleted_at' => null]);

@@ -63,7 +63,7 @@ class CourseManagementTest extends TestCase
     public function test_mentor_can_view_create_page(): void
     {
         $this->actingAs(User::factory()->mentor()->create())
-            ->get(route('courses.create', ['locale' => 'en']))
+            ->get(route('courses.create'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('mentor/courses/create'));
     }
@@ -74,7 +74,7 @@ class CourseManagementTest extends TestCase
         $category = Category::factory()->create();
 
         $this->actingAs($mentor)
-            ->post(route('courses.store', ['locale' => 'en']), [
+            ->post(route('courses.store'), [
                 'language' => 'en',
                 'title' => 'Intro to Laravel',
                 'description' => 'A great course.',
@@ -96,7 +96,7 @@ class CourseManagementTest extends TestCase
     {
         $mentor = User::factory()->mentor()->create();
 
-        $this->actingAs($mentor)->post(route('courses.store', ['locale' => 'en']), [
+        $this->actingAs($mentor)->post(route('courses.store'), [
             'language' => 'en',
             'title' => 'My Awesome Course',
             'description' => 'Desc',
@@ -112,7 +112,7 @@ class CourseManagementTest extends TestCase
         $mentor = User::factory()->mentor()->create();
         Course::factory()->for($mentor, 'mentor')->create(['slug' => 'my-course']);
 
-        $this->actingAs($mentor)->post(route('courses.store', ['locale' => 'en']), [
+        $this->actingAs($mentor)->post(route('courses.store'), [
             'language' => 'en',
             'title' => 'My Course',
             'description' => 'Desc',
@@ -126,7 +126,7 @@ class CourseManagementTest extends TestCase
     public function test_course_creation_requires_title(): void
     {
         $this->actingAs(User::factory()->mentor()->create())
-            ->post(route('courses.store', ['locale' => 'en']), [
+            ->post(route('courses.store'), [
                 'description' => 'Desc',
                 'what_you_will_learn' => 'Things',
                 'difficulty' => CourseDifficulty::Beginner->value,
@@ -137,7 +137,7 @@ class CourseManagementTest extends TestCase
     public function test_course_creation_requires_what_you_will_learn(): void
     {
         $this->actingAs(User::factory()->mentor()->create())
-            ->post(route('courses.store', ['locale' => 'en']), [
+            ->post(route('courses.store'), [
                 'title' => 'Test',
                 'description' => 'Desc',
                 'difficulty' => CourseDifficulty::Beginner->value,
@@ -150,7 +150,7 @@ class CourseManagementTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('courses.store', ['locale' => 'en']), [
+            ->post(route('courses.store'), [
                 'language' => 'en',
                 'title' => 'Paid Laravel Course',
                 'description' => 'Advanced course.',
@@ -176,7 +176,7 @@ class CourseManagementTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('courses.store', ['locale' => 'en']), [
+            ->post(route('courses.store'), [
                 'language' => 'en',
                 'title' => 'Monthly Course',
                 'description' => 'Subscription course.',
@@ -200,7 +200,7 @@ class CourseManagementTest extends TestCase
     public function test_course_creation_rejects_invalid_billing_type(): void
     {
         $this->actingAs(User::factory()->mentor()->create())
-            ->post(route('courses.store', ['locale' => 'en']), [
+            ->post(route('courses.store'), [
                 'title' => 'Test',
                 'description' => 'Desc',
                 'what_you_will_learn' => 'Things',
@@ -220,7 +220,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->create();
 
         $this->actingAs($mentor)
-            ->get(route('courses.edit', ['locale' => 'en', 'course' => $course->slug]))
+            ->get(route('courses.edit', ['course' => $course->slug]))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('mentor/courses/edit'));
     }
@@ -232,7 +232,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($other, 'mentor')->create();
 
         $this->actingAs($mentor)
-            ->get(route('courses.edit', ['locale' => 'en', 'course' => $course->slug]))
+            ->get(route('courses.edit', ['course' => $course->slug]))
             ->assertForbidden();
     }
 
@@ -243,7 +243,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->create();
 
         $this->actingAs($admin)
-            ->get(route('courses.edit', ['locale' => 'en', 'course' => $course->slug]))
+            ->get(route('courses.edit', ['course' => $course->slug]))
             ->assertOk();
     }
 
@@ -253,7 +253,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->create();
 
         $this->actingAs($mentor)
-            ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
+            ->put(route('courses.update', ['course' => $course->slug]), [
                 'language' => 'en',
                 'title' => 'Updated Title',
                 'description' => 'Updated description.',
@@ -275,7 +275,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
 
         $this->actingAs($mentor)
-            ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
+            ->put(route('courses.update', ['course' => $course->slug]), [
                 'language' => $course->language->value,
                 'title' => $course->title,
                 'description' => $course->description,
@@ -298,7 +298,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($other, 'mentor')->create();
 
         $this->actingAs($mentor)
-            ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
+            ->put(route('courses.update', ['course' => $course->slug]), [
                 'language' => 'en',
                 'title' => 'Hacked',
                 'description' => 'x',
@@ -318,7 +318,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->create();
 
         $this->actingAs($mentor)
-            ->delete(route('courses.destroy', ['locale' => 'en', 'course' => $course->slug]))
+            ->delete(route('courses.destroy', ['course' => $course->slug]))
             ->assertRedirect(route('courses.index', ['locale' => 'en']));
 
         $this->assertDatabaseMissing('courses', ['id' => $course->id]);
@@ -331,7 +331,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($other, 'mentor')->create();
 
         $this->actingAs($mentor)
-            ->delete(route('courses.destroy', ['locale' => 'en', 'course' => $course->slug]))
+            ->delete(route('courses.destroy', ['course' => $course->slug]))
             ->assertForbidden();
     }
 
@@ -345,7 +345,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
 
         $this->actingAs($mentor)
-            ->get(route('courses.preview', ['locale' => 'en', 'course' => $course->slug]))
+            ->get(route('courses.preview', ['course' => $course->slug]))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('courses/show')
@@ -360,7 +360,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
 
         $this->actingAs($admin)
-            ->get(route('courses.preview', ['locale' => 'en', 'course' => $course->slug]))
+            ->get(route('courses.preview', ['course' => $course->slug]))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->where('isPreview', true));
     }
@@ -372,7 +372,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($other, 'mentor')->draft()->create();
 
         $this->actingAs($mentor)
-            ->get(route('courses.preview', ['locale' => 'en', 'course' => $course->slug]))
+            ->get(route('courses.preview', ['course' => $course->slug]))
             ->assertForbidden();
     }
 
@@ -381,7 +381,7 @@ class CourseManagementTest extends TestCase
         $mentor = User::factory()->mentor()->create();
         $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
 
-        $this->get(route('courses.preview', ['locale' => 'en', 'course' => $course->slug]))
+        $this->get(route('courses.preview', ['course' => $course->slug]))
             ->assertRedirect();
     }
 
@@ -395,7 +395,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
 
         $this->actingAs($mentor)
-            ->post(route('courses.submit-review', ['locale' => 'en', 'course' => $course->slug]))
+            ->post(route('courses.submit-review', ['course' => $course->slug]))
             ->assertRedirect();
 
         $this->assertDatabaseHas('courses', [
@@ -412,7 +412,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($other, 'mentor')->draft()->create();
 
         $this->actingAs($mentor)
-            ->post(route('courses.submit-review', ['locale' => 'en', 'course' => $course->slug]))
+            ->post(route('courses.submit-review', ['course' => $course->slug]))
             ->assertForbidden();
     }
 
@@ -423,7 +423,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
 
         $this->actingAs($admin)
-            ->post(route('courses.approve', ['locale' => 'en', 'course' => $course->slug]))
+            ->post(route('courses.approve', ['course' => $course->slug]))
             ->assertRedirect();
 
         $this->assertDatabaseHas('courses', [
@@ -439,7 +439,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
 
         $this->actingAs($mentor)
-            ->post(route('courses.approve', ['locale' => 'en', 'course' => $course->slug]))
+            ->post(route('courses.approve', ['course' => $course->slug]))
             ->assertForbidden();
     }
 
@@ -450,7 +450,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
 
         $this->actingAs($admin)
-            ->post(route('courses.reject', ['locale' => 'en', 'course' => $course->slug]), [
+            ->post(route('courses.reject', ['course' => $course->slug]), [
                 'rejection_reason' => 'Content needs improvement.',
             ])
             ->assertRedirect();
@@ -469,7 +469,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
 
         $this->actingAs($admin)
-            ->post(route('courses.reject', ['locale' => 'en', 'course' => $course->slug]), [
+            ->post(route('courses.reject', ['course' => $course->slug]), [
                 'rejection_reason' => '',
             ])
             ->assertSessionHasErrors('rejection_reason');
@@ -481,7 +481,7 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->pendingReview()->create();
 
         $this->actingAs($mentor)
-            ->post(route('courses.reject', ['locale' => 'en', 'course' => $course->slug]), [
+            ->post(route('courses.reject', ['course' => $course->slug]), [
                 'rejection_reason' => 'Reason',
             ])
             ->assertForbidden();

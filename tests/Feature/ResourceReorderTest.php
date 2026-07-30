@@ -24,7 +24,7 @@ class ResourceReorderTest extends TestCase
         $r3 = Resource::factory()->for($module)->create(['order' => 2]);
 
         $this->actingAs($mentor)
-            ->post(route('resources.reorder', ['locale' => 'en', 'course' => $course->slug, 'module' => $module->id]), [
+            ->post(route('resources.reorder', ['course' => $course->slug, 'module' => $module->id]), [
                 'order' => [$r3->id, $r1->id, $r2->id],
             ])
             ->assertRedirect();
@@ -45,7 +45,7 @@ class ResourceReorderTest extends TestCase
         $r2 = Resource::factory()->for($module)->create(['order' => 1]);
 
         $this->actingAs($admin)
-            ->post(route('resources.reorder', ['locale' => 'en', 'course' => $course->slug, 'module' => $module->id]), [
+            ->post(route('resources.reorder', ['course' => $course->slug, 'module' => $module->id]), [
                 'order' => [$r2->id, $r1->id],
             ])
             ->assertRedirect();
@@ -65,7 +65,7 @@ class ResourceReorderTest extends TestCase
         $r2 = Resource::factory()->for($module)->create(['order' => 1]);
 
         $this->actingAs($mentor)
-            ->post(route('resources.reorder', ['locale' => 'en', 'course' => $course->slug, 'module' => $module->id]), [
+            ->post(route('resources.reorder', ['course' => $course->slug, 'module' => $module->id]), [
                 'order' => [$r2->id, $r1->id],
             ])
             ->assertForbidden();
@@ -79,7 +79,7 @@ class ResourceReorderTest extends TestCase
         $module = Module::factory()->for($otherCourse)->create();
 
         $this->actingAs($mentor)
-            ->post(route('resources.reorder', ['locale' => 'en', 'course' => $course->slug, 'module' => $module->id]), [
+            ->post(route('resources.reorder', ['course' => $course->slug, 'module' => $module->id]), [
                 'order' => [],
             ])
             ->assertNotFound();
@@ -92,7 +92,7 @@ class ResourceReorderTest extends TestCase
         $module = Module::factory()->for($course)->create();
 
         $this->actingAs($mentor)
-            ->post(route('resources.reorder', ['locale' => 'en', 'course' => $course->slug, 'module' => $module->id]), [])
+            ->post(route('resources.reorder', ['course' => $course->slug, 'module' => $module->id]), [])
             ->assertSessionHasErrors('order');
     }
 
@@ -102,7 +102,7 @@ class ResourceReorderTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->create();
         $module = Module::factory()->for($course)->create();
 
-        $this->post(route('resources.reorder', ['locale' => 'en', 'course' => $course->slug, 'module' => $module->id]), [
+        $this->post(route('resources.reorder', ['course' => $course->slug, 'module' => $module->id]), [
             'order' => [],
         ])->assertRedirect(route('login'));
     }

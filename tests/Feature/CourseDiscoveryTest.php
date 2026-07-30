@@ -147,7 +147,7 @@ class CourseDiscoveryTest extends TestCase
         $mentor = User::factory()->mentor()->create();
         $course = Course::factory()->for($mentor, 'mentor')->published()->create();
 
-        $this->post(route('courses.enroll', ['locale' => 'en', 'course' => $course->slug]))
+        $this->post(route('courses.enroll', ['course' => $course->slug]))
             ->assertRedirect(route('login'));
     }
 
@@ -158,7 +158,7 @@ class CourseDiscoveryTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->published()->create();
 
         $this->actingAs($learner)
-            ->post(route('courses.enroll', ['locale' => 'en', 'course' => $course->slug]))
+            ->post(route('courses.enroll', ['course' => $course->slug]))
             ->assertRedirect();
 
         $this->assertDatabaseHas('enrollments', [
@@ -175,10 +175,10 @@ class CourseDiscoveryTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->published()->create();
 
         $this->actingAs($learner)
-            ->post(route('courses.enroll', ['locale' => 'en', 'course' => $course->slug]));
+            ->post(route('courses.enroll', ['course' => $course->slug]));
 
         $this->actingAs($learner)
-            ->post(route('courses.enroll', ['locale' => 'en', 'course' => $course->slug]));
+            ->post(route('courses.enroll', ['course' => $course->slug]));
 
         $this->assertDatabaseCount('enrollments', 1);
     }
@@ -190,7 +190,7 @@ class CourseDiscoveryTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->draft()->create();
 
         $this->actingAs($learner)
-            ->post(route('courses.enroll', ['locale' => 'en', 'course' => $course->slug]))
+            ->post(route('courses.enroll', ['course' => $course->slug]))
             ->assertNotFound();
 
         $this->assertDatabaseCount('enrollments', 0);
@@ -203,7 +203,7 @@ class CourseDiscoveryTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->published()->create();
 
         $this->actingAs($learner)
-            ->post(route('courses.enroll', ['locale' => 'en', 'course' => $course->slug]))
+            ->post(route('courses.enroll', ['course' => $course->slug]))
             ->assertRedirect(route('courses.show', ['locale' => 'en', 'course' => $course->slug]));
     }
 }

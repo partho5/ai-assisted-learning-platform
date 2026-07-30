@@ -92,32 +92,68 @@ class LocaleTest extends TestCase
 
     public function test_locale_is_shared_in_inertia_props(): void
     {
-        $user = User::factory()->learner()->create();
-
-        $this->actingAs($user)
-            ->get('/en/dashboard')
-            ->assertInertia(fn ($page) => $page->where('locale', 'en'));
-
-        $this->actingAs($user)
-            ->get('/bn/dashboard')
-            ->assertInertia(fn ($page) => $page->where('locale', 'bn'));
+        $this->get('/en/courses')->assertInertia(fn ($page) => $page->where('locale', 'en'));
+        $this->get('/bn/courses')->assertInertia(fn ($page) => $page->where('locale', 'bn'));
     }
 
     public function test_ui_translations_are_shared_in_inertia_props(): void
     {
-        $user = User::factory()->learner()->create();
-
-        $this->actingAs($user)
-            ->get('/en/dashboard')
+        $this->get('/en/courses')
             ->assertInertia(fn ($page) => $page
                 ->has('ui.nav.dashboard')
                 ->has('ui.locale')
             );
     }
 
-    public function test_dashboard_requires_auth_with_locale_prefix(): void
+    /**
+     * Back-office screens are authenticated tooling with no indexable content,
+     * so they sit outside the /{locale} prefix entirely.
+     */
+    public function test_back_office_urls_have_no_locale_prefix(): void
     {
-        $this->get('/en/dashboard')->assertRedirect(route('login'));
+        $this->assertSame('/dashboard', route('dashboard', absolute: false));
+        $this->assertSame('/admin/dashboard', route('admin.dashboard', absolute: false));
+        $this->assertSame('/mentor/dashboard', route('mentor.dashboard', absolute: false));
+    }
+
+    public function test_locale_prefixed_back_office_urls_are_not_routable(): void
+    {
+        foreach (['/bn/dashboard', '/en/dashboard', '/bn/admin/dashboard', '/en/admin/dashboard'] as $url) {
+            $this->get($url)->assertNotFound();
+        }
+    }
+
+    public function test_dashboard_requires_auth(): void
+    {
+        $this->get('/dashboard')->assertRedirect(route('login'));
+    }
+
+    /**
+     * A hand-typed or legacy public URL missing its locale should land on the
+     * default locale rather than 404 (or 405, where a POST shares the path).
+     */
+    public function test_unprefixed_public_paths_redirect_to_the_default_locale(): void
+    {
+        $locale = config('app.locale');
+
+        foreach (['courses', 'resources', 'forum', 'portfolio-builder', 'about-us', 'contact', 'terms', 'privacy-policy', 'refund-policy'] as $path) {
+            $this->get("/{$path}")
+                ->assertStatus(301)
+                ->assertRedirect("/{$locale}/{$path}");
+        }
+    }
+
+    /**
+     * Back-office copy must not change wording when the public default locale
+     * changes, so those screens are pinned to the fallback locale.
+     */
+    public function test_back_office_uses_a_stable_interface_locale(): void
+    {
+        $user = User::factory()->learner()->create();
+
+        $this->actingAs($user)->get('/dashboard')->assertOk();
+
+        $this->assertSame(config('app.fallback_locale'), app()->getLocale());
     }
 
     /**

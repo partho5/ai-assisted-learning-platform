@@ -25,7 +25,7 @@ class PublicProfileTest extends TestCase
 
     private function showcaseRoute(int $attemptId): string
     {
-        return route('portfolio.showcase', ['locale' => 'en', 'attempt' => $attemptId]);
+        return route('portfolio.showcase', ['attempt' => $attemptId]);
     }
 
     private function profileRoute(User $user): string

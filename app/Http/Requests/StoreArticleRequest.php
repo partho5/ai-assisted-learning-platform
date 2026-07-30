@@ -25,12 +25,12 @@ class StoreArticleRequest extends FormRequest
         }
 
         /**
-         * Default to the locale the author is writing under — the same rule
+         * Default to the platform's primary language — the same rule
          * forum threads follow. Keeps the field required without forcing every
          * caller to restate the obvious.
          */
         if (! $this->filled('language')) {
-            $this->merge(['language' => app()->getLocale()]);
+            $this->merge(['language' => config('app.locale')]);
         }
     }
 

@@ -170,9 +170,7 @@ class TestAttemptController extends Controller
         }
 
         return redirect()->route('learn.attempts.result', [
-            'locale' => app()->getLocale(),
-            'attempt' => $attempt->id,
-        ]);
+            'attempt' => $attempt->id]);
     }
 
     public function result(TestAttempt $attempt): Response

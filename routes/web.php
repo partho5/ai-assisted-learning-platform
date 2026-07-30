@@ -66,7 +66,21 @@ Route::get('/llms.txt', [LlmsTxtController::class, 'index'])->name('llms');
 // signal to search engines that the site's root is Bengali.
 Route::permanentRedirect('/', '/'.config('app.locale'));
 
+// Un-prefixed public paths (hand-typed URLs, legacy links, pasted links with the
+// locale stripped) redirect to the default locale rather than 404/405.
+foreach (['courses', 'resources', 'forum', 'portfolio-builder', 'about-us', 'contact', 'terms', 'privacy-policy', 'refund-policy'] as $publicPath) {
+    Route::permanentRedirect($publicPath, '/'.config('app.locale').'/'.$publicPath);
+}
+
 // All content routes live under /{locale}/ for SEO (BN/EN URL routing)
+
+// ---------------------------------------------------------------------------
+// PUBLIC, INDEXABLE PAGES — these live under /{locale} for SEO.
+//
+// Only crawlable GET pages belong here. Everything else (authenticated tooling,
+// write endpoints, JSON APIs) is registered below without a locale prefix:
+// a locale in the URL only earns its keep when a search engine indexes it.
+// ---------------------------------------------------------------------------
 Route::prefix('{locale}')
     ->where(['locale' => 'bn|en'])
     ->middleware('setlocale')
@@ -95,6 +109,59 @@ Route::prefix('{locale}')
 
         Route::get('portfolio-builder', [PortfolioLandingController::class, 'index'])->name('portfolio-builder.landing');
 
+        // Course learn page — public for free resources, auth handled in controller
+        Route::get('courses/{course}/learn/{resource}', [LearnController::class, 'show'])
+            ->middleware('content.locale')
+            ->name('learn.show');
+
+        // Public course catalog & detail (no auth required, after specific routes)
+        Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
+        Route::get('courses/{course}', [CourseController::class, 'show'])
+            ->middleware('content.locale')
+            ->name('courses.show');
+
+        // Public index + detail (after static paths to avoid slug collision)
+        Route::get('resources', [ArticleController::class, 'index'])->name('articles.index');
+        Route::get('resources/{article:slug}', [ArticleController::class, 'show'])
+            ->middleware('content.locale')
+            ->name('articles.show');
+
+        // Public evidence portfolio
+        Route::get('u/{username}', [PublicProfileController::class, 'show'])->name('portfolio.show');
+
+        // Public portfolio builder pages
+        Route::get('u/{username}/portfolio', [PublicPortfolioController::class, 'show'])->name('public-portfolio.show');
+        Route::get('u/{username}/portfolio/{project_slug}', [PublicPortfolioController::class, 'showProject'])->name('public-portfolio.project');
+
+        // -----------------------------------------------------------------------
+        // Forum — public reading; auth required for writes
+        // NOTE: Specific static paths (create, search, threads/*, replies/*)
+        //       must be registered BEFORE wildcard slug routes.
+        // -----------------------------------------------------------------------
+
+        // Forum home & search (public) — static paths first
+        Route::get('forum', [ForumController::class, 'index'])->name('forum.index');
+        Route::get('forum/search', [ForumSearchController::class, 'index'])->name('forum.search');
+
+        // Category page (public) — wildcard after static paths
+        Route::get('forum/{forumCategory:slug}', [ForumCategoryController::class, 'show'])->name('forum.category.show');
+
+        // Thread show (public)
+        Route::get('forum/{forumCategory:slug}/{forumThread:slug}', [ForumThreadController::class, 'show'])
+            ->middleware('content.locale')
+            ->name('forum.threads.show');
+    });
+
+// ---------------------------------------------------------------------------
+// BACK OFFICE & WRITE ENDPOINTS — no locale prefix.
+//
+// Admin, mentor, dashboard, authoring, payment and JSON endpoints carry no
+// indexable content and no localized copy, so /admin/dashboard rather than
+// /bn/admin/dashboard. SetBackOfficeLocale pins these screens to one stable
+// interface language.
+// ---------------------------------------------------------------------------
+Route::middleware('backoffice.locale')
+    ->group(function () {
         Route::get('dashboard', [DashboardController::class, 'index'])
             ->middleware(['auth', 'verified'])
             ->name('dashboard');
@@ -177,11 +244,6 @@ Route::prefix('{locale}')
             Route::put('admin/categories/{category}', [AdminCategoryController::class, 'update'])->name('admin.categories.update');
             Route::delete('admin/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('admin.categories.destroy');
         });
-
-        // Course learn page — public for free resources, auth handled in controller
-        Route::get('courses/{course}/learn/{resource}', [LearnController::class, 'show'])
-            ->middleware('content.locale')
-            ->name('learn.show');
 
         // AI Chat — platform, course, and resource assistants (all public, auth optional)
         Route::post('chat/platform', [AiChatController::class, 'platform'])
@@ -295,12 +357,6 @@ Route::prefix('{locale}')
                 ->name('test-attempts.endorse');
         });
 
-        // Public course catalog & detail (no auth required, after specific routes)
-        Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
-        Route::get('courses/{course}', [CourseController::class, 'show'])
-            ->middleware('content.locale')
-            ->name('courses.show');
-
         // Enrollment (auth required)
         Route::post('courses/{course}/enroll', [EnrollmentController::class, 'store'])
             ->middleware(['auth', 'verified'])
@@ -354,19 +410,6 @@ Route::prefix('{locale}')
             Route::put('resources/{article:slug}', [ArticleController::class, 'update'])->name('articles.update');
             Route::delete('resources/{article:slug}', [ArticleController::class, 'destroy'])->name('articles.destroy');
         });
-
-        // Public index + detail (after static paths to avoid slug collision)
-        Route::get('resources', [ArticleController::class, 'index'])->name('articles.index');
-        Route::get('resources/{article:slug}', [ArticleController::class, 'show'])
-            ->middleware('content.locale')
-            ->name('articles.show');
-
-        // Public evidence portfolio
-        Route::get('u/{username}', [PublicProfileController::class, 'show'])->name('portfolio.show');
-
-        // Public portfolio builder pages
-        Route::get('u/{username}/portfolio', [PublicPortfolioController::class, 'show'])->name('public-portfolio.show');
-        Route::get('u/{username}/portfolio/{project_slug}', [PublicPortfolioController::class, 'showProject'])->name('public-portfolio.project');
         Route::post('u/{username}/portfolio/contact', [PublicPortfolioController::class, 'sendMessage'])
             ->middleware('throttle:5,60')
             ->name('public-portfolio.contact');
@@ -375,16 +418,6 @@ Route::prefix('{locale}')
         Route::post('portfolio/attempts/{attempt}/showcase', [PortfolioController::class, 'toggleShowcase'])
             ->middleware(['auth', 'verified'])
             ->name('portfolio.showcase');
-
-        // -----------------------------------------------------------------------
-        // Forum — public reading; auth required for writes
-        // NOTE: Specific static paths (create, search, threads/*, replies/*)
-        //       must be registered BEFORE wildcard slug routes.
-        // -----------------------------------------------------------------------
-
-        // Forum home & search (public) — static paths first
-        Route::get('forum', [ForumController::class, 'index'])->name('forum.index');
-        Route::get('forum/search', [ForumSearchController::class, 'index'])->name('forum.search');
 
         // Thread create form (auth) — must be before {forumCategory:slug} wildcard
         Route::get('forum/create', [ForumThreadController::class, 'create'])
@@ -413,14 +446,6 @@ Route::prefix('{locale}')
             // Push notification subscription
             Route::post('forum/push-subscription', [ForumPushSubscriptionController::class, 'store'])->name('forum.push-subscription.store');
         });
-
-        // Category page (public) — wildcard after static paths
-        Route::get('forum/{forumCategory:slug}', [ForumCategoryController::class, 'show'])->name('forum.category.show');
-
-        // Thread show (public)
-        Route::get('forum/{forumCategory:slug}/{forumThread:slug}', [ForumThreadController::class, 'show'])
-            ->middleware('content.locale')
-            ->name('forum.threads.show');
 
         // Auth-required thread & reply actions (use slug wildcards, registered after show routes)
         Route::middleware(['auth', 'verified'])->group(function () {

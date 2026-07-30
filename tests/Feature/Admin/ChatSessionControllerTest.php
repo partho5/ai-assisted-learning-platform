@@ -14,7 +14,7 @@ class ChatSessionControllerTest extends TestCase
 
     private function chatSessionRoute(int $sessionId): string
     {
-        return route('admin.chats.show', ['locale' => 'en', 'chatSession' => $sessionId]);
+        return route('admin.chats.show', ['chatSession' => $sessionId]);
     }
 
     public function test_guest_is_redirected_to_login(): void

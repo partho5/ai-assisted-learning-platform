@@ -63,14 +63,14 @@ export default function ArticleEdit({ article, categories, statuses, languages }
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         withUtcPublishAt();
-        form.submit(articleUpdate({ locale: l, article: article.slug }));
+        form.submit(articleUpdate({ article: article.slug }));
     }
 
     function handlePreview() {
         withUtcPublishAt();
-        form.submit(articleUpdate({ locale: l, article: article.slug }), {
+        form.submit(articleUpdate({ article: article.slug }), {
             onSuccess: () => {
-                router.visit(articlePreview.url({ locale: l, article: article.slug }));
+                router.visit(articlePreview.url({ article: article.slug }));
             },
         });
     }

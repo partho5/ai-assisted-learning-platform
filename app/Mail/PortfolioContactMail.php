@@ -43,7 +43,7 @@ class PortfolioContactMail extends Mailable implements ShouldQueue
                 'senderEmail' => $this->message->sender_email,
                 'messageSubject' => $this->message->subject,
                 'messageBody' => $this->message->body,
-                'dashboardUrl' => route('portfolio-builder.messages.index', ['locale' => config('app.locale')]),
+                'dashboardUrl' => route('portfolio-builder.messages.index'),
             ],
         );
     }

@@ -166,7 +166,7 @@ class ForumReputationTest extends TestCase
         $thread = ForumThread::factory()->for($author, 'author')->create();
 
         $this->actingAs($voter)
-            ->post(route('forum.votes.thread', ['locale' => 'en', 'forumThread' => $thread->id]))
+            ->post(route('forum.votes.thread', ['forumThread' => $thread->id]))
             ->assertOk();
 
         $expectedPoints = config('forum.reputation.points.thread_upvoted')
@@ -186,10 +186,10 @@ class ForumReputationTest extends TestCase
 
         // Vote then un-vote
         $this->actingAs($voter)
-            ->post(route('forum.votes.thread', ['locale' => 'en', 'forumThread' => $thread->id]));
+            ->post(route('forum.votes.thread', ['forumThread' => $thread->id]));
 
         $this->actingAs($voter)
-            ->post(route('forum.votes.thread', ['locale' => 'en', 'forumThread' => $thread->id]));
+            ->post(route('forum.votes.thread', ['forumThread' => $thread->id]));
 
         // thread_created bonus is NOT revoked when upvote removed
         $expectedPoints = config('forum.reputation.points.thread_created');
@@ -208,7 +208,7 @@ class ForumReputationTest extends TestCase
         $reply = ForumReply::factory()->for($thread, 'thread')->for($author, 'author')->create();
 
         $this->actingAs($voter)
-            ->post(route('forum.votes.reply', ['locale' => 'en', 'forumReply' => $reply->id]))
+            ->post(route('forum.votes.reply', ['forumReply' => $reply->id]))
             ->assertOk();
 
         $this->assertDatabaseHas('user_reputations', [
@@ -230,11 +230,9 @@ class ForumReputationTest extends TestCase
 
         $this->actingAs($threadAuthor)
             ->post(route('forum.replies.accept', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
                 'forumThread' => $thread->slug,
-                'forumReply' => $reply->id,
-            ]))
+                'forumReply' => $reply->id]))
             ->assertRedirect();
 
         $this->assertDatabaseHas('user_reputations', [

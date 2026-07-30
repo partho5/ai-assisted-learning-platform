@@ -55,7 +55,7 @@ class LinkOnlyCourseTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('courses.store', ['locale' => 'en']), [
+            ->post(route('courses.store'), [
                 'language' => 'en',
                 'title' => 'Secret Course',
                 'description' => 'Description here',
@@ -78,7 +78,7 @@ class LinkOnlyCourseTest extends TestCase
         $course->authors()->syncWithoutDetaching([$mentor->id => ['role' => 'lead', 'added_by' => $mentor->id]]);
 
         $this->actingAs($mentor)
-            ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
+            ->put(route('courses.update', ['course' => $course->slug]), [
                 'language' => $course->language->value,
                 'title' => $course->title,
                 'description' => $course->description,

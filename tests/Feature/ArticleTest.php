@@ -93,7 +93,7 @@ class ArticleTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->get(route('articles.create', ['locale' => 'en']))
+            ->get(route('articles.create'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('articles/create'));
     }
@@ -103,13 +103,13 @@ class ArticleTest extends TestCase
         $learner = User::factory()->create();
 
         $this->actingAs($learner)
-            ->get(route('articles.create', ['locale' => 'en']))
+            ->get(route('articles.create'))
             ->assertForbidden();
     }
 
     public function test_guest_cannot_access_create_form(): void
     {
-        $this->get(route('articles.create', ['locale' => 'en']))
+        $this->get(route('articles.create'))
             ->assertRedirect();
     }
 
@@ -119,7 +119,7 @@ class ArticleTest extends TestCase
         $category = Category::factory()->create();
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'en']), [
+            ->post(route('articles.store'), [
                 'title' => 'How to land a remote job',
                 'slug' => 'how-to-land-a-remote-job',
                 'excerpt' => 'A practical guide to landing remote work.',
@@ -144,7 +144,7 @@ class ArticleTest extends TestCase
         $body = '<p>'.str_repeat('word ', 400).'</p>'; // ~400 words → 2 min
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'en']), [
+            ->post(route('articles.store'), [
                 'title' => 'Long article',
                 'slug' => 'long-article',
                 'body' => $body,
@@ -164,7 +164,7 @@ class ArticleTest extends TestCase
         $article = Article::factory()->create(['author_id' => $mentor->id]);
 
         $this->actingAs($mentor)
-            ->get(route('articles.edit', ['locale' => 'en', 'article' => $article->slug]))
+            ->get(route('articles.edit', ['article' => $article->slug]))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('articles/edit'));
     }
@@ -176,7 +176,7 @@ class ArticleTest extends TestCase
         $article = Article::factory()->create(['author_id' => $owner->id]);
 
         $this->actingAs($other)
-            ->get(route('articles.edit', ['locale' => 'en', 'article' => $article->slug]))
+            ->get(route('articles.edit', ['article' => $article->slug]))
             ->assertForbidden();
     }
 
@@ -186,7 +186,7 @@ class ArticleTest extends TestCase
         $article = Article::factory()->create();
 
         $this->actingAs($admin)
-            ->get(route('articles.edit', ['locale' => 'en', 'article' => $article->slug]))
+            ->get(route('articles.edit', ['article' => $article->slug]))
             ->assertOk();
     }
 
@@ -196,7 +196,7 @@ class ArticleTest extends TestCase
         $article = Article::factory()->create(['author_id' => $mentor->id]);
 
         $this->actingAs($mentor)
-            ->put(route('articles.update', ['locale' => 'en', 'article' => $article->slug]), [
+            ->put(route('articles.update', ['article' => $article->slug]), [
                 'title' => 'Updated Title',
                 'slug' => $article->slug,
                 'body' => '<p>Updated body content here.</p>',
@@ -218,7 +218,7 @@ class ArticleTest extends TestCase
         $article = Article::factory()->create(['author_id' => $mentor->id]);
 
         $this->actingAs($mentor)
-            ->delete(route('articles.destroy', ['locale' => 'en', 'article' => $article->slug]))
+            ->delete(route('articles.destroy', ['article' => $article->slug]))
             ->assertRedirect(route('articles.index', ['locale' => 'en']));
 
         $this->assertDatabaseMissing('articles', ['id' => $article->id]);
@@ -231,7 +231,7 @@ class ArticleTest extends TestCase
         $article = Article::factory()->create(['author_id' => $owner->id]);
 
         $this->actingAs($other)
-            ->delete(route('articles.destroy', ['locale' => 'en', 'article' => $article->slug]))
+            ->delete(route('articles.destroy', ['article' => $article->slug]))
             ->assertForbidden();
 
         $this->assertDatabaseHas('articles', ['id' => $article->id]);
@@ -273,7 +273,7 @@ class ArticleTest extends TestCase
         Article::factory()->create(['slug' => 'my-article', 'author_id' => $mentor->id]);
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'en']), [
+            ->post(route('articles.store'), [
                 'title' => 'Another article',
                 'slug' => 'my-article',
                 'body' => '<p>body</p>',
@@ -324,7 +324,7 @@ class ArticleTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'en']), [
+            ->post(route('articles.store'), [
                 'title' => 'Future article',
                 'slug' => 'future-article',
                 'body' => '<p>content</p>',
@@ -344,7 +344,7 @@ class ArticleTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'en']), [
+            ->post(route('articles.store'), [
                 'title' => 'Future article',
                 'slug' => 'future-article',
                 'body' => '<p>content</p>',
@@ -361,7 +361,7 @@ class ArticleTest extends TestCase
         $article = Article::factory()->draft()->create(['author_id' => $mentor->id]);
 
         $this->actingAs($mentor)
-            ->get(route('articles.preview', ['locale' => 'en', 'article' => $article->slug]))
+            ->get(route('articles.preview', ['article' => $article->slug]))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('articles/show')
@@ -376,7 +376,7 @@ class ArticleTest extends TestCase
         $article = Article::factory()->draft()->create(['author_id' => $owner->id]);
 
         $this->actingAs($other)
-            ->get(route('articles.preview', ['locale' => 'en', 'article' => $article->slug]))
+            ->get(route('articles.preview', ['article' => $article->slug]))
             ->assertForbidden();
     }
 
@@ -384,7 +384,7 @@ class ArticleTest extends TestCase
     {
         $article = Article::factory()->draft()->create();
 
-        $this->get(route('articles.preview', ['locale' => 'en', 'article' => $article->slug]))
+        $this->get(route('articles.preview', ['article' => $article->slug]))
             ->assertRedirect();
     }
 
@@ -395,7 +395,7 @@ class ArticleTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'en']), [
+            ->post(route('articles.store'), [
                 'title' => 'Alt text test',
                 'slug' => 'alt-text-test',
                 'body' => '<p>body</p>',
@@ -420,7 +420,7 @@ class ArticleTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'bn']), [
+            ->post(route('articles.store'), [
                 'title' => 'ওয়েব ডেভেলপমেন্ট শিখুন',
                 'slug' => 'ওয়েব-ডেভেলপমেন্ট',
                 'body' => '<p>বিষয়বস্তু</p>',
@@ -431,7 +431,7 @@ class ArticleTest extends TestCase
 
         $this->assertDatabaseHas('articles', [
             'slug' => 'ওয়েব-ডেভেলপমেন্ট',
-            'language' => 'bn',
+            'language' => config('app.locale'),
         ]);
     }
 
@@ -440,7 +440,7 @@ class ArticleTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'bn']), [
+            ->post(route('articles.store'), [
                 'title' => 'React দিয়ে ওয়েব ডেভেলপমেন্ট',
                 'slug' => 'react-দিয়ে-ওয়েব-ডেভেলপমেন্ট',
                 'body' => '<p>বিষয়বস্তু</p>',
@@ -456,7 +456,7 @@ class ArticleTest extends TestCase
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'bn']), [
+            ->post(route('articles.store'), [
                 'title' => 'Bad slug',
                 'slug' => 'Has Spaces And CAPS',
                 'body' => '<p>body</p>',
@@ -469,28 +469,43 @@ class ArticleTest extends TestCase
      * Authoring under /bn/ should produce Bengali content without the author
      * having to restate it.
      */
-    public function test_language_defaults_to_the_authoring_locale(): void
+    /**
+     * Authoring happens on back-office URLs, which carry no locale, so there is
+     * no "authoring locale" to inherit. New content defaults to the platform's
+     * primary language; the form's language selector is how you choose English.
+     */
+    public function test_language_defaults_to_the_platform_primary_language(): void
     {
         $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'bn']), [
-                'title' => 'Defaulted to bengali',
-                'slug' => 'defaulted-to-bengali',
+            ->post(route('articles.store'), [
+                'title' => 'Defaulted to primary',
+                'slug' => 'defaulted-to-primary',
                 'body' => '<p>body</p>',
                 'status' => 'draft',
             ])->assertRedirect();
+
+        $this->assertDatabaseHas('articles', [
+            'slug' => 'defaulted-to-primary',
+            'language' => config('app.locale'),
+        ]);
+    }
+
+    public function test_language_can_be_chosen_explicitly_when_authoring(): void
+    {
+        $mentor = User::factory()->mentor()->create();
 
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'en']), [
-                'title' => 'Defaulted to english',
-                'slug' => 'defaulted-to-english',
+            ->post(route('articles.store'), [
+                'title' => 'Explicitly english',
+                'slug' => 'explicitly-english',
                 'body' => '<p>body</p>',
                 'status' => 'draft',
+                'language' => 'en',
             ])->assertRedirect();
 
-        $this->assertDatabaseHas('articles', ['slug' => 'defaulted-to-bengali', 'language' => 'bn']);
-        $this->assertDatabaseHas('articles', ['slug' => 'defaulted-to-english', 'language' => 'en']);
+        $this->assertDatabaseHas('articles', ['slug' => 'explicitly-english', 'language' => 'en']);
     }
 
     public function test_publishing_redirects_to_the_article_own_locale(): void
@@ -499,7 +514,7 @@ class ArticleTest extends TestCase
 
         // Authoring from /en/ but marking the article Bengali.
         $this->actingAs($mentor)
-            ->post(route('articles.store', ['locale' => 'en']), [
+            ->post(route('articles.store'), [
                 'title' => 'Bengali article authored from english ui',
                 'slug' => 'bengali-from-english-ui',
                 'body' => '<p>body</p>',

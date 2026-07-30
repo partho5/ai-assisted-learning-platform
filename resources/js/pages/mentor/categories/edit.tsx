@@ -19,7 +19,7 @@ export default function CategoryEdit({ category }: Props) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: ui.nav.dashboard, href: `/${l}/mentor/dashboard` },
-        { title: 'Categories', href: categoriesIndex.url(l) },
+        { title: 'Categories', href: categoriesIndex.url() },
         { title: 'Edit Category', href: '#' },
     ];
 
@@ -30,7 +30,7 @@ export default function CategoryEdit({ category }: Props) {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(categoryUpdate({ locale: l, category: category.id }));
+        form.submit(categoryUpdate({ category: category.id }));
     }
 
     return (

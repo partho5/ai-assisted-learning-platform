@@ -48,7 +48,7 @@ export default function ArticlesIndex(props: Props) {
 function AuthorView({ articles, isAdmin, locale, user }: AuthorProps & { locale: string; user: any }) {
     function handleDelete(article: Article) {
         if (!confirm(`Delete "${article.title}"? This cannot be undone.`)) return;
-        router.delete(articleDestroy.url({ locale, article: article.slug }));
+        router.delete(articleDestroy.url({ article: article.slug }));
     }
 
     return (
@@ -64,14 +64,14 @@ function AuthorView({ articles, isAdmin, locale, user }: AuthorProps & { locale:
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href={articleCreate.url(locale)}>+ New Article</Link>
+                        <Link href={articleCreate.url()}>+ New Article</Link>
                     </Button>
                 </div>
 
                 {articles.length === 0 ? (
                     <div className="rounded-xl border border-dashed p-12 text-center text-muted-foreground">
                         No articles yet.{' '}
-                        <Link href={articleCreate.url(locale)} className="font-medium text-primary underline">
+                        <Link href={articleCreate.url()} className="font-medium text-primary underline">
                             Write your first one.
                         </Link>
                     </div>
@@ -84,7 +84,7 @@ function AuthorView({ articles, isAdmin, locale, user }: AuthorProps & { locale:
                                         <Link
                                             href={article.status === 'published'
                                                 ? articleShow.url({ locale, article: article.slug })
-                                                : articlePreview.url({ locale, article: article.slug })}
+                                                : articlePreview.url({ article: article.slug })}
                                             className="font-medium hover:underline"
                                         >
                                             {article.title}
@@ -110,7 +110,7 @@ function AuthorView({ articles, isAdmin, locale, user }: AuthorProps & { locale:
                                 </div>
                                 <div className="flex shrink-0 gap-2">
                                     <Button variant="outline" size="sm" asChild>
-                                        <Link href={articleEdit.url({ locale, article: article.slug })}>Edit</Link>
+                                        <Link href={articleEdit.url({ article: article.slug })}>Edit</Link>
                                     </Button>
                                     <Button variant="destructive" size="sm" onClick={() => handleDelete(article)}>
                                         Delete
@@ -184,7 +184,7 @@ function PublicView({
                         )}
                         {isAuthor && (
                             <Button asChild>
-                                <Link href={articleCreate.url(locale)}>New Article</Link>
+                                <Link href={articleCreate.url()}>New Article</Link>
                             </Button>
                         )}
                     </div>

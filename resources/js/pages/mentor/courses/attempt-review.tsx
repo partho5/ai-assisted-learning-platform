@@ -64,7 +64,7 @@ export default function AttemptReview({ attempt }: Props) {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(endorseAttempt({ locale: l, attempt: attempt.id }));
+        form.submit(endorseAttempt({ attempt: attempt.id }));
     }
 
     const isEndorsed = attempt.status === 'endorsed';

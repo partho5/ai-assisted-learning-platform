@@ -27,7 +27,7 @@ class UpdateArticleRequest extends FormRequest
         /** Preserve the article's existing language when the field is omitted. */
         if (! $this->filled('language')) {
             $this->merge([
-                'language' => $this->route('article')?->language?->value ?? app()->getLocale(),
+                'language' => $this->route('article')?->language?->value ?? config('app.locale'),
             ]);
         }
     }

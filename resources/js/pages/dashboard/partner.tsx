@@ -108,7 +108,7 @@ export default function PartnerDashboard({ partner, summary, courseBreakdowns, r
                         </p>
                         <Button
                             className="mt-6"
-                            onClick={() => router.post(partnerStore.url({ locale: l }))}
+                            onClick={() => router.post(partnerStore.url({ }))}
                         >
                             Become a Partner
                         </Button>

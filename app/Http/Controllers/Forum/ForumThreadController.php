@@ -43,8 +43,8 @@ class ForumThreadController extends Controller
             'user_id' => $user->id,
             'category_id' => $request->input('category_id'),
             'slug' => $slug,
-            /** Threads inherit the locale they were posted under — users write in the language of the forum they're browsing. */
-            'language' => app()->getLocale(),
+            /** The compose form is back-office (no locale in the URL), so new threads default to the platform's primary language. */
+            'language' => config('app.locale'),
             'title' => $request->input('title'),
             'body' => $request->input('body'),
             'tags' => $request->input('tags', []),

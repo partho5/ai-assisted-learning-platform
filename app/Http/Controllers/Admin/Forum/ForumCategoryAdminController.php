@@ -40,7 +40,7 @@ class ForumCategoryAdminController extends Controller
 
         $locale = app()->getLocale();
 
-        return redirect()->route('admin.forum.categories.index', ['locale' => $locale]);
+        return redirect()->route('admin.forum.categories.index');
     }
 
     public function update(Request $request, ForumCategory $forumCategory): RedirectResponse
@@ -56,7 +56,7 @@ class ForumCategoryAdminController extends Controller
 
         $locale = app()->getLocale();
 
-        return redirect()->route('admin.forum.categories.index', ['locale' => $locale]);
+        return redirect()->route('admin.forum.categories.index');
     }
 
     public function destroy(Request $request, ForumCategory $forumCategory): RedirectResponse
@@ -65,6 +65,6 @@ class ForumCategoryAdminController extends Controller
 
         $locale = app()->getLocale();
 
-        return redirect()->route('admin.forum.categories.index', ['locale' => $locale]);
+        return redirect()->route('admin.forum.categories.index');
     }
 }

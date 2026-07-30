@@ -15,7 +15,7 @@ class AdminUserControllerTest extends TestCase
         $admin = User::factory()->admin()->create();
         User::factory()->learner()->count(3)->create();
 
-        $response = $this->actingAs($admin)->get(route('admin.users.index', ['locale' => 'en']));
+        $response = $this->actingAs($admin)->get(route('admin.users.index'));
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page->component('admin/users')
@@ -29,13 +29,13 @@ class AdminUserControllerTest extends TestCase
         $learner = User::factory()->learner()->create();
 
         $this->actingAs($learner)
-            ->get(route('admin.users.index', ['locale' => 'en']))
+            ->get(route('admin.users.index'))
             ->assertForbidden();
     }
 
     public function test_guest_cannot_access_users_index(): void
     {
-        $this->get(route('admin.users.index', ['locale' => 'en']))
+        $this->get(route('admin.users.index'))
             ->assertRedirect();
     }
 
@@ -46,7 +46,7 @@ class AdminUserControllerTest extends TestCase
         User::factory()->learner()->count(3)->create();
 
         $response = $this->actingAs($admin)
-            ->get(route('admin.users.index', ['locale' => 'en', 'role' => 'mentor']));
+            ->get(route('admin.users.index', ['role' => 'mentor']));
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page->component('admin/users')
@@ -60,7 +60,7 @@ class AdminUserControllerTest extends TestCase
         User::factory()->create(['is_ai' => true]);
 
         $response = $this->actingAs($admin)
-            ->get(route('admin.users.index', ['locale' => 'en']));
+            ->get(route('admin.users.index'));
 
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page->component('admin/users')

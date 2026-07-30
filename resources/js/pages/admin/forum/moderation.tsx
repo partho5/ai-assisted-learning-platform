@@ -59,11 +59,11 @@ export default function ForumModerationAdmin({ reports }: Props) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Admin', href: `/${l}/admin/dashboard` },
-        { title: 'Forum Moderation', href: index.url(l) },
+        { title: 'Forum Moderation', href: index.url() },
     ];
 
     function handleResolve(report: ForumReport) {
-        router.post(resolve.url({ locale: l, forumReport: report.id }), {}, {
+        router.post(resolve.url({ forumReport: report.id }), {}, {
             preserveScroll: true,
         });
     }
@@ -71,7 +71,7 @@ export default function ForumModerationAdmin({ reports }: Props) {
     function handleDeleteContent(report: ForumReport) {
         const type = isThread(report.reportable) ? 'thread' : 'reply';
         if (!confirm(`Permanently delete this ${type}? This action cannot be undone.`)) return;
-        router.delete(deleteContent.url({ locale: l, forumReport: report.id }), {
+        router.delete(deleteContent.url({ forumReport: report.id }), {
             preserveScroll: true,
         });
     }

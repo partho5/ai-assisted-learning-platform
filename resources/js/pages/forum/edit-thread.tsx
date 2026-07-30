@@ -44,7 +44,7 @@ export default function EditThread({ thread, categories }: Props) {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(updateThread({ locale: l, forumCategory: thread.category?.slug ?? '', forumThread: thread.slug }));
+        form.submit(updateThread({ forumCategory: thread.category?.slug ?? '', forumThread: thread.slug }));
     }
 
     return (

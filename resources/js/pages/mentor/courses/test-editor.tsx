@@ -201,16 +201,16 @@ function TestSettingsForm({
     function submit(e: React.FormEvent) {
         e.preventDefault();
         if (test) {
-            form.submit(testUpdate({ locale, course: course.slug, module: module.id, resource: resource.id, test: test.id }));
+            form.submit(testUpdate({ course: course.slug, module: module.id, resource: resource.id, test: test.id }));
         } else {
-            form.submit(testStore({ locale, course: course.slug, module: module.id, resource: resource.id }));
+            form.submit(testStore({ course: course.slug, module: module.id, resource: resource.id }));
         }
     }
 
     function handleDestroy() {
         if (!test) return;
         if (!confirm('Delete this test and all its questions? This cannot be undone.')) return;
-        router.delete(testDestroy.url({ locale, course: course.slug, module: module.id, resource: resource.id, test: test.id }));
+        router.delete(testDestroy.url({ course: course.slug, module: module.id, resource: resource.id, test: test.id }));
     }
 
     return (
@@ -428,8 +428,8 @@ function QuestionCard({
 
         const isNew = !q.serverId;
         const url = isNew
-            ? questionStoreAction.url({ locale, test: testId })
-            : questionUpdateAction.url({ locale, test: testId, question: q.serverId! });
+            ? questionStoreAction.url({ test: testId })
+            : questionUpdateAction.url({ test: testId, question: q.serverId! });
 
         try {
             const res = await fetch(url, {
@@ -469,7 +469,7 @@ function QuestionCard({
 
         try {
             await fetch(
-                questionDestroyAction.url({ locale, test: testId, question: q.serverId }),
+                questionDestroyAction.url({ test: testId, question: q.serverId }),
                 {
                     method: 'DELETE',
                     headers: {

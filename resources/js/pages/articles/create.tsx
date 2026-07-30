@@ -59,7 +59,7 @@ export default function ArticleCreate({ categories, statuses, languages }: Props
             ...data,
             publish_at: data.publish_at ? new Date(data.publish_at).toISOString() : '',
         }));
-        form.submit(articleStore(l));
+        form.submit(articleStore());
     }
 
     const isScheduled = form.data.status === 'scheduled';

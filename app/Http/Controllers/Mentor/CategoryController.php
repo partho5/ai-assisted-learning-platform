@@ -40,7 +40,7 @@ class CategoryController extends Controller
             'description' => $request->validated()['description'] ?? null,
         ]);
 
-        return redirect()->route('mentor.categories.index', ['locale' => app()->getLocale()])
+        return redirect()->route('mentor.categories.index')
             ->with('success', 'Category created.');
     }
 
@@ -61,7 +61,7 @@ class CategoryController extends Controller
             'description' => $request->validated()['description'] ?? null,
         ]);
 
-        return redirect()->route('mentor.categories.index', ['locale' => app()->getLocale()])
+        return redirect()->route('mentor.categories.index')
             ->with('success', 'Category updated.');
     }
 }

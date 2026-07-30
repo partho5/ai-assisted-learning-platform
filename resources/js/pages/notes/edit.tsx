@@ -27,7 +27,7 @@ export default function NotesEdit({ personal_notes }: Props) {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(notesUpdate(l), {
+        form.submit(notesUpdate(), {
             preserveScroll: true,
             onSuccess: () => {
                 setSaved(true);

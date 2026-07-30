@@ -184,7 +184,7 @@ class CourseController extends Controller
         ]);
 
         return redirect()
-            ->route('courses.edit', ['locale' => app()->getLocale(), 'course' => $course->slug])
+            ->route('courses.edit', ['course' => $course->slug])
             ->with('success', 'Course created. Add modules and resources below.');
     }
 

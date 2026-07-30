@@ -20,7 +20,7 @@ class ForumVoteTest extends TestCase
     {
         $thread = ForumThread::factory()->create();
 
-        $this->post(route('forum.votes.thread', ['locale' => 'en', 'forumThread' => $thread->id]))
+        $this->post(route('forum.votes.thread', ['forumThread' => $thread->id]))
             ->assertRedirect();
 
         $this->assertDatabaseEmpty('forum_votes');
@@ -32,7 +32,7 @@ class ForumVoteTest extends TestCase
         $thread = ForumThread::factory()->create(['upvotes_count' => 0]);
 
         $response = $this->actingAs($user)
-            ->postJson(route('forum.votes.thread', ['locale' => 'en', 'forumThread' => $thread->id]));
+            ->postJson(route('forum.votes.thread', ['forumThread' => $thread->id]));
 
         $response->assertOk()
             ->assertJsonFragment(['voted' => true, 'upvotes_count' => 1]);
@@ -46,10 +46,10 @@ class ForumVoteTest extends TestCase
         $thread = ForumThread::factory()->create(['upvotes_count' => 0]);
 
         $this->actingAs($user)
-            ->postJson(route('forum.votes.thread', ['locale' => 'en', 'forumThread' => $thread->id]));
+            ->postJson(route('forum.votes.thread', ['forumThread' => $thread->id]));
 
         $response = $this->actingAs($user)
-            ->postJson(route('forum.votes.thread', ['locale' => 'en', 'forumThread' => $thread->id]));
+            ->postJson(route('forum.votes.thread', ['forumThread' => $thread->id]));
 
         $response->assertOk()
             ->assertJsonFragment(['voted' => false, 'upvotes_count' => 0]);
@@ -67,7 +67,7 @@ class ForumVoteTest extends TestCase
         $reply = ForumReply::factory()->create(['upvotes_count' => 0]);
 
         $response = $this->actingAs($user)
-            ->postJson(route('forum.votes.reply', ['locale' => 'en', 'forumReply' => $reply->id]));
+            ->postJson(route('forum.votes.reply', ['forumReply' => $reply->id]));
 
         $response->assertOk()
             ->assertJsonFragment(['voted' => true, 'upvotes_count' => 1]);
@@ -82,9 +82,9 @@ class ForumVoteTest extends TestCase
         $thread = ForumThread::factory()->create(['upvotes_count' => 0]);
 
         $this->actingAs($user1)
-            ->postJson(route('forum.votes.thread', ['locale' => 'en', 'forumThread' => $thread->id]));
+            ->postJson(route('forum.votes.thread', ['forumThread' => $thread->id]));
         $this->actingAs($user2)
-            ->postJson(route('forum.votes.thread', ['locale' => 'en', 'forumThread' => $thread->id]));
+            ->postJson(route('forum.votes.thread', ['forumThread' => $thread->id]));
 
         $this->assertEquals(2, $thread->fresh()->upvotes_count);
     }

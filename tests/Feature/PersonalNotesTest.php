@@ -13,7 +13,7 @@ class PersonalNotesTest extends TestCase
     public function test_authenticated_user_can_view_notes_page(): void
     {
         $this->actingAs(User::factory()->learner()->create())
-            ->get(route('notes.edit', ['locale' => 'en']))
+            ->get(route('notes.edit'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('notes/edit'));
     }
@@ -21,7 +21,7 @@ class PersonalNotesTest extends TestCase
     public function test_mentor_can_view_notes_page(): void
     {
         $this->actingAs(User::factory()->mentor()->create())
-            ->get(route('notes.edit', ['locale' => 'en']))
+            ->get(route('notes.edit'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('notes/edit'));
     }
@@ -29,14 +29,14 @@ class PersonalNotesTest extends TestCase
     public function test_admin_can_view_notes_page(): void
     {
         $this->actingAs(User::factory()->admin()->create())
-            ->get(route('notes.edit', ['locale' => 'en']))
+            ->get(route('notes.edit'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('notes/edit'));
     }
 
     public function test_guest_cannot_view_notes_page(): void
     {
-        $this->get(route('notes.edit', ['locale' => 'en']))
+        $this->get(route('notes.edit'))
             ->assertRedirect();
     }
 
@@ -45,7 +45,7 @@ class PersonalNotesTest extends TestCase
         $user = User::factory()->learner()->create();
 
         $this->actingAs($user)
-            ->patch(route('notes.update', ['locale' => 'en']), [
+            ->patch(route('notes.update'), [
                 'personal_notes' => '<p>My private notes.</p>',
             ])
             ->assertRedirect();
@@ -61,7 +61,7 @@ class PersonalNotesTest extends TestCase
         $user = User::factory()->learner()->create(['personal_notes' => '<p>Old content.</p>']);
 
         $this->actingAs($user)
-            ->patch(route('notes.update', ['locale' => 'en']), [
+            ->patch(route('notes.update'), [
                 'personal_notes' => null,
             ])
             ->assertRedirect();
@@ -77,7 +77,7 @@ class PersonalNotesTest extends TestCase
         $user = User::factory()->learner()->create(['personal_notes' => '<p>Saved content.</p>']);
 
         $this->actingAs($user)
-            ->get(route('notes.edit', ['locale' => 'en']))
+            ->get(route('notes.edit'))
             ->assertInertia(fn ($page) => $page
                 ->component('notes/edit')
                 ->where('personal_notes', '<p>Saved content.</p>')
@@ -90,13 +90,13 @@ class PersonalNotesTest extends TestCase
         $userB = User::factory()->learner()->create(['personal_notes' => '<p>User B notes.</p>']);
 
         $this->actingAs($userA)
-            ->get(route('notes.edit', ['locale' => 'en']))
+            ->get(route('notes.edit'))
             ->assertInertia(fn ($page) => $page
                 ->where('personal_notes', '<p>User A notes.</p>')
             );
 
         $this->actingAs($userB)
-            ->get(route('notes.edit', ['locale' => 'en']))
+            ->get(route('notes.edit'))
             ->assertInertia(fn ($page) => $page
                 ->where('personal_notes', '<p>User B notes.</p>')
             );

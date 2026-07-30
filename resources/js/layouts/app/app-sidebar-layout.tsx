@@ -29,7 +29,7 @@ export default function AppSidebarLayout({
             </AppContent>
             {!hidePlatformChat && (
                 <FloatingChatButton
-                    context={{ type: 'platform', key: 'platform', endpoint: platform.url(l), historyEndpoint: chatHistory.url(l), locale: l }}
+                    context={{ type: 'platform', key: 'platform', endpoint: platform.url(), historyEndpoint: chatHistory.url(), locale: l }}
                 />
             )}
             <PushPermissionPrompt appId={onesignalAppId} isSubscribed={!!auth?.user?.onesignal_player_id} />

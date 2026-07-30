@@ -35,11 +35,11 @@ export default function AdminUsers({ users, filters }: Props) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Admin', href: `/${l}/admin/dashboard` },
-        { title: 'Users', href: adminUsers.url(l) },
+        { title: 'Users', href: adminUsers.url() },
     ];
 
     function applyFilter(params: Record<string, string | undefined>) {
-        router.get(adminUsers.url(l), { ...filters, ...params });
+        router.get(adminUsers.url(), { ...filters, ...params });
     }
 
     return (

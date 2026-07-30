@@ -22,7 +22,7 @@ class ModuleReorderTest extends TestCase
         $m3 = Module::factory()->for($course)->create(['order' => 2]);
 
         $this->actingAs($mentor)
-            ->post(route('modules.reorder', ['locale' => 'en', 'course' => $course->slug]), [
+            ->post(route('modules.reorder', ['course' => $course->slug]), [
                 'order' => [$m3->id, $m1->id, $m2->id],
             ])
             ->assertRedirect();
@@ -42,7 +42,7 @@ class ModuleReorderTest extends TestCase
         $m2 = Module::factory()->for($course)->create(['order' => 1]);
 
         $this->actingAs($admin)
-            ->post(route('modules.reorder', ['locale' => 'en', 'course' => $course->slug]), [
+            ->post(route('modules.reorder', ['course' => $course->slug]), [
                 'order' => [$m2->id, $m1->id],
             ])
             ->assertRedirect();
@@ -61,7 +61,7 @@ class ModuleReorderTest extends TestCase
         $m2 = Module::factory()->for($course)->create(['order' => 1]);
 
         $this->actingAs($mentor)
-            ->post(route('modules.reorder', ['locale' => 'en', 'course' => $course->slug]), [
+            ->post(route('modules.reorder', ['course' => $course->slug]), [
                 'order' => [$m2->id, $m1->id],
             ])
             ->assertForbidden();
@@ -73,7 +73,7 @@ class ModuleReorderTest extends TestCase
         $course = Course::factory()->for($mentor, 'mentor')->create();
 
         $this->actingAs($mentor)
-            ->post(route('modules.reorder', ['locale' => 'en', 'course' => $course->slug]), [])
+            ->post(route('modules.reorder', ['course' => $course->slug]), [])
             ->assertSessionHasErrors('order');
     }
 
@@ -82,7 +82,7 @@ class ModuleReorderTest extends TestCase
         $mentor = User::factory()->mentor()->create();
         $course = Course::factory()->for($mentor, 'mentor')->create();
 
-        $this->post(route('modules.reorder', ['locale' => 'en', 'course' => $course->slug]), [
+        $this->post(route('modules.reorder', ['course' => $course->slug]), [
             'order' => [],
         ])->assertRedirect(route('login'));
     }

@@ -130,7 +130,7 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
         if (!auth?.user) { return; }
         setHasVoted(!hasVoted);
         setUpvotes((prev) => hasVoted ? prev - 1 : prev + 1);
-        jsonPost(voteThread.url({ locale: l, forumThread: thread.id })).catch(() => {
+        jsonPost(voteThread.url({ forumThread: thread.id })).catch(() => {
             setHasVoted(hasVoted);
             setUpvotes((prev) => hasVoted ? prev + 1 : prev - 1);
         });
@@ -139,7 +139,7 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
     function handleBookmark() {
         if (!auth?.user) { return; }
         setIsBookmarked(!isBookmarked);
-        jsonPost(toggleBookmark.url({ locale: l, forumThread: thread.id })).catch(() => {
+        jsonPost(toggleBookmark.url({ forumThread: thread.id })).catch(() => {
             setIsBookmarked(isBookmarked);
         });
     }
@@ -147,7 +147,7 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
     function handleFollow() {
         if (!auth?.user) { return; }
         setIsFollowing(!isFollowing);
-        jsonPost(toggleFollow.url({ locale: l, forumThread: thread.id })).catch(() => {
+        jsonPost(toggleFollow.url({ forumThread: thread.id })).catch(() => {
             setIsFollowing(isFollowing);
         });
     }
@@ -608,7 +608,7 @@ function ReplyBody({ reply, locale, auth, threadArgs, canModerate, isThreadAutho
         setHasVoted(!hasVoted);
         setUpvotes((prev) => hasVoted ? prev - 1 : prev + 1);
         const csrfMeta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]');
-        fetch(voteReply.url({ locale, forumReply: reply.id }), {
+        fetch(voteReply.url({ forumReply: reply.id }), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

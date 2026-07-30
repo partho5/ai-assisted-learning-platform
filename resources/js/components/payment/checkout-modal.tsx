@@ -72,7 +72,7 @@ function InnerButtons({
             <PayPalButtons
                 style={{ layout: 'vertical', label: 'subscribe', shape: 'rect', color: 'gold' }}
                 createSubscription={async () => {
-                    const res = await fetch(createSubscription.url({ locale, course: course.slug }), {
+                    const res = await fetch(createSubscription.url({ course: course.slug }), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrf() },
                         body: JSON.stringify({ coupon_code: couponCode || undefined, referral_code: referralCode || undefined }),
@@ -82,7 +82,7 @@ function InnerButtons({
                     return data.subscription_id;
                 }}
                 onApprove={async (data) => {
-                    const res = await fetch(activateSubscription.url({ locale, course: course.slug }), {
+                    const res = await fetch(activateSubscription.url({ course: course.slug }), {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrf() },
                         body: JSON.stringify({ subscription_id: data.subscriptionID }),
@@ -100,7 +100,7 @@ function InnerButtons({
         <PayPalButtons
             style={{ layout: 'vertical', label: 'pay', shape: 'rect', color: 'gold' }}
             createOrder={async () => {
-                const res = await fetch(createOrder.url({ locale, course: course.slug }), {
+                const res = await fetch(createOrder.url({ course: course.slug }), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrf() },
                     body: JSON.stringify({ coupon_code: couponCode || undefined, referral_code: referralCode || undefined }),
@@ -114,7 +114,7 @@ function InnerButtons({
                 return data.order_id;
             }}
             onApprove={async (data) => {
-                const res = await fetch(captureOrder.url({ locale, course: course.slug }), {
+                const res = await fetch(captureOrder.url({ course: course.slug }), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrf() },
                     body: JSON.stringify({ order_id: data.orderID }),
@@ -187,7 +187,7 @@ export function CheckoutModal({ course, locale, isOpen, onClose }: Props) {
         setPaypalError('');
 
         try {
-            const res = await fetch(validateCoupon.url({ locale, course: course.slug }), {
+            const res = await fetch(validateCoupon.url({ course: course.slug }), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrf() },
                 body: JSON.stringify({ code }),
@@ -213,7 +213,7 @@ export function CheckoutModal({ course, locale, isOpen, onClose }: Props) {
 
     async function handleFreeEnroll() {
         // 100% coupon — hit the createOrder endpoint which will short-circuit
-        const res = await fetch(createOrder.url({ locale, course: course.slug }), {
+        const res = await fetch(createOrder.url({ course: course.slug }), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': getCsrf() },
             body: JSON.stringify({ coupon_code: couponCode, referral_code: referralCode || undefined }),

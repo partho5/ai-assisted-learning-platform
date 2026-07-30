@@ -138,7 +138,7 @@ export default function AdminDashboard({ stats, recentUsers, recentCourses, rece
                                         <tr
                                             key={session.id}
                                             className="cursor-pointer hover:bg-muted/20"
-                                            onClick={() => router.visit(showChatSession.url({ locale: l, chatSession: session.id }))}
+                                            onClick={() => router.visit(showChatSession.url({ chatSession: session.id }))}
                                         >
                                             <td className="px-4 py-3">
                                                 {session.identity.type === 'user' ? (

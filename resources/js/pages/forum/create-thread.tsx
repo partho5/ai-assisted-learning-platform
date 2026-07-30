@@ -51,7 +51,7 @@ export default function CreateThread({ categories, prefill }: Props) {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(storeThread(l));
+        form.submit(storeThread());
     }
 
     return (

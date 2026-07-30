@@ -200,7 +200,7 @@ class PublicPortfolioTest extends TestCase
         $user = User::factory()->create();
         Portfolio::factory()->create(['user_id' => $user->id, 'is_published' => true]);
 
-        $this->post(route('public-portfolio.contact', ['locale' => 'en', 'username' => $user->username]), [
+        $this->post(route('public-portfolio.contact', ['username' => $user->username]), [
             'sender_name' => 'Jane Doe',
             'sender_email' => 'jane@example.com',
             'subject' => 'Hello',
@@ -223,7 +223,7 @@ class PublicPortfolioTest extends TestCase
         $user = User::factory()->create();
         Portfolio::factory()->create(['user_id' => $user->id, 'is_published' => true]);
 
-        $this->post(route('public-portfolio.contact', ['locale' => 'en', 'username' => $user->username]), [
+        $this->post(route('public-portfolio.contact', ['username' => $user->username]), [
             'sender_name' => 'Jane Doe',
             'sender_email' => 'jane@example.com',
             'body' => 'Spam attempt',
@@ -238,7 +238,7 @@ class PublicPortfolioTest extends TestCase
         $user = User::factory()->create();
         Portfolio::factory()->create(['user_id' => $user->id, 'is_published' => true]);
 
-        $this->post(route('public-portfolio.contact', ['locale' => 'en', 'username' => $user->username]), [
+        $this->post(route('public-portfolio.contact', ['username' => $user->username]), [
             'sender_name' => 'Bot',
             'sender_email' => 'bot@example.com',
             'body' => 'I am a bot',

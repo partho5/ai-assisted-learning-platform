@@ -130,7 +130,7 @@ export default function ForumAiMembersAdmin({ aiMembers, categories }: Props) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Admin', href: `/${l}/admin/dashboard` },
-        { title: 'AI Members', href: index.url(l) },
+        { title: 'AI Members', href: index.url() },
     ];
 
     function openCreate() {
@@ -156,11 +156,11 @@ export default function ForumAiMembersAdmin({ aiMembers, categories }: Props) {
         };
 
         if (editing) {
-            router.put(update.url({ locale: l, aiMember: editing.id }), payload, {
+            router.put(update.url({ aiMember: editing.id }), payload, {
                 onSuccess: () => setEditing(null),
             });
         } else {
-            router.post(store.url(l), payload, {
+            router.post(store.url(), payload, {
                 onSuccess: () => setCreating(false),
             });
         }
@@ -168,7 +168,7 @@ export default function ForumAiMembersAdmin({ aiMembers, categories }: Props) {
 
     function handleDestroy(m: AiMember) {
         if (!confirm(`Delete AI member "${m.user.name}"? Their posts will remain but the user account will be removed.`)) return;
-        router.delete(destroy.url({ locale: l, aiMember: m.id }));
+        router.delete(destroy.url({ aiMember: m.id }));
     }
 
     function toggleTrigger(t: TriggerOn) {

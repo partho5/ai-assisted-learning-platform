@@ -172,7 +172,7 @@ class ArticleController extends Controller
                 ->with('success', 'Article published.');
         }
 
-        return redirect()->route('articles.edit', ['locale' => app()->getLocale(), 'article' => $article->slug])
+        return redirect()->route('articles.edit', ['article' => $article->slug])
             ->with('success', $article->status === ArticleStatus::Scheduled ? 'Article scheduled.' : 'Draft saved.');
     }
 
@@ -245,7 +245,7 @@ class ArticleController extends Controller
                 ->with('success', 'Article updated.');
         }
 
-        return redirect()->route('articles.edit', ['locale' => app()->getLocale(), 'article' => $article->slug])
+        return redirect()->route('articles.edit', ['article' => $article->slug])
             ->with('success', $fresh->status === ArticleStatus::Scheduled ? 'Article scheduled.' : 'Draft saved.');
     }
 

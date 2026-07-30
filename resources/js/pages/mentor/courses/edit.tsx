@@ -104,12 +104,12 @@ function CourseDetailsForm({
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(courseUpdate({ locale, course: course.slug }));
+        form.submit(courseUpdate({ course: course.slug }));
     }
 
     function unpublish() {
         router.put(
-            courseUpdate.url({ locale, course: course.slug }),
+            courseUpdate.url({ course: course.slug }),
             {
                 language: course.language,
                 title: course.title,
@@ -128,22 +128,22 @@ function CourseDetailsForm({
     }
 
     function submitForReview() {
-        router.post(courseSubmitForReview.url({ locale, course: course.slug }), {}, { preserveScroll: true });
+        router.post(courseSubmitForReview.url({ course: course.slug }), {}, { preserveScroll: true });
     }
 
     function approve() {
-        router.post(courseApprove.url({ locale, course: course.slug }), {}, { preserveScroll: true });
+        router.post(courseApprove.url({ course: course.slug }), {}, { preserveScroll: true });
     }
 
     function reject() {
         const reason = prompt('Rejection reason (required):');
         if (!reason?.trim()) { return; }
-        router.post(courseReject.url({ locale, course: course.slug }), { rejection_reason: reason }, { preserveScroll: true });
+        router.post(courseReject.url({ course: course.slug }), { rejection_reason: reason }, { preserveScroll: true });
     }
 
     function deleteCourse() {
         if (!confirm('Delete this course? This cannot be undone.')) { return; }
-        router.delete(courseDestroy.url({ locale, course: course.slug }));
+        router.delete(courseDestroy.url({ course: course.slug }));
     }
 
     return (
@@ -160,7 +160,7 @@ function CourseDetailsForm({
                     >
                         {course.status === 'pending_review' ? 'Pending Review' : course.status}
                     </Badge>
-                    <Link href={coursePreview.url({ locale, course: course.slug })}>
+                    <Link href={coursePreview.url({ course: course.slug })}>
                         <Button type="button" variant="utility" size="compact">
                             Preview
                         </Button>
@@ -570,7 +570,7 @@ function CoAuthorManager({
         setError(null);
 
         router.post(
-            authorStore.url({ locale, course: course.slug }),
+            authorStore.url({ course: course.slug }),
             { identifier: identifier.trim() },
             {
                 preserveScroll: true,
@@ -585,7 +585,7 @@ function CoAuthorManager({
 
     function handleRemove(author: CourseMentorWithRole) {
         router.delete(
-            authorDestroy.url({ locale, course: course.slug, author: author.id! }),
+            authorDestroy.url({ course: course.slug, author: author.id! }),
             { preserveScroll: true },
         );
     }
@@ -670,7 +670,7 @@ function CouponCodeManager({ course, locale }: { course: Course; locale: string 
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(couponStore({ locale, course: course.slug }), {
+        form.submit(couponStore({ course: course.slug }), {
             preserveScroll: true,
             onSuccess: () => { form.reset(); setOpen(false); },
         });
@@ -678,7 +678,7 @@ function CouponCodeManager({ course, locale }: { course: Course; locale: string 
 
     function deleteCoupon(coupon: CouponCode) {
         if (!confirm(`Delete coupon "${coupon.code}"?`)) { return; }
-        router.delete(couponDestroy.url({ locale, course: course.slug, couponCode: coupon.id }), { preserveScroll: true });
+        router.delete(couponDestroy.url({ course: course.slug, couponCode: coupon.id }), { preserveScroll: true });
     }
 
     const coupons = course.coupon_codes ?? [];
@@ -834,8 +834,8 @@ function ResourceForm({
     function submit(e: React.FormEvent) {
         e.preventDefault();
         const target = existing
-            ? resourceUpdate({ locale, course: courseSlug, module: moduleId, resource: existing.id })
-            : resourceStore({ locale, course: courseSlug, module: moduleId });
+            ? resourceUpdate({ course: courseSlug, module: moduleId, resource: existing.id })
+            : resourceStore({ course: courseSlug, module: moduleId });
 
         form.submit(target, { preserveScroll: true, onSuccess: onDone });
     }
@@ -1015,7 +1015,7 @@ function ModulePanel({
 
         setResources(reordered);
         router.post(
-            resourceReorder.url({ locale, course: courseSlug, module: module.id }),
+            resourceReorder.url({ course: courseSlug, module: module.id }),
             { order: reordered.map((r) => r.id) },
             { preserveScroll: true, preserveState: true },
         );
@@ -1025,7 +1025,7 @@ function ModulePanel({
 
     function saveModule(e: React.FormEvent) {
         e.preventDefault();
-        moduleForm.submit(moduleUpdate({ locale, course: courseSlug, module: module.id }), {
+        moduleForm.submit(moduleUpdate({ course: courseSlug, module: module.id }), {
             preserveScroll: true,
             onSuccess: () => setEditingModule(false),
         });
@@ -1033,12 +1033,12 @@ function ModulePanel({
 
     function deleteModule() {
         if (!confirm('Delete this module and all its lessons?')) { return; }
-        router.delete(moduleDestroy.url({ locale, course: courseSlug, module: module.id }), { preserveScroll: true });
+        router.delete(moduleDestroy.url({ course: courseSlug, module: module.id }), { preserveScroll: true });
     }
 
     function deleteResource(resourceId: number) {
         if (!confirm('Delete this lesson?')) { return; }
-        router.delete(resourceDestroy.url({ locale, course: courseSlug, module: module.id, resource: resourceId }), {
+        router.delete(resourceDestroy.url({ course: courseSlug, module: module.id, resource: resourceId }), {
             preserveScroll: true,
         });
     }
@@ -1155,7 +1155,7 @@ function AddModuleForm({ courseSlug, locale }: { courseSlug: string; locale: str
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(moduleStore({ locale, course: courseSlug }), {
+        form.submit(moduleStore({ course: courseSlug }), {
             preserveScroll: true,
             onSuccess: () => {
                 form.reset();
@@ -1229,7 +1229,7 @@ export default function CourseEdit({ course, categories, difficulties, languages
 
         setModules(reordered);
         router.post(
-            moduleReorder.url({ locale: l, course: course.slug }),
+            moduleReorder.url({ course: course.slug }),
             { order: reordered.map((m) => m.id) },
             { preserveScroll: true, preserveState: true },
         );
@@ -1356,7 +1356,7 @@ function SortableResourceRow({
                         type="button"
                         variant="secondary"
                         size="compact"
-                        onClick={() => router.get(testEdit.url({ locale, course: courseSlug, module: moduleId, resource: resource.id }))}
+                        onClick={() => router.get(testEdit.url({ course: courseSlug, module: moduleId, resource: resource.id }))}
                     >
                         {resource.test ? 'Edit Questions' : 'Set/Edit Questions'}
                     </Button>

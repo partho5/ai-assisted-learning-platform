@@ -121,7 +121,7 @@ export default function Submissions({ course, submissions, filters }: Props) {
                                         <td className="px-4 py-3">
                                             <button
                                                 onClick={() =>
-                                                    router.get(showAttempt.url({ locale: l, attempt: row.id }))
+                                                    router.get(showAttempt.url({ attempt: row.id }))
                                                 }
                                                 className="text-xs text-primary hover:underline"
                                             >

@@ -108,7 +108,7 @@ class EnsureContentLocaleTest extends TestCase
         $course->authors()->syncWithoutDetaching([$mentor->id => ['role' => 'lead', 'added_by' => $mentor->id]]);
 
         $this->actingAs($mentor)
-            ->get("/en/courses/{$course->slug}/preview")
+            ->get("/courses/{$course->slug}/preview")
             ->assertOk();
     }
 

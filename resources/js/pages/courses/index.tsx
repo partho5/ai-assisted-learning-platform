@@ -83,8 +83,8 @@ export default function CourseCatalog({ courses, categories, difficulties, filte
         () => ({
             type: 'platform' as const,
             key: 'courses-catalog',
-            endpoint: platform.url(l),
-            historyEndpoint: chatHistory.url(l),
+            endpoint: platform.url(),
+            historyEndpoint: chatHistory.url(),
             locale: l,
             extra: { courses: visibleCourses },
             autoTrigger: true,

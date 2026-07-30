@@ -61,7 +61,7 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
 
         // Track server-side + store in localStorage
         const csrf = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
-        fetch(referralTrack.url({ locale: l }), {
+        fetch(referralTrack.url({ }), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -82,15 +82,15 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
 
     function handleEnroll() {
         trackEnroll(course.id, course.title);
-        router.post(enrollStore.url({ locale: l, course: course.slug }));
+        router.post(enrollStore.url({ course: course.slug }));
     }
 
     const chatContext = {
         type: 'course' as const,
         key: `course-${course.id}`,
         label: course.title,
-        endpoint: courseChatAction.url({ locale: l, course: course.slug }),
-        historyEndpoint: chatHistory.url(l),
+        endpoint: courseChatAction.url({ course: course.slug }),
+        historyEndpoint: chatHistory.url(),
         locale: l,
         autoTrigger: !!enrollment,
     };

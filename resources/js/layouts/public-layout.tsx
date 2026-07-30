@@ -238,7 +238,7 @@ export default function PublicLayout({
 
             {!hidePlatformChat && (
                 <FloatingChatButton
-                    context={{ type: 'platform', key: 'platform', endpoint: platform.url(l), historyEndpoint: chatHistory.url(l), locale: l }}
+                    context={{ type: 'platform', key: 'platform', endpoint: platform.url(), historyEndpoint: chatHistory.url(), locale: l }}
                 />
             )}
 

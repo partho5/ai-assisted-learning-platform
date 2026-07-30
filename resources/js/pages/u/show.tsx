@@ -335,7 +335,7 @@ function ShowcasedAttemptCard({
     function handleUnfeature(e: React.MouseEvent) {
         e.preventDefault();
         router.post(
-            toggleShowcase.url({ locale, attempt: attempt.id }),
+            toggleShowcase.url({ attempt: attempt.id }),
             {},
             { preserveState: true },
         );

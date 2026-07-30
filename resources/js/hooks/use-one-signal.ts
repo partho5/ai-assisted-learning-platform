@@ -47,7 +47,7 @@ function registerPlayerId(playerId: string, locale: string): void {
         .find((c) => c.startsWith('XSRF-TOKEN='))
         ?.split('=')[1];
 
-    fetch(storePushSubscription.url(locale), {
+    fetch(storePushSubscription.url(), {
         method: 'POST',
         credentials: 'same-origin',
         headers: {

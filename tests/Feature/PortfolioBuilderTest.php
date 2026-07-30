@@ -20,7 +20,7 @@ class PortfolioBuilderTest extends TestCase
 
     public function test_dashboard_requires_auth(): void
     {
-        $this->get(route('portfolio-builder.index', ['locale' => 'en']))
+        $this->get(route('portfolio-builder.index'))
             ->assertRedirect();
     }
 
@@ -29,7 +29,7 @@ class PortfolioBuilderTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->get(route('portfolio-builder.index', ['locale' => 'en']))
+            ->get(route('portfolio-builder.index'))
             ->assertOk();
 
         $this->assertDatabaseHas('portfolios', ['user_id' => $user->id]);
@@ -43,7 +43,7 @@ class PortfolioBuilderTest extends TestCase
         PortfolioMessage::factory()->count(2)->create(['portfolio_id' => $portfolio->id, 'is_read' => false]);
 
         $this->actingAs($user)
-            ->get(route('portfolio-builder.index', ['locale' => 'en']))
+            ->get(route('portfolio-builder.index'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('dashboard/portfolio-builder/index')
@@ -62,7 +62,7 @@ class PortfolioBuilderTest extends TestCase
         Portfolio::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->get(route('portfolio-builder.settings', ['locale' => 'en']))
+            ->get(route('portfolio-builder.settings'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('dashboard/portfolio-builder/settings'));
     }
@@ -79,7 +79,7 @@ class PortfolioBuilderTest extends TestCase
          * assert no session errors, or the failure hides behind assertRedirect.
          */
         $this->actingAs($user)
-            ->put(route('portfolio-builder.settings.update', ['locale' => 'en']), [
+            ->put(route('portfolio-builder.settings.update'), [
                 'bio' => 'Updated bio',
                 'secondary_bio' => 'Secondary',
                 'services' => [
@@ -112,7 +112,7 @@ class PortfolioBuilderTest extends TestCase
         Portfolio::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->get(route('portfolio-builder.categories', ['locale' => 'en']))
+            ->get(route('portfolio-builder.categories'))
             ->assertOk();
     }
 
@@ -122,7 +122,7 @@ class PortfolioBuilderTest extends TestCase
         Portfolio::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->post(route('portfolio-builder.categories.store', ['locale' => 'en']), [
+            ->post(route('portfolio-builder.categories.store'), [
                 'name' => 'Web Projects',
             ])
             ->assertRedirect();
@@ -140,7 +140,7 @@ class PortfolioBuilderTest extends TestCase
         $category = PortfolioCategory::factory()->create(['portfolio_id' => $portfolio->id]);
 
         $this->actingAs($user)
-            ->put(route('portfolio-builder.categories.update', ['locale' => 'en', 'category' => $category->id]), [
+            ->put(route('portfolio-builder.categories.update', ['category' => $category->id]), [
                 'name' => 'Renamed',
             ])
             ->assertRedirect();
@@ -155,7 +155,7 @@ class PortfolioBuilderTest extends TestCase
         $category = PortfolioCategory::factory()->create(['portfolio_id' => $portfolio->id]);
 
         $this->actingAs($user)
-            ->delete(route('portfolio-builder.categories.destroy', ['locale' => 'en', 'category' => $category->id]))
+            ->delete(route('portfolio-builder.categories.destroy', ['category' => $category->id]))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('portfolio_categories', ['id' => $category->id]);
@@ -170,7 +170,7 @@ class PortfolioBuilderTest extends TestCase
         $category = PortfolioCategory::factory()->create(['portfolio_id' => $otherPortfolio->id]);
 
         $this->actingAs($user)
-            ->delete(route('portfolio-builder.categories.destroy', ['locale' => 'en', 'category' => $category->id]))
+            ->delete(route('portfolio-builder.categories.destroy', ['category' => $category->id]))
             ->assertForbidden();
     }
 
@@ -184,7 +184,7 @@ class PortfolioBuilderTest extends TestCase
         Portfolio::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->get(route('portfolio-builder.projects.index', ['locale' => 'en']))
+            ->get(route('portfolio-builder.projects.index'))
             ->assertOk();
     }
 
@@ -194,12 +194,12 @@ class PortfolioBuilderTest extends TestCase
         Portfolio::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->post(route('portfolio-builder.projects.store', ['locale' => 'en']), [
+            ->post(route('portfolio-builder.projects.store'), [
                 'title' => 'My Cool Project',
                 'description' => '<p>Project description</p>',
                 'is_published' => true,
             ])
-            ->assertRedirect(route('portfolio-builder.projects.index', ['locale' => 'en']));
+            ->assertRedirect(route('portfolio-builder.projects.index'));
 
         $this->assertDatabaseHas('portfolio_projects', [
             'title' => 'My Cool Project',
@@ -213,7 +213,7 @@ class PortfolioBuilderTest extends TestCase
         Portfolio::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->post(route('portfolio-builder.projects.store', ['locale' => 'en']), [
+            ->post(route('portfolio-builder.projects.store'), [
                 'title' => 'Media Project',
                 'description' => '<p>With media</p>',
                 'is_published' => true,
@@ -234,7 +234,7 @@ class PortfolioBuilderTest extends TestCase
         $project = PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id]);
 
         $this->actingAs($user)
-            ->put(route('portfolio-builder.projects.update', ['locale' => 'en', 'project' => $project->id]), [
+            ->put(route('portfolio-builder.projects.update', ['project' => $project->id]), [
                 'title' => 'Updated Title',
                 'description' => '<p>Updated</p>',
                 'is_published' => false,
@@ -255,7 +255,7 @@ class PortfolioBuilderTest extends TestCase
         $project = PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id]);
 
         $this->actingAs($user)
-            ->delete(route('portfolio-builder.projects.destroy', ['locale' => 'en', 'project' => $project->id]))
+            ->delete(route('portfolio-builder.projects.destroy', ['project' => $project->id]))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('portfolio_projects', ['id' => $project->id]);
@@ -270,7 +270,7 @@ class PortfolioBuilderTest extends TestCase
         $project = PortfolioProject::factory()->create(['portfolio_id' => $otherPortfolio->id]);
 
         $this->actingAs($user)
-            ->get(route('portfolio-builder.projects.edit', ['locale' => 'en', 'project' => $project->id]))
+            ->get(route('portfolio-builder.projects.edit', ['project' => $project->id]))
             ->assertForbidden();
     }
 
@@ -284,7 +284,7 @@ class PortfolioBuilderTest extends TestCase
         $projectC = PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id, 'sort_order' => 2]);
 
         $this->actingAs($user)
-            ->post(route('portfolio-builder.projects.reorder', ['locale' => 'en']), [
+            ->post(route('portfolio-builder.projects.reorder'), [
                 'order' => [$projectC->id, $projectA->id, $projectB->id],
             ])
             ->assertRedirect();
@@ -304,7 +304,7 @@ class PortfolioBuilderTest extends TestCase
         $theirs = PortfolioProject::factory()->create(['portfolio_id' => $otherPortfolio->id, 'sort_order' => 5]);
 
         $this->actingAs($user)
-            ->post(route('portfolio-builder.projects.reorder', ['locale' => 'en']), [
+            ->post(route('portfolio-builder.projects.reorder'), [
                 'order' => [$theirs->id, $mine->id],
             ])
             ->assertRedirect();
@@ -325,7 +325,7 @@ class PortfolioBuilderTest extends TestCase
         Portfolio::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->get(route('portfolio-builder.messages.index', ['locale' => 'en']))
+            ->get(route('portfolio-builder.messages.index'))
             ->assertOk();
     }
 
@@ -336,7 +336,7 @@ class PortfolioBuilderTest extends TestCase
         $message = PortfolioMessage::factory()->create(['portfolio_id' => $portfolio->id, 'is_read' => false]);
 
         $this->actingAs($user)
-            ->get(route('portfolio-builder.messages.show', ['locale' => 'en', 'message' => $message->id]))
+            ->get(route('portfolio-builder.messages.show', ['message' => $message->id]))
             ->assertOk();
 
         $this->assertTrue($message->fresh()->is_read);
@@ -349,7 +349,7 @@ class PortfolioBuilderTest extends TestCase
         $message = PortfolioMessage::factory()->create(['portfolio_id' => $portfolio->id]);
 
         $this->actingAs($user)
-            ->delete(route('portfolio-builder.messages.destroy', ['locale' => 'en', 'message' => $message->id]))
+            ->delete(route('portfolio-builder.messages.destroy', ['message' => $message->id]))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('portfolio_messages', ['id' => $message->id]);
@@ -365,7 +365,7 @@ class PortfolioBuilderTest extends TestCase
         Portfolio::factory()->create(['user_id' => $user->id]);
 
         $this->actingAs($user)
-            ->get(route('portfolio-builder.analytics', ['locale' => 'en']))
+            ->get(route('portfolio-builder.analytics'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('dashboard/portfolio-builder/analytics'));
     }
@@ -381,7 +381,7 @@ class PortfolioBuilderTest extends TestCase
         PortfolioProject::factory()->create(['portfolio_id' => $portfolio->id, 'slug' => 'my-project']);
 
         $this->actingAs($user)
-            ->post(route('portfolio-builder.projects.store', ['locale' => 'en']), [
+            ->post(route('portfolio-builder.projects.store'), [
                 'title' => 'My Project',
                 'description' => '<p>Another project</p>',
                 'is_published' => true,

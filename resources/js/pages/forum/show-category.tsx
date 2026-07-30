@@ -51,7 +51,7 @@ export default function ShowCategory({ category, threads, filter }: Props) {
                         )}
                     </div>
                     {auth?.user && (
-                        <Link href={createThread.url(l, { query: { category_id: category.id } })}>
+                        <Link href={createThread.url({ query: { category_id: category.id } })}>
                             <Button className="shrink-0">New Thread</Button>
                         </Link>
                     )}

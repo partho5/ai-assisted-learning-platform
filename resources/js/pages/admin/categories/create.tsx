@@ -15,7 +15,7 @@ export default function CategoryCreate() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: ui.nav.dashboard, href: `/${l}/admin/dashboard` },
-        { title: ui.nav.categories, href: categoriesIndex.url(l) },
+        { title: ui.nav.categories, href: categoriesIndex.url() },
         { title: 'New Category', href: '#' },
     ];
 
@@ -26,7 +26,7 @@ export default function CategoryCreate() {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(categoryStore(l));
+        form.submit(categoryStore());
     }
 
     return (

@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureContentLocale;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SetBackOfficeLocale;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => EnsureRole::class,
             'setlocale' => SetLocale::class,
+            'backoffice.locale' => SetBackOfficeLocale::class,
             'content.locale' => EnsureContentLocale::class,
         ]);
     })

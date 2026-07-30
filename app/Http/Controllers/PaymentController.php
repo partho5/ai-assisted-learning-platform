@@ -146,8 +146,8 @@ class PaymentController extends Controller
 
         $subscription = $this->paypal->createSubscription(
             $planId,
-            route('payment.subscription.return', ['locale' => app()->getLocale(), 'course' => $course->slug]),
-            route('payment.subscription.cancel', ['locale' => app()->getLocale(), 'course' => $course->slug]),
+            route('payment.subscription.return', ['course' => $course->slug]),
+            route('payment.subscription.cancel', ['course' => $course->slug]),
         );
 
         Payment::create([

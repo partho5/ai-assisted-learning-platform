@@ -21,7 +21,7 @@ export default function CategoriesIndex({ categories }: Props) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: ui.nav.dashboard, href: `/${l}/mentor/dashboard` },
-        { title: 'Categories', href: categoryCreate.url(l) },
+        { title: 'Categories', href: categoryCreate.url() },
     ];
 
     return (
@@ -38,7 +38,7 @@ export default function CategoriesIndex({ categories }: Props) {
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-2xl font-semibold tracking-tight">Categories</h1>
                     <Button asChild variant="enroll">
-                        <Link href={categoryCreate.url(l)}>New Category</Link>
+                        <Link href={categoryCreate.url()}>New Category</Link>
                     </Button>
                 </div>
 
@@ -70,7 +70,7 @@ export default function CategoriesIndex({ categories }: Props) {
                                         <td className="px-4 py-3">
                                             <div className="flex items-center justify-end">
                                                 <Button asChild variant="utility" size="compact">
-                                                    <Link href={categoryEdit.url({ locale: l, category: category.id })}>
+                                                    <Link href={categoryEdit.url({ category: category.id })}>
                                                         Edit
                                                     </Link>
                                                 </Button>

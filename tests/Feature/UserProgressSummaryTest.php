@@ -154,7 +154,7 @@ class UserProgressSummaryTest extends TestCase
         });
 
         $this->actingAs($learner)
-            ->postJson(route('chat.platform', ['locale' => 'en']), [
+            ->postJson(route('chat.platform'), [
                 'message' => 'What courses am I enrolled in?',
             ])->assertOk();
     }

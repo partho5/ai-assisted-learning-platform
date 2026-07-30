@@ -9,7 +9,6 @@ use App\Models\Module;
 use App\Models\Resource;
 use App\Models\Test;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -42,11 +41,9 @@ class TestController extends Controller
 
         return redirect()
             ->route('tests.edit', [
-                'locale' => app()->getLocale(),
                 'course' => $course->slug,
                 'module' => $module->id,
-                'resource' => $resource->id,
-            ])
+                'resource' => $resource->id])
             ->with('success', 'Test created.');
     }
 
@@ -66,7 +63,7 @@ class TestController extends Controller
         $test->delete();
 
         return redirect()
-            ->route('courses.edit', ['locale' => app()->getLocale(), 'course' => $course->slug])
+            ->route('courses.edit', ['course' => $course->slug])
             ->with('success', 'Test deleted.');
     }
 

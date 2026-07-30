@@ -54,7 +54,7 @@ export default function ForumIndex({ categories }: Props) {
                         </p>
                     </div>
                     {auth?.user && (
-                        <Link href={createThread.url(l)}>
+                        <Link href={createThread.url()}>
                             <Button>New Thread</Button>
                         </Link>
                     )}

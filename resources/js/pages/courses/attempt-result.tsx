@@ -104,7 +104,7 @@ export default function AttemptResult({ attempt, isShowcased, learnUrl }: Props)
 
     function handleToggleShowcase() {
         router.post(
-            toggleShowcase.url({ locale: l, attempt: attempt.id }),
+            toggleShowcase.url({ attempt: attempt.id }),
             {},
             { preserveState: true, only: ['isShowcased'] },
         );
@@ -125,8 +125,8 @@ export default function AttemptResult({ attempt, isShowcased, learnUrl }: Props)
     const chatContext = {
         type: 'platform' as const,
         key: `attempt-${attempt.id}`,
-        endpoint: platform.url(l),
-        historyEndpoint: chatHistory.url(l),
+        endpoint: platform.url(),
+        historyEndpoint: chatHistory.url(),
         locale: l,
         autoTrigger: !isGrading,
         pageContext: `Attempt result page. Test: "${attempt.test.title}", Score: ${attempt.score ?? '?'}%${passScore !== null ? `, Passing score: ${passScore}%` : ''}, Status: ${attempt.status}${passed ? ' (passed)' : passScore !== null ? ' (not passed)' : ''}.`,

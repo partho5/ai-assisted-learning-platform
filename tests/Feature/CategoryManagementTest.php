@@ -17,21 +17,21 @@ class CategoryManagementTest extends TestCase
 
     public function test_guest_cannot_view_categories_index(): void
     {
-        $this->get(route('admin.categories.index', ['locale' => 'en']))
+        $this->get(route('admin.categories.index'))
             ->assertRedirect();
     }
 
     public function test_learner_cannot_view_categories_index(): void
     {
         $this->actingAs(User::factory()->learner()->create())
-            ->get(route('admin.categories.index', ['locale' => 'en']))
+            ->get(route('admin.categories.index'))
             ->assertForbidden();
     }
 
     public function test_mentor_cannot_view_categories_index(): void
     {
         $this->actingAs(User::factory()->mentor()->create())
-            ->get(route('admin.categories.index', ['locale' => 'en']))
+            ->get(route('admin.categories.index'))
             ->assertForbidden();
     }
 
@@ -40,7 +40,7 @@ class CategoryManagementTest extends TestCase
         Category::factory()->count(3)->create();
 
         $this->actingAs(User::factory()->admin()->create())
-            ->get(route('admin.categories.index', ['locale' => 'en']))
+            ->get(route('admin.categories.index'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('admin/categories/index')
@@ -55,7 +55,7 @@ class CategoryManagementTest extends TestCase
     public function test_admin_can_view_create_form(): void
     {
         $this->actingAs(User::factory()->admin()->create())
-            ->get(route('admin.categories.create', ['locale' => 'en']))
+            ->get(route('admin.categories.create'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('admin/categories/create'));
     }
@@ -65,11 +65,11 @@ class CategoryManagementTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)
-            ->post(route('admin.categories.store', ['locale' => 'en']), [
+            ->post(route('admin.categories.store'), [
                 'name' => 'Web Development',
                 'description' => 'Everything about the web.',
             ])
-            ->assertRedirect(route('admin.categories.index', ['locale' => 'en']));
+            ->assertRedirect(route('admin.categories.index'));
 
         $this->assertDatabaseHas('categories', [
             'name' => 'Web Development',
@@ -82,7 +82,7 @@ class CategoryManagementTest extends TestCase
         Category::factory()->create(['name' => 'Web Development']);
 
         $this->actingAs(User::factory()->admin()->create())
-            ->post(route('admin.categories.store', ['locale' => 'en']), [
+            ->post(route('admin.categories.store'), [
                 'name' => 'Web Development',
             ])
             ->assertSessionHasErrors('name');
@@ -91,7 +91,7 @@ class CategoryManagementTest extends TestCase
     public function test_store_requires_name(): void
     {
         $this->actingAs(User::factory()->admin()->create())
-            ->post(route('admin.categories.store', ['locale' => 'en']), ['name' => ''])
+            ->post(route('admin.categories.store'), ['name' => ''])
             ->assertSessionHasErrors('name');
     }
 
@@ -104,7 +104,7 @@ class CategoryManagementTest extends TestCase
         $category = Category::factory()->create();
 
         $this->actingAs(User::factory()->admin()->create())
-            ->get(route('admin.categories.edit', ['locale' => 'en', 'category' => $category]))
+            ->get(route('admin.categories.edit', ['category' => $category]))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('admin/categories/edit')
@@ -117,11 +117,11 @@ class CategoryManagementTest extends TestCase
         $category = Category::factory()->create(['name' => 'Old Name']);
 
         $this->actingAs(User::factory()->admin()->create())
-            ->put(route('admin.categories.update', ['locale' => 'en', 'category' => $category]), [
+            ->put(route('admin.categories.update', ['category' => $category]), [
                 'name' => 'New Name',
                 'description' => 'Updated description.',
             ])
-            ->assertRedirect(route('admin.categories.index', ['locale' => 'en']));
+            ->assertRedirect(route('admin.categories.index'));
 
         $this->assertDatabaseHas('categories', [
             'id' => $category->id,
@@ -135,10 +135,10 @@ class CategoryManagementTest extends TestCase
         $category = Category::factory()->create(['name' => 'Same Name']);
 
         $this->actingAs(User::factory()->admin()->create())
-            ->put(route('admin.categories.update', ['locale' => 'en', 'category' => $category]), [
+            ->put(route('admin.categories.update', ['category' => $category]), [
                 'name' => 'Same Name',
             ])
-            ->assertRedirect(route('admin.categories.index', ['locale' => 'en']));
+            ->assertRedirect(route('admin.categories.index'));
     }
 
     // ──────────────────────────────────────────────
@@ -150,8 +150,8 @@ class CategoryManagementTest extends TestCase
         $category = Category::factory()->create();
 
         $this->actingAs(User::factory()->admin()->create())
-            ->delete(route('admin.categories.destroy', ['locale' => 'en', 'category' => $category]))
-            ->assertRedirect(route('admin.categories.index', ['locale' => 'en']));
+            ->delete(route('admin.categories.destroy', ['category' => $category]))
+            ->assertRedirect(route('admin.categories.index'));
 
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
     }
@@ -162,8 +162,8 @@ class CategoryManagementTest extends TestCase
         \App\Models\Course::factory()->for(\App\Models\User::factory()->mentor()->create(), 'mentor')->create(['category_id' => $category->id]);
 
         $this->actingAs(User::factory()->admin()->create())
-            ->delete(route('admin.categories.destroy', ['locale' => 'en', 'category' => $category]))
-            ->assertRedirect(route('admin.categories.index', ['locale' => 'en']))
+            ->delete(route('admin.categories.destroy', ['category' => $category]))
+            ->assertRedirect(route('admin.categories.index'))
             ->assertSessionHas('error');
 
         $this->assertDatabaseHas('categories', ['id' => $category->id]);
@@ -174,7 +174,7 @@ class CategoryManagementTest extends TestCase
         $category = Category::factory()->create();
 
         $this->actingAs(User::factory()->learner()->create())
-            ->delete(route('admin.categories.destroy', ['locale' => 'en', 'category' => $category]))
+            ->delete(route('admin.categories.destroy', ['category' => $category]))
             ->assertForbidden();
 
         $this->assertDatabaseHas('categories', ['id' => $category->id]);

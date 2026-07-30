@@ -40,7 +40,7 @@ class CategoryController extends Controller
             'description' => $request->validated()['description'] ?? null,
         ]);
 
-        return redirect()->route('admin.categories.index', ['locale' => app()->getLocale()])
+        return redirect()->route('admin.categories.index')
             ->with('success', 'Category created.');
     }
 
@@ -61,20 +61,20 @@ class CategoryController extends Controller
             'description' => $request->validated()['description'] ?? null,
         ]);
 
-        return redirect()->route('admin.categories.index', ['locale' => app()->getLocale()])
+        return redirect()->route('admin.categories.index')
             ->with('success', 'Category updated.');
     }
 
     public function destroy(Category $category): RedirectResponse
     {
         if ($category->courses()->exists()) {
-            return redirect()->route('admin.categories.index', ['locale' => app()->getLocale()])
+            return redirect()->route('admin.categories.index')
                 ->with('error', "Cannot delete \"{$category->name}\" — it has courses assigned. Reassign or remove the category from those courses first.");
         }
 
         $category->delete();
 
-        return redirect()->route('admin.categories.index', ['locale' => app()->getLocale()])
+        return redirect()->route('admin.categories.index')
             ->with('success', 'Category deleted.');
     }
 }

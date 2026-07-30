@@ -537,7 +537,7 @@ function TestForm({
     async function autosave(qId: number, v: string) {
         if (!attempt) return;
         setSaving(true);
-        await fetch(saveAnswers.url({ locale, attempt: attempt.id }), {
+        await fetch(saveAnswers.url({ attempt: attempt.id }), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -555,7 +555,7 @@ function TestForm({
 
         if (autosaveRef.current) clearTimeout(autosaveRef.current);
 
-        await fetch(saveAnswers.url({ locale, attempt: attempt.id }), {
+        await fetch(saveAnswers.url({ attempt: attempt.id }), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -566,7 +566,7 @@ function TestForm({
         });
 
         trackTestSubmit(resource.test!.id, courseSlug);
-        router.post(submitAttempt.url({ locale, attempt: attempt.id }), {}, { preserveScroll: true });
+        router.post(submitAttempt.url({ attempt: attempt.id }), {}, { preserveScroll: true });
     }
 
     if (!attempt) {
@@ -595,7 +595,7 @@ function TestForm({
                 <Button
                     onClick={() =>
                         router.post(
-                            startAttempt.url({ locale, course: courseSlug, resource: resource.id }),
+                            startAttempt.url({ course: courseSlug, resource: resource.id }),
                             {},
                             { preserveScroll: true },
                         )
@@ -699,7 +699,7 @@ function ResourceBlock({
     function handleMarkComplete() {
         trackResourceComplete(resource.id, courseSlug);
         router.post(
-            markComplete.url({ locale, course: courseSlug, resource: resource.id }),
+            markComplete.url({ course: courseSlug, resource: resource.id }),
             {},
             { preserveScroll: true },
         );
@@ -918,8 +918,8 @@ export default function Learn({ course, initialResourceId, resources, enrollment
         key: `resource-${activeResourceId}`,
         label: activeResource?.title,
         resourceType: typeof activeResource?.type === 'string' ? activeResource.type : (activeResource?.type as { value?: string })?.value ?? 'text',
-        endpoint: resourceChatAction.url({ locale: l, course: course.slug, resource: activeResourceId }),
-        historyEndpoint: chatHistory.url(l),
+        endpoint: resourceChatAction.url({ course: course.slug, resource: activeResourceId }),
+        historyEndpoint: chatHistory.url(),
         locale: l,
         autoTrigger: enrollment?.access_level === 'full',
     }), [activeResourceId, activeResource, l, course.slug, enrollment?.access_level]);

@@ -19,17 +19,17 @@ class DashboardTest extends TestCase
 
     private function dashboardRoute(): string
     {
-        return route('dashboard', ['locale' => 'en']);
+        return route('dashboard');
     }
 
     private function mentorDashboardRoute(): string
     {
-        return route('mentor.dashboard', ['locale' => 'en']);
+        return route('mentor.dashboard');
     }
 
     private function adminDashboardRoute(): string
     {
-        return route('admin.dashboard', ['locale' => 'en']);
+        return route('admin.dashboard');
     }
 
     // ─── Guest access ─────────────────────────────────────────────────────────

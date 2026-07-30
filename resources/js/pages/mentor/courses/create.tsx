@@ -48,7 +48,7 @@ export default function CourseCreate({ categories, difficulties, languages, isAd
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.submit(courseStore(l));
+        form.submit(courseStore());
     }
 
     return (

@@ -26,7 +26,7 @@ class ForumAdminPanelTest extends TestCase
         ForumCategory::factory()->create(['name' => 'General']);
 
         $this->actingAs($admin)
-            ->get(route('admin.forum.categories.index', ['locale' => 'en']))
+            ->get(route('admin.forum.categories.index'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('admin/forum/categories/index')
@@ -39,7 +39,7 @@ class ForumAdminPanelTest extends TestCase
         $learner = User::factory()->create(['role' => UserRole::Learner]);
 
         $this->actingAs($learner)
-            ->get(route('admin.forum.categories.index', ['locale' => 'en']))
+            ->get(route('admin.forum.categories.index'))
             ->assertForbidden();
     }
 
@@ -48,7 +48,7 @@ class ForumAdminPanelTest extends TestCase
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
         $this->actingAs($admin)
-            ->post(route('admin.forum.categories.store', ['locale' => 'en']), [
+            ->post(route('admin.forum.categories.store'), [
                 'name' => 'Course Help',
                 'description' => 'Get help with courses',
                 'color' => 'indigo',
@@ -65,7 +65,7 @@ class ForumAdminPanelTest extends TestCase
         $category = ForumCategory::factory()->create(['name' => 'Old Name']);
 
         $this->actingAs($admin)
-            ->put(route('admin.forum.categories.update', ['locale' => 'en', 'forumCategory' => $category->slug]), [
+            ->put(route('admin.forum.categories.update', ['forumCategory' => $category->slug]), [
                 'name' => 'New Name',
                 'color' => 'emerald',
                 'sort_order' => 2,
@@ -81,7 +81,7 @@ class ForumAdminPanelTest extends TestCase
         $category = ForumCategory::factory()->create();
 
         $this->actingAs($admin)
-            ->delete(route('admin.forum.categories.destroy', ['locale' => 'en', 'forumCategory' => $category->slug]))
+            ->delete(route('admin.forum.categories.destroy', ['forumCategory' => $category->slug]))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('forum_categories', ['id' => $category->id]);
@@ -97,7 +97,7 @@ class ForumAdminPanelTest extends TestCase
         AiMember::factory()->create();
 
         $this->actingAs($admin)
-            ->get(route('admin.forum.ai-members.index', ['locale' => 'en']))
+            ->get(route('admin.forum.ai-members.index'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('admin/forum/ai-members')
@@ -110,7 +110,7 @@ class ForumAdminPanelTest extends TestCase
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
         $this->actingAs($admin)
-            ->post(route('admin.forum.ai-members.store', ['locale' => 'en']), [
+            ->post(route('admin.forum.ai-members.store'), [
                 'name' => 'Aria',
                 'persona_prompt' => 'You are Aria, a helpful learning assistant.',
                 'description' => 'AI learning guide',
@@ -130,7 +130,7 @@ class ForumAdminPanelTest extends TestCase
         $aiMember = AiMember::factory()->create();
 
         $this->actingAs($admin)
-            ->put(route('admin.forum.ai-members.update', ['locale' => 'en', 'aiMember' => $aiMember->id]), [
+            ->put(route('admin.forum.ai-members.update', ['aiMember' => $aiMember->id]), [
                 'name' => 'Updated Aria',
                 'persona_prompt' => 'Updated prompt.',
                 'is_active' => false,
@@ -149,7 +149,7 @@ class ForumAdminPanelTest extends TestCase
         $userId = $aiMember->user_id;
 
         $this->actingAs($admin)
-            ->delete(route('admin.forum.ai-members.destroy', ['locale' => 'en', 'aiMember' => $aiMember->id]))
+            ->delete(route('admin.forum.ai-members.destroy', ['aiMember' => $aiMember->id]))
             ->assertRedirect();
 
         $this->assertDatabaseMissing('ai_members', ['id' => $aiMember->id]);
@@ -161,7 +161,7 @@ class ForumAdminPanelTest extends TestCase
         $learner = User::factory()->create(['role' => UserRole::Learner]);
 
         $this->actingAs($learner)
-            ->get(route('admin.forum.ai-members.index', ['locale' => 'en']))
+            ->get(route('admin.forum.ai-members.index'))
             ->assertForbidden();
     }
 
@@ -183,7 +183,7 @@ class ForumAdminPanelTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get(route('admin.forum.moderation.index', ['locale' => 'en']))
+            ->get(route('admin.forum.moderation.index'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('admin/forum/moderation')
@@ -205,7 +205,7 @@ class ForumAdminPanelTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->post(route('admin.forum.moderation.resolve', ['locale' => 'en', 'forumReport' => $report->id]))
+            ->post(route('admin.forum.moderation.resolve', ['forumReport' => $report->id]))
             ->assertOk()
             ->assertJson(['resolved' => true]);
 
@@ -226,7 +226,7 @@ class ForumAdminPanelTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->delete(route('admin.forum.moderation.delete-content', ['locale' => 'en', 'forumReport' => $report->id]))
+            ->delete(route('admin.forum.moderation.delete-content', ['forumReport' => $report->id]))
             ->assertOk()
             ->assertJson(['deleted' => true]);
 
@@ -248,7 +248,7 @@ class ForumAdminPanelTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->delete(route('admin.forum.moderation.delete-content', ['locale' => 'en', 'forumReport' => $report->id]))
+            ->delete(route('admin.forum.moderation.delete-content', ['forumReport' => $report->id]))
             ->assertOk()
             ->assertJson(['deleted' => true]);
 
@@ -260,7 +260,7 @@ class ForumAdminPanelTest extends TestCase
         $learner = User::factory()->create(['role' => UserRole::Learner]);
 
         $this->actingAs($learner)
-            ->get(route('admin.forum.moderation.index', ['locale' => 'en']))
+            ->get(route('admin.forum.moderation.index'))
             ->assertForbidden();
     }
 }

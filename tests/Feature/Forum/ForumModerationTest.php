@@ -28,10 +28,8 @@ class ForumModerationTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('forum.moderation.pin', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]))
+                'forumThread' => $thread->slug]))
             ->assertOk()
             ->assertJson(['is_pinned' => true]);
 
@@ -45,10 +43,8 @@ class ForumModerationTest extends TestCase
 
         $this->actingAs($mentor)
             ->post(route('forum.moderation.pin', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]))
+                'forumThread' => $thread->slug]))
             ->assertOk();
     }
 
@@ -59,10 +55,8 @@ class ForumModerationTest extends TestCase
 
         $this->actingAs($learner)
             ->post(route('forum.moderation.pin', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]))
+                'forumThread' => $thread->slug]))
             ->assertForbidden();
     }
 
@@ -73,10 +67,8 @@ class ForumModerationTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('forum.moderation.pin', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]))
+                'forumThread' => $thread->slug]))
             ->assertJson(['is_pinned' => false]);
     }
 
@@ -87,10 +79,8 @@ class ForumModerationTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('forum.moderation.lock', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]))
+                'forumThread' => $thread->slug]))
             ->assertOk()
             ->assertJson(['is_locked' => true]);
     }
@@ -108,10 +98,8 @@ class ForumModerationTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('forum.moderation.move', [
-                'locale' => 'en',
                 'forumCategory' => $originalCategory->slug,
-                'forumThread' => $thread->slug,
-            ]), ['category_id' => $newCategory->id])
+                'forumThread' => $thread->slug]), ['category_id' => $newCategory->id])
             ->assertRedirect();
 
         $this->assertDatabaseHas('forum_threads', [
@@ -130,10 +118,8 @@ class ForumModerationTest extends TestCase
         $newCategory = ForumCategory::factory()->create(['thread_count' => 0]);
 
         $this->actingAs($admin)->post(route('forum.moderation.move', [
-            'locale' => 'en',
             'forumCategory' => $originalCategory->slug,
-            'forumThread' => $thread->slug,
-        ]), ['category_id' => $newCategory->id]);
+            'forumThread' => $thread->slug]), ['category_id' => $newCategory->id]);
 
         $this->assertDatabaseHas('forum_categories', ['id' => $originalCategory->id, 'thread_count' => 0]);
         $this->assertDatabaseHas('forum_categories', ['id' => $newCategory->id, 'thread_count' => 1]);
@@ -146,10 +132,8 @@ class ForumModerationTest extends TestCase
 
         $this->actingAs($admin)
             ->post(route('forum.moderation.move', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]), ['category_id' => $thread->category_id])
+                'forumThread' => $thread->slug]), ['category_id' => $thread->category_id])
             ->assertStatus(422);
     }
 
@@ -170,7 +154,7 @@ class ForumModerationTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->post(route('admin.forum.moderation.resolve', ['locale' => 'en', 'forumReport' => $report->id]))
+            ->post(route('admin.forum.moderation.resolve', ['forumReport' => $report->id]))
             ->assertOk()
             ->assertJson(['resolved' => true]);
 
@@ -190,7 +174,7 @@ class ForumModerationTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->delete(route('admin.forum.moderation.delete-content', ['locale' => 'en', 'forumReport' => $report->id]))
+            ->delete(route('admin.forum.moderation.delete-content', ['forumReport' => $report->id]))
             ->assertOk()
             ->assertJson(['deleted' => true]);
 
@@ -212,7 +196,7 @@ class ForumModerationTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->delete(route('admin.forum.moderation.delete-content', ['locale' => 'en', 'forumReport' => $report->id]))
+            ->delete(route('admin.forum.moderation.delete-content', ['forumReport' => $report->id]))
             ->assertOk();
 
         $this->assertSoftDeleted('forum_replies', ['id' => $reply->id]);
@@ -224,7 +208,7 @@ class ForumModerationTest extends TestCase
         $mentor = User::factory()->create(['role' => UserRole::Mentor]);
 
         $this->actingAs($mentor)
-            ->get(route('admin.forum.moderation.index', ['locale' => 'en']))
+            ->get(route('admin.forum.moderation.index'))
             ->assertForbidden();
     }
 
@@ -240,7 +224,7 @@ class ForumModerationTest extends TestCase
         $category = ForumCategory::factory()->create();
 
         $this->actingAs($user)
-            ->post(route('forum.threads.store', ['locale' => 'en']), [
+            ->post(route('forum.threads.store'), [
                 'category_id' => $category->id,
                 'title' => 'Test moderation dispatch',
                 'body' => '<p>Body here</p>',
@@ -260,10 +244,8 @@ class ForumModerationTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('forum.replies.store', [
-                'locale' => 'en',
                 'forumCategory' => $thread->category->slug,
-                'forumThread' => $thread->slug,
-            ]), ['body' => '<p>A test reply</p>'])
+                'forumThread' => $thread->slug]), ['body' => '<p>A test reply</p>'])
             ->assertRedirect();
 
         Queue::assertPushed(AutoFlagWithAi::class, fn ($job) => $job->contentType === ForumReply::class);
