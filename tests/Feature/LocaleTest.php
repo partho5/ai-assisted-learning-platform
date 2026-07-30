@@ -119,4 +119,37 @@ class LocaleTest extends TestCase
     {
         $this->get('/en/dashboard')->assertRedirect(route('login'));
     }
+
+    /**
+     * Without a URL default, every route() call on a /{locale} route must pass
+     * the parameter or throw UrlGenerationException — a footgun that only shows
+     * up at runtime.
+     */
+    public function test_route_generation_does_not_require_an_explicit_locale(): void
+    {
+        $this->assertStringEndsWith('/bn/courses', route('courses.index', absolute: false));
+        $this->assertStringEndsWith('/bn/resources', route('articles.index', absolute: false));
+        $this->assertStringEndsWith('/bn/forum', route('forum.index', absolute: false));
+    }
+
+    public function test_route_generation_follows_the_locale_being_browsed(): void
+    {
+        $this->get('/en');
+
+        $this->assertStringEndsWith('/en/courses', route('courses.index', absolute: false));
+
+        $this->get('/bn');
+
+        $this->assertStringEndsWith('/bn/courses', route('courses.index', absolute: false));
+    }
+
+    public function test_an_explicit_locale_still_overrides_the_default(): void
+    {
+        $this->get('/bn');
+
+        $this->assertStringEndsWith(
+            '/en/courses',
+            route('courses.index', ['locale' => 'en'], absolute: false)
+        );
+    }
 }

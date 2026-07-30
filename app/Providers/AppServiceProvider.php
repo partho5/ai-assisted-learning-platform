@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -78,6 +79,18 @@ class AppServiceProvider extends ServiceProvider
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);
+
+        /**
+         * Baseline `locale` for route generation.
+         *
+         * Content routes live under a /{locale} prefix, so without a default
+         * every route() call must pass it or throw UrlGenerationException.
+         * {@see \App\Http\Middleware\SetLocale} overrides this per request with
+         * the locale being browsed; this value covers routes outside that
+         * middleware's group (auth, settings) plus queue and console contexts,
+         * where there is no request to read a locale from.
+         */
+        URL::defaults(['locale' => config('app.locale')]);
 
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
