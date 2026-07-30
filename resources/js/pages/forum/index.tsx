@@ -41,7 +41,7 @@ export default function ForumIndex({ categories }: Props) {
 
     return (
         <Layout>
-            <Head title="Forum — SkillEvidence" />
+            <Head title="Forum — Jovoc" />
 
             <div className="mx-0 max-w-7xl px-4 py-8 md:mx-auto">
                 {/* Header */}

@@ -16,9 +16,9 @@ class CloudinaryCleanupTest extends TestCase
 {
     use RefreshDatabase;
 
-    private string $oldUrl = 'https://res.cloudinary.com/testcloud/image/upload/v1700000000/skill-evidence/old.jpg';
+    private string $oldUrl = 'https://res.cloudinary.com/testcloud/image/upload/v1700000000/jovoc/old.jpg';
 
-    private string $newUrl = 'https://res.cloudinary.com/testcloud/image/upload/v1700000001/skill-evidence/new.jpg';
+    private string $newUrl = 'https://res.cloudinary.com/testcloud/image/upload/v1700000001/jovoc/new.jpg';
 
     // ──────────────────────────────────────────────────────────────────────────
     // CloudinaryService unit tests
@@ -44,7 +44,7 @@ class CloudinaryCleanupTest extends TestCase
         $service = app(CloudinaryService::class);
 
         $this->assertSame(
-            'skill-evidence/old',
+            'jovoc/old',
             $service->extractPublicId($this->oldUrl),
         );
     }
@@ -76,7 +76,7 @@ class CloudinaryCleanupTest extends TestCase
         $course->update(['thumbnail' => $this->newUrl]);
 
         Http::assertSent(fn ($req) => str_contains($req->url(), 'cloudinary.com') &&
-            $req->data()['public_id'] === 'skill-evidence/old');
+            $req->data()['public_id'] === 'jovoc/old');
     }
 
     public function test_no_cloudinary_call_when_thumbnail_unchanged(): void
@@ -121,7 +121,7 @@ class CloudinaryCleanupTest extends TestCase
         $user->update(['avatar' => $this->newUrl]);
 
         Http::assertSent(fn ($req) => str_contains($req->url(), 'cloudinary.com') &&
-            $req->data()['public_id'] === 'skill-evidence/old');
+            $req->data()['public_id'] === 'jovoc/old');
     }
 
     public function test_no_cloudinary_call_when_avatar_unchanged(): void
@@ -161,7 +161,7 @@ class CloudinaryCleanupTest extends TestCase
         $resource->update(['url' => $this->newUrl]);
 
         Http::assertSent(fn ($req) => str_contains($req->url(), 'cloudinary.com') &&
-            $req->data()['public_id'] === 'skill-evidence/old');
+            $req->data()['public_id'] === 'jovoc/old');
     }
 
     public function test_no_cloudinary_call_when_resource_url_is_non_cloudinary(): void

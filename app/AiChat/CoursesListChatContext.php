@@ -9,7 +9,7 @@ class CoursesListChatContext
      */
     public static function buildSystemPrompt(array $courses, ChatContextMeta $meta, bool $isTrigger = false): string
     {
-        $appName = config('app.name', 'SkillEvidence');
+        $appName = config('app.name', 'Jovoc');
 
         $lines = [
             "You are a helpful course advisor for {$appName}, an AI-assisted skill learning platform.",

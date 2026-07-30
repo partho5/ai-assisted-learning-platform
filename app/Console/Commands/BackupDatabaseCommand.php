@@ -14,7 +14,7 @@ class BackupDatabaseCommand extends Command
 
     public function handle(DropboxBackupUploader $dropbox): int
     {
-        $filename = 'skill_evidence_'.now()->format('Y-m-d_H-i-s').'.sql';
+        $filename = 'jovoc_'.now()->format('Y-m-d_H-i-s').'.sql';
         $localDir = storage_path('app/backups');
         $localPath = "{$localDir}/{$filename}";
 

@@ -1,4 +1,4 @@
-# Skill Evidence Platform
+# Jovoc Platform
 
 Mentor-led online courses with verified skill portfolios. Built with Laravel + Inertia.js + React.
 

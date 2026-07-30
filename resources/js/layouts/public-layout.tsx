@@ -11,7 +11,7 @@ import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumC
 import { index as articlesIndex } from '@/actions/App/Http/Controllers/ArticleController';
 import { index as portfolioLanding } from '@/actions/App/Http/Controllers/PortfolioLandingController';
 import { login, register } from '@/routes';
-import { BRAND_EXPANSION } from '@/lib/brand';
+import { BRAND_EXPANSION, BRAND_NAME } from '@/lib/brand';
 
 interface NavLinkProps {
     href: string;
@@ -78,9 +78,9 @@ export default function PublicLayout({
                 <div className="mx-auto flex max-w-7xl items-stretch justify-between px-4 md:px-6">
                     {/* Logo */}
                     <Link href={`/${l}/`} className="flex items-center gap-2 py-3">
-                        <img src="/logo.png" alt="SkillEvidence" width={28} height={28} className="h-7 w-7" />
+                        <img src="/logo.png" alt={BRAND_NAME} width={28} height={28} className="h-7 w-7" />
                         <span className="text-base font-semibold tracking-tight">
-                            {import.meta.env.VITE_APP_NAME}
+                            {BRAND_NAME}
                         </span>
                     </Link>
 
@@ -139,9 +139,9 @@ export default function PublicLayout({
                 {/* Drawer header */}
                 <div className="border-b border-border px-4 py-3">
                     <Link href={`/${l}/`} className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                        <img src="/logo.png" alt="SkillEvidence" width={28} height={28} className="h-7 w-7" />
+                        <img src="/logo.png" alt={BRAND_NAME} width={28} height={28} className="h-7 w-7" />
                         <span className="text-base font-semibold tracking-tight">
-                            {import.meta.env.VITE_APP_NAME}
+                            {BRAND_NAME}
                         </span>
                     </Link>
                 </div>
@@ -188,9 +188,9 @@ export default function PublicLayout({
                             {/* Brand */}
                             <div className="col-span-2 md:col-span-1">
                                 <Link href={`/${l}/`} className="mb-3 flex items-center gap-2">
-                                    <img src="/logo.png" alt={import.meta.env.VITE_APP_NAME} width={24} height={24} className="h-6 w-6" />
+                                    <img src="/logo.png" alt={BRAND_NAME} width={24} height={24} className="h-6 w-6" />
                                     <span className="text-sm font-semibold text-foreground">
-                                        {import.meta.env.VITE_APP_NAME}
+                                        {BRAND_NAME}
                                     </span>
                                 </Link>
                                 <p className="mb-2 text-xs font-medium text-foreground">{BRAND_EXPANSION}</p>
@@ -232,7 +232,7 @@ export default function PublicLayout({
 
                         <div className="mt-12 border-t border-border pt-6">
                             <p className="text-xs text-muted-foreground">
-                                &copy; {new Date().getFullYear()} {import.meta.env.VITE_APP_NAME}. {t.footer.rights}
+                                &copy; {new Date().getFullYear()} {BRAND_NAME}. {t.footer.rights}
                             </p>
                         </div>
                     </div>

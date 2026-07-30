@@ -36,7 +36,7 @@ export default function Contact() {
             <Head title="Contact Us">
                 <meta
                     name="description"
-                    content="Contact the SkillEvidence team — support, billing, privacy, or legal queries."
+                    content="Contact the Jovoc team — support, billing, privacy, or legal queries."
                 />
                 <meta name="robots" content="index, follow" />
             </Head>

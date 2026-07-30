@@ -1,4 +1,4 @@
-# SEO — Skill Evidence Platform
+# SEO — Jovoc Platform
 
 ## Status Legend
 - ✅ Done / Already correct
@@ -15,7 +15,7 @@
 - ✅ **Documented** — `README.md` created with PM2 setup, verification command, env var notes
 - `ssr.tsx` configured, Node.js SSR process is running in production
 - **Rule:** If the SSR process ever goes down, Googlebot sees `<div id="app"></div>` — monitor it
-- **CRITICAL:** All `<Head>` meta tags (title, description, OG, JSON-LD) depend on SSR. Without it, crawlers see ONLY the default `<title>Skill Evidence</title>` and zero meta/structured data.
+- **CRITICAL:** All `<Head>` meta tags (title, description, OG, JSON-LD) depend on SSR. Without it, crawlers see ONLY the default `<title>Jovoc</title>` and zero meta/structured data.
 
 ### robots.txt
 - ✅ Now served dynamically via `RobotsController` — Sitemap URL built from `config('app.url')`

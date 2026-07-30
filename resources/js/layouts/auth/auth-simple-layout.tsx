@@ -3,6 +3,7 @@ import { BadgeCheck, BookOpen, GraduationCap } from 'lucide-react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
+import { BRAND_NAME } from '@/lib/brand';
 
 const features = [
     {
@@ -38,7 +39,7 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white ring-1 ring-white/20">
                         <AppLogoIcon className="size-6" />
                     </div>
-                    <span className="text-lg font-semibold tracking-tight">Skill Evidence</span>
+                    <span className="text-lg font-semibold tracking-tight">{BRAND_NAME}</span>
                 </Link>
 
                 {/* Tagline + features */}
@@ -69,7 +70,7 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
 
                 {/* Footer quote */}
                 <p className="relative text-xs text-primary-foreground/40">
-                    © {new Date().getFullYear()} Skill Evidence
+                    © {new Date().getFullYear()} {BRAND_NAME}
                 </p>
             </div>
 
@@ -78,7 +79,7 @@ export default function AuthSimpleLayout({ children, title, description }: AuthL
                 {/* Mobile logo */}
                 <Link href={home(locale)} className="mb-8 flex items-center gap-2 lg:hidden">
                     <AppLogoIcon className="size-8" />
-                    <span className="text-base font-semibold">Skill Evidence</span>
+                    <span className="text-base font-semibold">{BRAND_NAME}</span>
                 </Link>
 
                 <div className="w-full max-w-sm space-y-6">

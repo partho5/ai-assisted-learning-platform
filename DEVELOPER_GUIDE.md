@@ -1,4 +1,4 @@
-# SkillEvidence Developer Guide
+# Jovoc Developer Guide
 
 This guide covers all important configurations and how to modify them for development and production.
 
@@ -296,7 +296,7 @@ php artisan migrate:refresh
 **File:** `.env`
 
 ```env
-APP_NAME=SkillEvidence
+APP_NAME=Jovoc
 APP_URL=http://localhost:8000
 APP_LOCALE=en
 ```

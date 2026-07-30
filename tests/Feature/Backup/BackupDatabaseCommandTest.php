@@ -16,7 +16,7 @@ class BackupDatabaseCommandTest extends TestCase
         $uploader->shouldReceive('uploadAndPrune')
             ->once()
             ->withArgs(function (string $localPath, string $filename) {
-                return str_ends_with($filename, '.sql') && str_starts_with($filename, 'skill_evidence_');
+                return str_ends_with($filename, '.sql') && str_starts_with($filename, 'jovoc_');
             });
 
         $this->artisan('backup:database')->assertSuccessful();

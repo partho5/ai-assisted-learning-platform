@@ -314,7 +314,7 @@ On the learn page, below each resource:
 ### 11. SEO
 
 **Per-thread:**
-- `<title>`: Thread title — Category — Forum — SkillEvidence
+- `<title>`: Thread title — Category — Forum — Jovoc
 - Meta description: first 160 chars of thread body (plain text, stripped HTML)
 - Open Graph: auto-generated image with thread title + category color
 - Schema: `DiscussionForumPosting` on thread page, `Comment` on each reply

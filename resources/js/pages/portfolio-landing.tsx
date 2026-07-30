@@ -163,12 +163,12 @@ export default function PortfolioLanding() {
     return (
         <PublicLayout hideFooter={false} hidePlatformChat>
             <Head>
-                <title>Free Portfolio Builder — Showcase Your Work | SkillEvidence</title>
+                <title>Free Portfolio Builder — Showcase Your Work | Jovoc</title>
                 <meta
                     name="description"
                     content="Build your professional portfolio for free. This portfolio builder includes project showcase, media galleries, visitor analytics, contact form, SEO-optimized pages, and more. No hidden costs."
                 />
-                <meta property="og:title" content="Free Portfolio Builder — SkillEvidence" />
+                <meta property="og:title" content="Free Portfolio Builder — Jovoc" />
                 <meta
                     property="og:description"
                     content="A free portfolio builder with project galleries, analytics, contact form, and SEO. Always free, no hidden costs."
@@ -281,7 +281,7 @@ export default function PortfolioLanding() {
                             <div className="h-3 w-3 rounded-full bg-yellow-400" />
                             <div className="h-3 w-3 rounded-full bg-green-400" />
                             <div className="ml-4 rounded-md bg-white px-3 py-1 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                                skillevidence.com/u/yourname/portfolio
+                                jovoc.com/u/yourname/portfolio
                             </div>
                         </div>
                         {/* Mock layout */}

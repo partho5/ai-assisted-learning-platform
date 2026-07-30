@@ -62,7 +62,7 @@ class ChatSessionControllerTest extends TestCase
         ChatMessage::factory()->create([
             'chat_session_id' => $session->id,
             'role' => 'assistant',
-            'content' => 'This is a skill evidence platform!',
+            'content' => 'This is a Jovoc platform!',
         ]);
 
         $this->actingAs($admin)

@@ -35,7 +35,7 @@ export default function ForumSearch({ threads, categories, filters }: Props) {
 
     return (
         <Layout>
-            <Head title="Search Forum — SkillEvidence" />
+            <Head title="Search Forum — Jovoc" />
 
             <div className="mx-0 max-w-7xl px-4 py-8 md:mx-auto">
                 <nav className="text-sm text-muted-foreground mb-6 flex items-center gap-1.5">

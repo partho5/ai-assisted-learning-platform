@@ -24,7 +24,7 @@ export default function RefundPolicy() {
             <Head title="Refund Policy">
                 <meta
                     name="description"
-                    content="SkillEvidence Refund Policy — how platform credit works and how to request a refund within 7 days."
+                    content="Jovoc Refund Policy — how platform credit works and how to request a refund within 7 days."
                 />
                 <meta name="robots" content="index, follow" />
             </Head>
@@ -55,7 +55,7 @@ export default function RefundPolicy() {
                         In case you are not satisfied with a course, you may request
                         a refund within <strong>7 days of purchase</strong>.
                         Approved refunds are issued as{' '}
-                        <strong>SkillEvidence platform credit</strong> — not as
+                        <strong>Jovoc platform credit</strong> — not as
                         cash — which you can use to enrol in any other course on
                         the platform. Platform credit is valid for{' '}
                         <strong>1 year</strong> and cannot be converted to cash.
@@ -93,14 +93,14 @@ export default function RefundPolicy() {
                     <p>
                         All approved refunds are issued exclusively as{' '}
                         <strong className="text-foreground">
-                            SkillEvidence Platform Credit
+                            Jovoc Platform Credit
                         </strong>
                         . This means:
                     </p>
                     <ul className="ml-5 list-disc space-y-1">
                         <li>
                             Credit is added to your account and can be used to
-                            purchase any course on SkillEvidence.
+                            purchase any course on Jovoc.
                         </li>
                         <li>
                             Credit cannot be withdrawn as money or transferred
@@ -121,7 +121,7 @@ export default function RefundPolicy() {
                         </li>
                     </ul>
                     <p>
-                        By completing a purchase on SkillEvidence, you
+                        By completing a purchase on Jovoc, you
                         acknowledge and agree that any refund you may be
                         eligible for will be issued as platform credit, not as a
                         cash refund.
@@ -160,7 +160,7 @@ export default function RefundPolicy() {
                 <PolicySection title="4. Exceptional Circumstances">
                     <p>
                         If a course is removed from the platform by its Mentor
-                        or by SkillEvidence administration, all learners who
+                        or by Jovoc administration, all learners who
                         purchased it will automatically receive full platform
                         credit equal to the purchase price, regardless of the
                         7-day window.
@@ -176,7 +176,7 @@ export default function RefundPolicy() {
                     <p>
                         Initiating a chargeback or dispute through PayPal or
                         your bank instead of following this policy may result in
-                        immediate suspension of your SkillEvidence account
+                        immediate suspension of your Jovoc account
                         pending review. We strongly encourage you to contact us
                         first — we are happy to help.
                     </p>

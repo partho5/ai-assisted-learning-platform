@@ -16,7 +16,7 @@ export default function PrivacyPolicy() {
             <Head title="Privacy Policy">
                 <meta
                     name="description"
-                    content="SkillEvidence Privacy Policy — how we collect, use, and protect your personal data."
+                    content="Jovoc Privacy Policy — how we collect, use, and protect your personal data."
                 />
                 <meta name="robots" content="index, follow" />
             </Head>
@@ -33,9 +33,9 @@ export default function PrivacyPolicy() {
 
                 <PolicySection title="1. Who We Are">
                     <p>
-                        SkillEvidence ("<strong className="text-foreground">we</strong>", "
+                        Jovoc ("<strong className="text-foreground">we</strong>", "
                         <strong className="text-foreground">us</strong>", "
-                        <strong className="text-foreground">our</strong>") operates the SkillEvidence learning platform
+                        <strong className="text-foreground">our</strong>") operates the Jovoc learning platform
                         accessible at this website. This policy explains how we collect, use, and protect information about
                         you when you use our services.
                     </p>

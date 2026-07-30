@@ -20,10 +20,10 @@ class AiChatTest extends TestCase
 
     public function test_guest_can_access_platform_chat(): void
     {
-        $this->mockAiStreamChat('Hello! I can help you with SkillEvidence.');
+        $this->mockAiStreamChat('Hello! I can help you with Jovoc.');
 
         $this->postJson(route('chat.platform'), [
-            'message' => 'What is SkillEvidence?',
+            'message' => 'What is Jovoc?',
         ])->assertOk()
             ->assertHeaderContains('Content-Type', 'text/event-stream');
     }
@@ -71,7 +71,7 @@ class AiChatTest extends TestCase
         $this->postJson(route('chat.platform'), [
             'message' => 'Tell me more',
             'history' => [
-                ['role' => 'user', 'content' => 'What is SkillEvidence?'],
+                ['role' => 'user', 'content' => 'What is Jovoc?'],
                 ['role' => 'assistant', 'content' => 'It is a learning platform.'],
             ],
         ])->assertOk();

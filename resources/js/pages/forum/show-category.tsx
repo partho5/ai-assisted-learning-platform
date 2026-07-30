@@ -32,7 +32,7 @@ export default function ShowCategory({ category, threads, filter }: Props) {
 
     return (
         <Layout>
-            <Head title={`${category.name} — Forum — SkillEvidence`} />
+            <Head title={`${category.name} — Forum — Jovoc`} />
 
             <div className="mx-0 max-w-7xl px-4 py-8 md:mx-auto">
                 {/* Breadcrumb */}

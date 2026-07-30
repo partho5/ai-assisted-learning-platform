@@ -1,4 +1,4 @@
-# SkillEvidence — Production Deployment Guide
+# Jovoc — Production Deployment Guide
 
 Target: **Ubuntu 20.04 LTS or later** · **Nginx** · **PostgreSQL 17 + pgvector (Docker)** · **PHP 8.4**
 
@@ -219,7 +219,7 @@ sudo -u www-data nano .env
 Set the following values. Every other key can stay at its default unless you need it.
 
 ```dotenv
-APP_NAME="SkillEvidence"
+APP_NAME="Jovoc"
 APP_ENV=production
 APP_KEY=                          # generated in next step
 APP_DEBUG=false

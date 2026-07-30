@@ -16,7 +16,7 @@ export default function Terms() {
             <Head title="Terms and Conditions">
                 <meta
                     name="description"
-                    content="SkillEvidence Terms and Conditions — the rules and agreements that govern use of our learning platform."
+                    content="Jovoc Terms and Conditions — the rules and agreements that govern use of our learning platform."
                 />
                 <meta name="robots" content="index, follow" />
             </Head>
@@ -32,14 +32,14 @@ export default function Terms() {
                 </div>
 
                 <p className="mb-10 text-sm leading-relaxed text-muted-foreground">
-                    By creating an account or using SkillEvidence you agree to these Terms and Conditions. Please read them
+                    By creating an account or using Jovoc you agree to these Terms and Conditions. Please read them
                     carefully before using the platform.
                 </p>
 
                 <PolicySection title="1. Definitions">
                     <ul className="ml-5 list-disc space-y-1">
                         <li>
-                            <strong className="text-foreground">"Platform"</strong> — the SkillEvidence website and all
+                            <strong className="text-foreground">"Platform"</strong> — the Jovoc website and all
                             related services.
                         </li>
                         <li>
@@ -119,7 +119,7 @@ export default function Terms() {
 
                 <PolicySection title="7. Intellectual Property">
                     <p>
-                        All Platform code, design, and branding are owned by SkillEvidence. Course content is owned by the
+                        All Platform code, design, and branding are owned by Jovoc. Course content is owned by the
                         respective Mentor who created it. You may not reproduce, distribute, or create derivative works
                         without written permission from the rights holder.
                     </p>
@@ -148,7 +148,7 @@ export default function Terms() {
 
                 <PolicySection title="10. Limitation of Liability">
                     <p>
-                        To the fullest extent permitted by law, SkillEvidence is not liable for any indirect, incidental,
+                        To the fullest extent permitted by law, Jovoc is not liable for any indirect, incidental,
                         or consequential damages arising from your use of the Platform. Our total liability to you for any
                         claim will not exceed the amount you paid us in the 12 months preceding the claim.
                     </p>
@@ -174,7 +174,7 @@ export default function Terms() {
                     <p>
                         These Terms are governed by applicable law. Any disputes will be resolved through good-faith
                         negotiation first. If unresolved, disputes will be submitted to the courts of the jurisdiction
-                        where SkillEvidence is registered.
+                        where Jovoc is registered.
                     </p>
                 </PolicySection>
 

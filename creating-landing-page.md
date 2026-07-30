@@ -32,7 +32,7 @@ Every tag that matters:
 ```tsx
 <Head title="Learn. Prove. Get Hired.">
     <meta name="description" content="Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers can trust. Free to start." />
-    <meta name="keywords" content="skill evidence, online courses, verified learning, skill portfolio, mentor courses" />
+    <meta name="keywords" content="jovoc, online courses, verified learning, skill portfolio, mentor courses" />
     <link rel="canonical" href="https://yoursite.com/en/" />
 
     {/* hreflang — EN/BN language variants */}
@@ -42,7 +42,7 @@ Every tag that matters:
 
     {/* Open Graph */}
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Learn. Prove. Get Hired. — SkillEvidence" />
+    <meta property="og:title" content="Learn. Prove. Get Hired. — Jovoc" />
     <meta property="og:description" content="Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers can trust." />
     <meta property="og:url" content="https://yoursite.com/en/" />
     <meta property="og:image" content="https://yoursite.com/og-image.png" />
@@ -68,7 +68,7 @@ Three schemas, inlined as `<script type="application/ld+json">`:
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "SkillEvidence",
+  "name": "Jovoc",
   "url": "https://yoursite.com",
   "logo": "https://yoursite.com/logo.png",
   "sameAs": []
@@ -80,7 +80,7 @@ Three schemas, inlined as `<script type="application/ld+json">`:
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "SkillEvidence",
+  "name": "Jovoc",
   "url": "https://yoursite.com",
   "potentialAction": {
     "@type": "SearchAction",
@@ -95,7 +95,7 @@ Three schemas, inlined as `<script type="application/ld+json">`:
 {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
-  "name": "SkillEvidence",
+  "name": "Jovoc",
   "description": "Mentor-led online courses with verified skill portfolios.",
   "url": "https://yoursite.com",
   "hasOfferCatalog": {

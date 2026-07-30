@@ -1,5 +1,5 @@
 const PLATFORM_SUGGESTIONS = [
-    'What is SkillEvidence and who is it for?',
+    'What is Jovoc and who is it for?',
     'How does the enrollment process work?',
     'What is the difference between Free and Paid tier?',
 ];

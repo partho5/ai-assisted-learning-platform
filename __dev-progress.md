@@ -1,4 +1,4 @@
-# SkillEvidence Development Progress
+# Jovoc Development Progress
 
 **Tests**: 121 passing | **Build**: ✓ | **Last Updated**: 2026-03-04
 

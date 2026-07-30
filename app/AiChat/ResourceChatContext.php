@@ -10,7 +10,7 @@ class ResourceChatContext
 {
     public static function buildSystemPrompt(Resource $resource, Course $course, ChatContextMeta $meta, ?Collection $chunks = null, bool $isTrigger = false): string
     {
-        $appName = config('app.name', 'SkillEvidence');
+        $appName = config('app.name', 'Jovoc');
         $resourceType = $resource->type instanceof \App\Enums\ResourceType
             ? $resource->type->value
             : (string) $resource->type;

@@ -8,7 +8,7 @@ class PlatformChatContext
 {
     public static function buildSystemPrompt(ChatContextMeta $meta, ?Collection $chunks = null, bool $isTrigger = false, ?string $pageContext = null): string
     {
-        $appName = config('app.name', 'SkillEvidence');
+        $appName = config('app.name', 'Jovoc');
 
         $lines = [
             "You are a friendly and knowledgeable assistant for {$appName}, an AI-assisted skill learning platform.",

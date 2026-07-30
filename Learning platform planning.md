@@ -1,4 +1,4 @@
-# [**SkillEvidence.com**](http://SkillEvidence.com)
+# [**jovoc.com**](http://jovoc.com)
 
 Implement features one at a time — never implement multiple features simultaneously.
 
@@ -181,7 +181,7 @@ For every resource they are will be self test.
 
 ### **6\. Public Evidence Portfolio (CRITICAL FOR MONETIZATION)**
 
-**Public Profile URL:** `skillevidence.com/u/username`
+**Public Profile URL:** `jovoc.com/u/username`
 
 **Visible to Anyone (No login required):**
 
@@ -244,7 +244,7 @@ For every resource they are will be self test.
   * Total hours invested (from footprint data)  
   * Unique verification ID  
   * QR code linking to public portfolio  
-  * SkillEvidence logo \+ branding
+  * Jovoc logo \+ branding
 
 **Why This Matters:**
 

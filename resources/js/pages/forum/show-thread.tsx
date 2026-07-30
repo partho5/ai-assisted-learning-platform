@@ -175,7 +175,7 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
 
     return (
         <Layout>
-            <Head title={`${thread.title} — ${thread.category?.name ?? 'Forum'} — SkillEvidence`} />
+            <Head title={`${thread.title} — ${thread.category?.name ?? 'Forum'} — Jovoc`} />
 
             <div className="mx-0 max-w-7xl px-4 py-8 md:mx-auto">
                 {/* Breadcrumb */}
