@@ -3,12 +3,20 @@ import type { Category } from './course';
 
 export type ArticleStatus = 'draft' | 'scheduled' | 'published';
 
+/**
+ * An article's primary language. Content is single-language: the article is
+ * indexed only under this locale, and EnsureContentLocale redirects requests
+ * that arrive under the other one.
+ */
+export type ContentLanguage = 'bn' | 'en';
+
 export type Article = {
     id: number;
     author_id: number;
     category_id: number | null;
     title: string;
     slug: string;
+    language: ContentLanguage;
     excerpt: string | null;
     body: string | null;
     featured_image: string | null;

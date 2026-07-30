@@ -78,13 +78,24 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    /*
+     * This is a Bengali-first platform: the bare root redirects to /bn, and
+     * Bengali is the canonically-indexed default. English remains a fully
+     * supported secondary locale under /en.
+     */
+    'locale' => env('APP_LOCALE', 'bn'),
 
+    /*
+     * Translation strings fall back to English, not Bengali — resources/lang/bn
+     * is sparse, so English remains the more complete backstop. This governs
+     * translation lookup only, never URLs.
+     */
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
-    /* Locales supported by the URL prefix routing (/en/..., /bn/...) */
-    'supported_locales' => ['en', 'bn'],
+    /* Locales supported by the URL prefix routing (/bn/..., /en/...); primary first. */
+    'supported_locales' => ['bn', 'en'],
 
+    /* Test fixture data only — unrelated to content locale. */
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*

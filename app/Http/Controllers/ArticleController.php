@@ -2,21 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\BuildsMetaDescription;
 use App\Enums\ArticleStatus;
+use App\Enums\ContentLanguage;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
 use App\Models\Category;
+use App\Services\SlugGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ArticleController extends Controller
 {
+    use BuildsMetaDescription;
+
     /**
      * Get all unique tags used across articles.
      */
@@ -59,7 +63,7 @@ class ArticleController extends Controller
 
         $articles = $query
             ->latest()
-            ->get(['id', 'author_id', 'category_id', 'title', 'slug', 'status', 'read_time_minutes', 'published_at', 'created_at', 'updated_at']);
+            ->get(['id', 'author_id', 'category_id', 'title', 'slug', 'language', 'status', 'read_time_minutes', 'published_at', 'created_at', 'updated_at']);
 
         return Inertia::render('articles/index', [
             'articles' => $articles,
@@ -84,10 +88,20 @@ class ArticleController extends Controller
             $query->whereRaw("search_vector @@ plainto_tsquery('english', ?)", [$search]);
         }
 
+        /**
+         * Articles are single-language, so the listing shows only the current
+         * locale's pool. 'all' is the escape hatch, mirroring the `course_lang`
+         * filter on the course catalogue.
+         */
+        $articleLang = $request->input('article_lang', app()->getLocale());
+        if ($articleLang !== 'all') {
+            $query->byLanguage($articleLang);
+        }
+
         return Inertia::render('articles/index', [
             'articles' => $query->paginate(12)->withQueryString(),
             'categories' => Category::orderBy('name')->get(['id', 'name', 'slug']),
-            'filters' => $request->only(['category', 'search']),
+            'filters' => $request->only(['category', 'search', 'article_lang']),
             'isAuthorView' => false,
         ]);
     }
@@ -100,9 +114,7 @@ class ArticleController extends Controller
 
         $article->load('author:id,name,username,avatar,headline,bio,social_links,created_at', 'category');
 
-        $description = $article->excerpt
-            ? mb_substr(trim($article->excerpt), 0, 160)
-            : mb_substr(trim(strip_tags($article->body ?? '')), 0, 160);
+        $description = $this->metaDescription($article->excerpt ?: $article->body);
 
         return Inertia::render('articles/show', [
             'article' => $article,
@@ -128,6 +140,7 @@ class ArticleController extends Controller
         return Inertia::render('articles/create', [
             'categories' => Category::orderBy('name')->get(['id', 'name', 'slug']),
             'statuses' => collect(ArticleStatus::cases())->map(fn ($s) => ['value' => $s->value, 'label' => ucfirst($s->value)]),
+            'languages' => collect(ContentLanguage::cases())->map(fn ($c) => ['value' => $c->value, 'label' => $c->label()]),
         ]);
     }
 
@@ -153,8 +166,9 @@ class ArticleController extends Controller
 
         $article = Article::create($data);
 
+        /** Land on the article's own locale — the guard would 301 there anyway. */
         if ($article->isPublished()) {
-            return redirect()->route('articles.show', ['locale' => app()->getLocale(), 'article' => $article->slug])
+            return redirect()->route('articles.show', ['locale' => $article->language->value, 'article' => $article->slug])
                 ->with('success', 'Article published.');
         }
 
@@ -170,6 +184,7 @@ class ArticleController extends Controller
             'article' => $article->load('category'),
             'categories' => Category::orderBy('name')->get(['id', 'name', 'slug']),
             'statuses' => collect(ArticleStatus::cases())->map(fn ($s) => ['value' => $s->value, 'label' => ucfirst($s->value)]),
+            'languages' => collect(ContentLanguage::cases())->map(fn ($c) => ['value' => $c->value, 'label' => $c->label()]),
         ]);
     }
 
@@ -179,9 +194,7 @@ class ArticleController extends Controller
 
         $article->load('author:id,name,username,avatar,headline,bio,social_links,created_at', 'category');
 
-        $description = $article->excerpt
-            ? mb_substr(trim($article->excerpt), 0, 160)
-            : mb_substr(trim(strip_tags($article->body ?? '')), 0, 160);
+        $description = $this->metaDescription($article->excerpt ?: $article->body);
 
         return Inertia::render('articles/show', [
             'article' => $article,
@@ -226,8 +239,9 @@ class ArticleController extends Controller
 
         $fresh = $article->fresh();
 
+        /** Language may have just changed, so follow the record, not the request. */
         if ($fresh->isPublished()) {
-            return redirect()->route('articles.show', ['locale' => app()->getLocale(), 'article' => $article->slug])
+            return redirect()->route('articles.show', ['locale' => $fresh->language->value, 'article' => $article->slug])
                 ->with('success', 'Article updated.');
         }
 
@@ -247,7 +261,7 @@ class ArticleController extends Controller
 
     private function uniqueSlug(string $value): string
     {
-        $base = Str::slug($value);
+        $base = SlugGenerator::generate($value);
         $slug = $base;
         $i = 2;
 

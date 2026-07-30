@@ -30,7 +30,7 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', ['locale' => 'en'], false));
+        $response->assertRedirect(route('dashboard', ['locale' => config('app.locale')], false));
 
         $user = User::where('email', 'learner@example.com')->firstOrFail();
         $this->assertSame(UserRole::Learner, $user->role);
@@ -49,7 +49,7 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', ['locale' => 'en'], false));
+        $response->assertRedirect(route('dashboard', ['locale' => config('app.locale')], false));
 
         $user = User::where('email', 'mentor@example.com')->firstOrFail();
         $this->assertSame(UserRole::Mentor, $user->role);

@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\ArticleStatus;
+use App\Enums\ContentLanguage;
+use App\Services\SlugGenerator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,6 +23,15 @@ class StoreArticleRequest extends FormRequest
                 'tags' => array_filter(array_map('trim', explode(',', $this->tags))),
             ]);
         }
+
+        /**
+         * Default to the locale the author is writing under — the same rule
+         * forum threads follow. Keeps the field required without forcing every
+         * caller to restate the obvious.
+         */
+        if (! $this->filled('language')) {
+            $this->merge(['language' => app()->getLocale()]);
+        }
     }
 
     /** @return array<string, mixed> */
@@ -28,7 +39,7 @@ class StoreArticleRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:articles,slug', 'regex:/^[a-z0-9\-]+$/'],
+            'slug' => ['required', 'string', 'max:255', 'unique:articles,slug', 'regex:'.SlugGenerator::pattern()],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'body' => ['required', 'string'],
             'featured_image' => ['nullable', 'url', 'max:2048'],
@@ -38,6 +49,15 @@ class StoreArticleRequest extends FormRequest
             'category_id' => ['nullable', 'exists:categories,id'],
             'status' => ['required', Rule::enum(ArticleStatus::class)],
             'publish_at' => ['required_if:status,scheduled', 'nullable', 'date'],
+            'language' => ['required', Rule::enum(ContentLanguage::class)],
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        return [
+            'slug.regex' => 'The slug may only contain Bengali or lowercase English letters, numbers, and hyphens.',
         ];
     }
 }

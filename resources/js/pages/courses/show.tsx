@@ -16,6 +16,7 @@ import PublicLayout from '@/layouts/public-layout';
 import { trackCourseView, trackEnroll } from '@/lib/analytics';
 import { captureReferral } from '@/lib/referral';
 import type { Course, Enrollment } from '@/types';
+import { inLanguage, ogLocale } from '@/lib/locale';
 
 interface Props {
     course: Course;
@@ -120,7 +121,7 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                 <meta property="og:image:alt" content={course.title} />
                 <meta property="og:url" content={ogUrl} />
                 <meta property="og:type" content="website" />
-                <meta property="og:locale" content="en_US" />
+                <meta property="og:locale" content={ogLocale(l)} />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`${course.title} | ${String(name)}`} />
                 <meta name="twitter:description" content={ogDescription} />
@@ -131,6 +132,7 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                     name: course.title,
                     description: ogDescription,
                     url: ogUrl,
+                    inLanguage: inLanguage(l),
                     image: ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`,
                     provider: {
                         '@type': 'Organization',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Concerns\BuildsMetaDescription;
 use App\Enums\CourseDifficulty;
 use App\Enums\CourseLanguage;
 use App\Enums\ResourceType;
@@ -10,14 +11,16 @@ use App\Http\Requests\UpdateCourseRequest;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Services\SlugGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class CourseController extends Controller
 {
+    use BuildsMetaDescription;
+
     /**
      * Role-aware index: mentors/admins see their own course management,
      * everyone else sees the public catalog.
@@ -117,9 +120,7 @@ class CourseController extends Controller
                 ->first();
         }
 
-        $ogDescription = $course->subtitle
-            ? mb_substr(trim($course->subtitle), 0, 160)
-            : mb_substr(trim(strip_tags($course->description ?? '')), 0, 160);
+        $ogDescription = $this->metaDescription($course->subtitle ?: $course->description);
 
         return Inertia::render('courses/show', [
             'course' => $course,
@@ -302,7 +303,7 @@ class CourseController extends Controller
 
     private function uniqueSlug(string $title, ?int $excludeId = null): string
     {
-        $base = Str::of($title)->lower()->replaceMatches('/[^\p{L}\p{N}\p{M}]+/u', '-')->trim('-')->toString();
+        $base = SlugGenerator::generate($title);
         $slug = $base;
         $counter = 1;
 

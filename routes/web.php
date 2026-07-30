@@ -62,12 +62,13 @@ Route::get('/robots.txt', [RobotsController::class, 'index'])->name('robots');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/llms.txt', [LlmsTxtController::class, 'index'])->name('llms');
 
-// Redirect bare root to default locale
-Route::redirect('/', '/en');
+// Redirect bare root to the default locale. Permanent: this is the primary
+// signal to search engines that the site's root is Bengali.
+Route::permanentRedirect('/', '/'.config('app.locale'));
 
-// All content routes live under /{locale}/ for SEO (EN/BN URL routing)
+// All content routes live under /{locale}/ for SEO (BN/EN URL routing)
 Route::prefix('{locale}')
-    ->where(['locale' => 'en|bn'])
+    ->where(['locale' => 'bn|en'])
     ->middleware('setlocale')
     ->group(function () {
         Route::get('/', [WelcomeController::class, 'index'])->name('home');
@@ -179,6 +180,7 @@ Route::prefix('{locale}')
 
         // Course learn page — public for free resources, auth handled in controller
         Route::get('courses/{course}/learn/{resource}', [LearnController::class, 'show'])
+            ->middleware('content.locale')
             ->name('learn.show');
 
         // AI Chat — platform, course, and resource assistants (all public, auth optional)
@@ -295,7 +297,9 @@ Route::prefix('{locale}')
 
         // Public course catalog & detail (no auth required, after specific routes)
         Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
-        Route::get('courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+        Route::get('courses/{course}', [CourseController::class, 'show'])
+            ->middleware('content.locale')
+            ->name('courses.show');
 
         // Enrollment (auth required)
         Route::post('courses/{course}/enroll', [EnrollmentController::class, 'store'])
@@ -353,7 +357,9 @@ Route::prefix('{locale}')
 
         // Public index + detail (after static paths to avoid slug collision)
         Route::get('resources', [ArticleController::class, 'index'])->name('articles.index');
-        Route::get('resources/{article:slug}', [ArticleController::class, 'show'])->name('articles.show');
+        Route::get('resources/{article:slug}', [ArticleController::class, 'show'])
+            ->middleware('content.locale')
+            ->name('articles.show');
 
         // Public evidence portfolio
         Route::get('u/{username}', [PublicProfileController::class, 'show'])->name('portfolio.show');
@@ -412,7 +418,9 @@ Route::prefix('{locale}')
         Route::get('forum/{forumCategory:slug}', [ForumCategoryController::class, 'show'])->name('forum.category.show');
 
         // Thread show (public)
-        Route::get('forum/{forumCategory:slug}/{forumThread:slug}', [ForumThreadController::class, 'show'])->name('forum.threads.show');
+        Route::get('forum/{forumCategory:slug}/{forumThread:slug}', [ForumThreadController::class, 'show'])
+            ->middleware('content.locale')
+            ->name('forum.threads.show');
 
         // Auth-required thread & reply actions (use slug wildcards, registered after show routes)
         Route::middleware(['auth', 'verified'])->group(function () {

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ContentLanguage;
 use App\Models\ForumCategory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,6 +21,8 @@ class ForumThreadFactory extends Factory
             'user_id' => User::factory()->paid(),
             'category_id' => ForumCategory::factory(),
             'slug' => Str::slug($title).'-'.Str::lower(Str::random(4)),
+            /* Faker generates English text, so default the marker to match. */
+            'language' => ContentLanguage::En,
             'title' => $title,
             'body' => '<p>'.implode('</p><p>', fake()->paragraphs(2)).'</p>',
             'is_pinned' => false,
@@ -47,5 +50,15 @@ class ForumThreadFactory extends Factory
     public function resolved(): static
     {
         return $this->state(fn (array $attributes) => ['is_resolved' => true]);
+    }
+
+    public function bengali(): static
+    {
+        return $this->state(fn (array $attributes) => ['language' => ContentLanguage::Bn]);
+    }
+
+    public function english(): static
+    {
+        return $this->state(fn (array $attributes) => ['language' => ContentLanguage::En]);
     }
 }

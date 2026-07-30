@@ -147,10 +147,15 @@ class ForumBrowsingTest extends TestCase
     // Sitemap
     // ──────────────────────────────────────────────
 
-    public function test_forum_threads_appear_in_sitemap(): void
+    /**
+     * Threads are single-language, so a thread and its category are listed only
+     * under the thread's own locale. The forum index itself is a listing page
+     * that genuinely exists in both locales, so it is expected in both.
+     */
+    public function test_forum_threads_appear_in_sitemap_under_their_own_locale(): void
     {
         $category = ForumCategory::factory()->create(['slug' => 'general']);
-        $thread = ForumThread::factory()->for($category, 'category')->create([
+        ForumThread::factory()->english()->for($category, 'category')->create([
             'slug' => 'my-thread',
             'last_activity_at' => now(),
         ]);
@@ -160,7 +165,23 @@ class ForumBrowsingTest extends TestCase
         $response->assertSee('/en/forum');
         $response->assertSee('/en/forum/general');
         $response->assertSee('/en/forum/general/my-thread');
-        $response->assertDontSee('/bn/forum');
+
+        // No Bengali threads exist, so no Bengali category or thread URL should.
+        $response->assertDontSee('/bn/forum/general');
+    }
+
+    public function test_bengali_thread_is_listed_only_under_the_bengali_locale(): void
+    {
+        $category = ForumCategory::factory()->create(['slug' => 'general']);
+        ForumThread::factory()->bengali()->for($category, 'category')->create([
+            'slug' => 'amar-thread',
+            'last_activity_at' => now(),
+        ]);
+
+        $response = $this->get(route('sitemap'));
+        $response->assertOk();
+        $response->assertSee('/bn/forum/general/amar-thread');
+        $response->assertDontSee('/en/forum/general/amar-thread');
     }
 
     public function test_soft_deleted_threads_excluded_from_sitemap(): void

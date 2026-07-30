@@ -43,6 +43,20 @@ class CourseFactory extends Factory
         ]);
     }
 
+    public function bengali(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'language' => CourseLanguage::Bn,
+        ]);
+    }
+
+    public function english(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'language' => CourseLanguage::En,
+        ]);
+    }
+
     public function draft(): static
     {
         return $this->state(fn (array $attributes) => [

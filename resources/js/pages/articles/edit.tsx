@@ -7,9 +7,14 @@ import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
 import TagSuggestions from '@/components/tag-suggestions';
 import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
-import type { Article, Category } from '@/types';
+import type { Article, Category, ContentLanguage } from '@/types';
 
 interface StatusOption {
+    value: string;
+    label: string;
+}
+
+interface LanguageOption {
     value: string;
     label: string;
 }
@@ -18,9 +23,10 @@ interface Props {
     article: Article;
     categories: Category[];
     statuses: StatusOption[];
+    languages: LanguageOption[];
 }
 
-export default function ArticleEdit({ article, categories, statuses }: Props) {
+export default function ArticleEdit({ article, categories, statuses, languages }: Props) {
     const { locale } = usePage().props as Record<string, any>;
     const l = String(locale);
 
@@ -44,6 +50,7 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
         category_id: article.category_id ? String(article.category_id) : '',
         status: article.status,
         publish_at: article.status === 'scheduled' ? existingPublishAt : '',
+        language: article.language,
     });
 
     function withUtcPublishAt(): void {
@@ -173,6 +180,26 @@ export default function ArticleEdit({ article, categories, statuses }: Props) {
                             tagsUrl={`/${l}/resources/api/tags`}
                         />
                         {form.errors.tags && <p className="text-sm text-destructive">{form.errors.tags}</p>}
+                    </div>
+
+                    {/* Content language — changing this moves the article's indexed URL locale */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="language">
+                            Language
+                            <span className="ml-1 text-xs font-normal text-muted-foreground">(changing this moves the article to the other locale's URL)</span>
+                        </Label>
+                        <select
+                            id="language"
+                            value={form.data.language}
+                            onChange={(e) => form.setData('language', e.target.value as ContentLanguage)}
+                            disabled={form.processing}
+                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                        >
+                            {languages.map((lang) => (
+                                <option key={lang.value} value={lang.value}>{lang.label}</option>
+                            ))}
+                        </select>
+                        {form.errors.language && <p className="text-sm text-destructive">{form.errors.language}</p>}
                     </div>
 
                     {/* Category */}

@@ -7,6 +7,7 @@ import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
 import TagSuggestions from '@/components/tag-suggestions';
 import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
+import { sanitizeSlug, slugify } from '@/lib/slug';
 import type { Category } from '@/types';
 import { useEffect, useState } from 'react';
 
@@ -15,12 +16,18 @@ interface StatusOption {
     label: string;
 }
 
+interface LanguageOption {
+    value: string;
+    label: string;
+}
+
 interface Props {
     categories: Category[];
     statuses: StatusOption[];
+    languages: LanguageOption[];
 }
 
-export default function ArticleCreate({ categories, statuses }: Props) {
+export default function ArticleCreate({ categories, statuses, languages }: Props) {
     const { locale } = usePage().props as Record<string, any>;
     const l = String(locale);
 
@@ -35,19 +42,14 @@ export default function ArticleCreate({ categories, statuses }: Props) {
         category_id: '',
         status: 'published',
         publish_at: '',
+        language: l,
     });
 
     const [slugEdited, setSlugEdited] = useState(false);
 
     useEffect(() => {
         if (!slugEdited && form.data.title) {
-            form.setData('slug', form.data.title
-                .toLowerCase()
-                .trim()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/-+/g, '-')
-            );
+            form.setData('slug', slugify(form.data.title));
         }
     }, [form.data.title]);
 
@@ -94,8 +96,8 @@ export default function ArticleCreate({ categories, statuses }: Props) {
                             <Input
                                 id="slug"
                                 value={form.data.slug}
-                                onChange={(e) => { setSlugEdited(true); form.setData('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-')); }}
-                                placeholder="how-to-land-remote-job"
+                                onChange={(e) => { setSlugEdited(true); form.setData('slug', sanitizeSlug(e.target.value)); }}
+                                placeholder="কিভাবে-রিমোট-চাকরি-পাবেন"
                                 className="font-mono text-sm"
                                 disabled={form.processing}
                             />
@@ -172,6 +174,26 @@ export default function ArticleCreate({ categories, statuses }: Props) {
                     </div>
 
                     {/* Category */}
+                    {/* Content language — determines which locale this article is indexed under */}
+                    <div className="space-y-1.5">
+                        <Label htmlFor="language">
+                            Language
+                            <span className="ml-1 text-xs font-normal text-muted-foreground">(the article's primary language — sets its URL locale)</span>
+                        </Label>
+                        <select
+                            id="language"
+                            value={form.data.language}
+                            onChange={(e) => form.setData('language', e.target.value)}
+                            disabled={form.processing}
+                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                        >
+                            {languages.map((lang) => (
+                                <option key={lang.value} value={lang.value}>{lang.label}</option>
+                            ))}
+                        </select>
+                        {form.errors.language && <p className="text-sm text-destructive">{form.errors.language}</p>}
+                    </div>
+
                     <div className="space-y-1.5">
                         <Label htmlFor="category_id">Category</Label>
                         <select

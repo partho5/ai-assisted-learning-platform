@@ -60,7 +60,7 @@ class ForumAiMemberAdminController extends Controller
         ]);
 
         return redirect()->route('admin.forum.ai-members.index', [
-            'locale' => $request->route('locale', 'en'),
+            'locale' => app()->getLocale(),
         ]);
     }
 
@@ -86,7 +86,7 @@ class ForumAiMemberAdminController extends Controller
         ]);
 
         return redirect()->route('admin.forum.ai-members.index', [
-            'locale' => $request->route('locale', 'en'),
+            'locale' => app()->getLocale(),
         ]);
     }
 
@@ -97,7 +97,7 @@ class ForumAiMemberAdminController extends Controller
         $user->delete();
 
         return redirect()->route('admin.forum.ai-members.index', [
-            'locale' => $request->route('locale', 'en'),
+            'locale' => app()->getLocale(),
         ]);
     }
 

@@ -23,6 +23,15 @@ class ForumCategoryController extends Controller
                 $q->where('user_id', $request->user()?->id ?? 0);
             }]);
 
+        /**
+         * Threads are single-language, so a category listing shows only the
+         * current locale's threads. 'all' is the escape hatch.
+         */
+        $threadLang = $request->input('thread_lang', app()->getLocale());
+        if ($threadLang !== 'all') {
+            $query->byLanguage($threadLang);
+        }
+
         // Pinned threads always first within the current filter
         match ($filter) {
             'trending' => $query->trending(),
@@ -40,6 +49,7 @@ class ForumCategoryController extends Controller
             'category' => $forumCategory,
             'threads' => $threads,
             'filter' => $filter,
+            'threadLang' => $threadLang,
         ]);
     }
 }

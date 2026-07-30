@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PublicLayout from '@/layouts/public-layout';
 import type { Category, Course, Paginated, SelectOption } from '@/types';
+import { inLanguage, ogLocale } from '@/lib/locale';
 
 interface Filters {
     category?: string;
@@ -132,7 +133,7 @@ export default function CourseCatalog({ courses, categories, difficulties, filte
                 <meta property="og:image:alt" content={`Courses — ${String(name)}`} />
                 <meta property="og:url" content={ogUrl} />
                 <meta property="og:type" content="website" />
-                <meta property="og:locale" content="en_US" />
+                <meta property="og:locale" content={ogLocale(l)} />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`Courses | ${String(name)}`} />
                 <meta name="twitter:description" content="Browse curated learning courses built by expert mentors." />
@@ -143,6 +144,7 @@ export default function CourseCatalog({ courses, categories, difficulties, filte
                     name: `Courses — ${String(name)}`,
                     description: 'Browse curated learning courses built by expert mentors.',
                     url: ogUrl,
+                    inLanguage: inLanguage(l),
                     provider: { '@type': 'Organization', name: String(name), url: String(serverAppUrl) },
                     mainEntity: {
                         '@type': 'ItemList',

@@ -73,7 +73,8 @@ return [
     |
     */
 
-    'home' => '/en/dashboard',
+    /* Auth routes live outside the locale prefix, so this lands in the default locale. */
+    'home' => '/'.env('APP_LOCALE', 'bn').'/dashboard',
 
     /*
     |--------------------------------------------------------------------------

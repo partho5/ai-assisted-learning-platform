@@ -10,6 +10,7 @@ import MentorCard from '@/components/mentor-card';
 import RichHtml from '@/components/rich-html';
 import PublicLayout from '@/layouts/public-layout';
 import type { Article } from '@/types';
+import { inLanguage, ogLocale } from '@/lib/locale';
 
 interface SchemaTypes {
     howTo: boolean;
@@ -101,7 +102,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
         },
         wordCount: article.body ? article.body.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(Boolean).length : 0,
         timeRequired: `PT${article.read_time_minutes}M`,
-        inLanguage: 'en',
+        inLanguage: inLanguage(l),
     };
 
     const breadcrumbSchema = {
@@ -156,7 +157,7 @@ export default function ArticleShow({ article, ogUrl, appUrl, schemaTypes, isPre
                 <meta property="og:image:alt" content={article.featured_image_alt ?? article.title} />
                 <meta property="og:url" content={ogUrl} />
                 <meta property="og:type" content="article" />
-                <meta property="og:locale" content="en_US" />
+                <meta property="og:locale" content={ogLocale(l)} />
                 <meta property="article:published_time" content={publishedIso} />
                 <meta property="article:modified_time" content={article.updated_at} />
                 <meta property="article:author" content={authorUrl} />

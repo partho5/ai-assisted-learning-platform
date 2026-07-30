@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin\Forum;
 
 use App\Http\Controllers\Controller;
 use App\Models\ForumCategory;
+use App\Services\SlugGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -32,13 +32,13 @@ class ForumCategoryAdminController extends Controller
 
         ForumCategory::create([
             'name' => $validated['name'],
-            'slug' => Str::slug($validated['name']),
+            'slug' => SlugGenerator::generate($validated['name']),
             'description' => $validated['description'] ?? null,
             'color' => $validated['color'],
             'sort_order' => $validated['sort_order'] ?? 0,
         ]);
 
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('admin.forum.categories.index', ['locale' => $locale]);
     }
@@ -54,7 +54,7 @@ class ForumCategoryAdminController extends Controller
 
         $forumCategory->update($validated);
 
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('admin.forum.categories.index', ['locale' => $locale]);
     }
@@ -63,7 +63,7 @@ class ForumCategoryAdminController extends Controller
     {
         $forumCategory->delete();
 
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('admin.forum.categories.index', ['locale' => $locale]);
     }

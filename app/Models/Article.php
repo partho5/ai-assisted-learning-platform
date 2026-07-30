@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Concerns\HasContentLanguage;
 use App\Enums\ArticleStatus;
+use App\Enums\ContentLanguage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,13 +13,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Article extends Model
 {
     /** @use HasFactory<\Database\Factories\ArticleFactory> */
-    use HasFactory;
+    use HasContentLanguage, HasFactory;
 
     protected $fillable = [
         'author_id',
         'category_id',
         'title',
         'slug',
+        'language',
         'excerpt',
         'body',
         'featured_image',
@@ -33,6 +36,7 @@ class Article extends Model
     {
         return [
             'status' => ArticleStatus::class,
+            'language' => ContentLanguage::class,
             'tags' => 'array',
             'published_at' => 'datetime',
         ];

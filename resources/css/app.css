@@ -38,8 +38,15 @@
 }
 
 @theme {
+    /*
+     * Order matters. Instrument Sans has no Bengali glyphs and Anek Bangla is
+     * served with unicode-range subsetting, so the browser resolves per
+     * character: Latin hits Instrument Sans, Bengali falls through to Anek
+     * Bangla. This is what keeps mixed Bengali/English passages rendering each
+     * script in its intended face — do not swap the whole stack per locale.
+     */
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Instrument Sans', 'Anek Bangla', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
@@ -766,4 +773,64 @@ ol[data-enhanced] > li::before, .prose ol[data-enhanced] > li::before {
 
 @media (max-width: 768px) {
     .portfolio-btn { padding: 12px 24px; font-size: 13px; min-width: 120px; }
+}
+
+/* ─── Bengali typography ────────────────────────────────────────────────
+ *
+ * Scoped to html[lang="bn"] so English pages are untouched.
+ *
+ * Bengali needs more vertical room than Latin at the same font-size: the matra
+ * (headline stroke) sits above the x-height while vowel signs and hasanta hang
+ * below the baseline, so English-tuned leading causes ascender/descender
+ * collisions between lines.
+ *
+ * These rules are applied at block level and inherited by nested English spans
+ * on purpose. Content mixes Bengali with English passages, and a consistent
+ * baseline rhythm reads better than leading that changes mid-paragraph.
+ */
+html[lang='bn'] {
+    /* Bengali glyphs read smaller than Latin at an identical size. */
+    --bn-line-height: 1.85;
+}
+
+html[lang='bn'] body {
+    line-height: var(--bn-line-height);
+}
+
+html[lang='bn'] h1,
+html[lang='bn'] h2,
+html[lang='bn'] h3,
+html[lang='bn'] h4,
+html[lang='bn'] h5,
+html[lang='bn'] h6 {
+    line-height: 1.4;
+    /* Tracking breaks Bengali conjuncts apart — never letter-space Bengali. */
+    letter-spacing: normal;
+}
+
+html[lang='bn'] p,
+html[lang='bn'] li {
+    line-height: var(--bn-line-height);
+    letter-spacing: normal;
+}
+
+html[lang='bn'] .prose :where(p, li, blockquote) {
+    line-height: var(--bn-line-height);
+}
+
+html[lang='bn'] .prose :where(h1, h2, h3, h4) {
+    line-height: 1.45;
+    letter-spacing: normal;
+}
+
+/* Override the two English-tuned tracking rules elsewhere in this file. */
+html[lang='bn'] div[data-type='section-block'][data-label]:not([data-label=''])::before,
+html[lang='bn'] .portfolio-btn {
+    letter-spacing: normal;
+}
+
+/* Bengali numerals and Latin code should stay monospaced-neutral. */
+html[lang='bn'] :where(code, pre, kbd, samp) {
+    line-height: 1.6;
+    letter-spacing: normal;
 }

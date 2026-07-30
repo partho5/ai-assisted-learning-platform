@@ -33,7 +33,7 @@ class VerificationNotificationTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('verification.send'))
-            ->assertRedirect(route('dashboard', ['locale' => 'en'], false));
+            ->assertRedirect(route('dashboard', ['locale' => config('app.locale')], false));
 
         Notification::assertNothingSent();
     }

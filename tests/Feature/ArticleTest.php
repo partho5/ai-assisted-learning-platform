@@ -410,4 +410,118 @@ class ArticleTest extends TestCase
             'featured_image_alt' => 'A descriptive alt text',
         ]);
     }
+
+    /**
+     * The slug validation regex previously enforced /^[a-z0-9\-]+$/, which
+     * rejected Bengali outright and made Bengali-keyword URLs impossible.
+     */
+    public function test_store_accepts_a_bengali_slug(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('articles.store', ['locale' => 'bn']), [
+                'title' => 'ওয়েব ডেভেলপমেন্ট শিখুন',
+                'slug' => 'ওয়েব-ডেভেলপমেন্ট',
+                'body' => '<p>বিষয়বস্তু</p>',
+                'status' => 'published',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('articles', [
+            'slug' => 'ওয়েব-ডেভেলপমেন্ট',
+            'language' => 'bn',
+        ]);
+    }
+
+    public function test_store_accepts_a_mixed_script_slug(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('articles.store', ['locale' => 'bn']), [
+                'title' => 'React দিয়ে ওয়েব ডেভেলপমেন্ট',
+                'slug' => 'react-দিয়ে-ওয়েব-ডেভেলপমেন্ট',
+                'body' => '<p>বিষয়বস্তু</p>',
+                'status' => 'published',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('articles', ['slug' => 'react-দিয়ে-ওয়েব-ডেভেলপমেন্ট']);
+    }
+
+    public function test_store_still_rejects_a_malformed_slug(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('articles.store', ['locale' => 'bn']), [
+                'title' => 'Bad slug',
+                'slug' => 'Has Spaces And CAPS',
+                'body' => '<p>body</p>',
+                'status' => 'draft',
+            ])
+            ->assertSessionHasErrors('slug');
+    }
+
+    /**
+     * Authoring under /bn/ should produce Bengali content without the author
+     * having to restate it.
+     */
+    public function test_language_defaults_to_the_authoring_locale(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('articles.store', ['locale' => 'bn']), [
+                'title' => 'Defaulted to bengali',
+                'slug' => 'defaulted-to-bengali',
+                'body' => '<p>body</p>',
+                'status' => 'draft',
+            ])->assertRedirect();
+
+        $this->actingAs($mentor)
+            ->post(route('articles.store', ['locale' => 'en']), [
+                'title' => 'Defaulted to english',
+                'slug' => 'defaulted-to-english',
+                'body' => '<p>body</p>',
+                'status' => 'draft',
+            ])->assertRedirect();
+
+        $this->assertDatabaseHas('articles', ['slug' => 'defaulted-to-bengali', 'language' => 'bn']);
+        $this->assertDatabaseHas('articles', ['slug' => 'defaulted-to-english', 'language' => 'en']);
+    }
+
+    public function test_publishing_redirects_to_the_article_own_locale(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        // Authoring from /en/ but marking the article Bengali.
+        $this->actingAs($mentor)
+            ->post(route('articles.store', ['locale' => 'en']), [
+                'title' => 'Bengali article authored from english ui',
+                'slug' => 'bengali-from-english-ui',
+                'body' => '<p>body</p>',
+                'status' => 'published',
+                'language' => 'bn',
+            ])
+            ->assertRedirect(route('articles.show', ['locale' => 'bn', 'article' => 'bengali-from-english-ui']));
+    }
+
+    public function test_public_index_shows_only_the_current_locale_articles(): void
+    {
+        $bengali = Article::factory()->published()->bengali()->create();
+        $english = Article::factory()->published()->english()->create();
+
+        $this->get(route('articles.index', ['locale' => 'bn']))
+            ->assertOk()
+            ->assertSee($bengali->title)
+            ->assertDontSee($english->title);
+
+        $this->get(route('articles.index', ['locale' => 'en']))
+            ->assertOk()
+            ->assertSee($english->title)
+            ->assertDontSee($bengali->title);
+    }
 }

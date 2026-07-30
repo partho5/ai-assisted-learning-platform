@@ -7,6 +7,7 @@ import PublicLayout from '@/layouts/public-layout';
 import { trackLandingCta } from '@/lib/analytics';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { register } from '@/routes';
+import { inLanguage, ogLocale } from '@/lib/locale';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -82,7 +83,7 @@ function FadeIn({ children, className = '', delay = 0, id }: { children: React.R
 
 // ─── Schema JSON-LD ──────────────────────────────────────────────────────────
 
-function SchemaOrg({ courses, appUrl, appName }: { courses: FeaturedCourse[]; appUrl: string; appName: string }) {
+function SchemaOrg({ courses, appUrl, appName, locale }: { courses: FeaturedCourse[]; appUrl: string; appName: string; locale: string }) {
     const org = {
         '@context': 'https://schema.org',
         '@type': 'EducationalOrganization',
@@ -97,9 +98,10 @@ function SchemaOrg({ courses, appUrl, appName }: { courses: FeaturedCourse[]; ap
         '@type': 'WebSite',
         name: appName,
         url: appUrl,
+        inLanguage: inLanguage(locale),
         potentialAction: {
             '@type': 'SearchAction',
-            target: `${appUrl}/en/courses?search={search_term_string}`,
+            target: `${appUrl}/${locale}/courses?search={search_term_string}`,
             'query-input': 'required name=search_term_string',
         },
     };
@@ -109,6 +111,7 @@ function SchemaOrg({ courses, appUrl, appName }: { courses: FeaturedCourse[]; ap
         '@type': 'Course',
         name: c.title,
         description: c.description,
+        inLanguage: inLanguage(locale),
         provider: { '@type': 'Person', name: c.mentor_name ?? appName },
         offers: {
             '@type': 'Offer',
@@ -232,7 +235,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
                 <meta property="og:image:alt" content={`${String(appName)} — Learn, Prove, Get Hired`} />
-                <meta property="og:locale" content="en_US" />
+                <meta property="og:locale" content={ogLocale(l)} />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta
                     name="twitter:title"
@@ -247,6 +250,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     courses={courses}
                     appUrl={appUrl}
                     appName={String(appName)}
+                    locale={l}
                 />
             </Head>
 

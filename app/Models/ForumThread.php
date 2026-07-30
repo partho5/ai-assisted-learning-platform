@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Concerns\HasContentLanguage;
+use App\Enums\ContentLanguage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,12 +15,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ForumThread extends Model
 {
     /** @use HasFactory<\Database\Factories\ForumThreadFactory> */
-    use HasFactory, SoftDeletes;
+    use HasContentLanguage, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
         'category_id',
         'slug',
+        'language',
         'title',
         'body',
         'is_pinned',
@@ -37,6 +40,7 @@ class ForumThread extends Model
     protected function casts(): array
     {
         return [
+            'language' => ContentLanguage::class,
             'is_pinned' => 'boolean',
             'is_locked' => 'boolean',
             'is_resolved' => 'boolean',
@@ -169,7 +173,7 @@ class ForumThread extends Model
     /** Generate a unique slug from the title. */
     public static function generateSlug(string $title): string
     {
-        $base = \Illuminate\Support\Str::slug($title);
+        $base = \App\Services\SlugGenerator::generate($title);
         $slug = $base;
         $i = 1;
 

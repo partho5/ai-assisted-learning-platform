@@ -10,16 +10,19 @@ class RobotsController extends Controller
     {
         $sitemapUrl = rtrim(config('app.url'), '/').'/sitemap.xml';
 
+        /** Derived from config so a new locale can't silently become crawlable. */
+        $localePaths = [];
+        foreach (config('app.supported_locales', ['bn', 'en']) as $locale) {
+            $localePaths[] = "Disallow: /{$locale}/dashboard";
+            $localePaths[] = "Disallow: /{$locale}/admin/";
+            $localePaths[] = "Disallow: /{$locale}/mentor/";
+        }
+
         $lines = [
             'User-agent: *',
             'Allow: /',
             '',
-            'Disallow: /en/dashboard',
-            'Disallow: /bn/dashboard',
-            'Disallow: /en/admin/',
-            'Disallow: /bn/admin/',
-            'Disallow: /en/mentor/',
-            'Disallow: /bn/mentor/',
+            ...$localePaths,
             'Disallow: /settings/',
             'Disallow: /login',
             'Disallow: /register',

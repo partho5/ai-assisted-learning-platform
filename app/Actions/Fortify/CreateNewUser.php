@@ -42,9 +42,15 @@ class CreateNewUser implements CreatesNewUsers
         ]);
     }
 
+    /**
+     * Usernames stay ASCII deliberately: they appear in @mentions and in
+     * /u/{username} profile URLs, where percent-encoding would be a liability.
+     * Bengali names romanize acceptably ('রহিম উদ্দিন' becomes 'rhim-uddin'),
+     * but a name that romanizes to nothing must not yield an empty username.
+     */
     private function generateUsername(string $name): string
     {
-        $base = Str::slug($name);
+        $base = Str::slug($name) ?: 'user-'.Str::lower(Str::random(6));
         $username = $base;
         $counter = 1;
 

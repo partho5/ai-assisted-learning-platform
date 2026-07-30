@@ -58,7 +58,7 @@ class ForumThreadModerationController extends Controller
         }
 
         $forumThread->refresh();
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('forum.threads.show', [
             'locale' => $locale,

@@ -62,15 +62,25 @@
         <meta property="og:url" content="{{ $meta['url'] ?? url()->current() }}">
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="{{ config('app.name') }}">
+        {{-- Single og:locale only: content is single-language, so there is no alternate to declare --}}
+        <meta property="og:locale" content="{{ app()->getLocale() === 'bn' ? 'bn_BD' : 'en_US' }}">
 
         <link rel="icon" href="/logo.png" type="image/png">
         <link rel="apple-touch-icon" href="/logo.png">
 
         <meta name="theme-color" content="#0a0a0a">
 
+        {{--
+            Anek Bangla is served with unicode-range subsetting, so the Bengali
+            subset only downloads when Bengali codepoints are actually rendered.
+            English-only pages pay nothing for it. See --font-sans in app.css:
+            Latin resolves to Instrument Sans, Bengali falls through to Anek Bangla
+            per character — which is what keeps mixed Bengali/English passages
+            rendering in the right face.
+        --}}
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-        <link rel="preload" as="style" href="https://fonts.bunny.net/css?family=bricolage-grotesque:600,700|instrument-sans:400,500,600&display=swap">
-        <link href="https://fonts.bunny.net/css?family=bricolage-grotesque:600,700|instrument-sans:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="preload" as="style" href="https://fonts.bunny.net/css?family=anek-bangla:400,500,600,700|bricolage-grotesque:600,700|instrument-sans:400,500,600&display=swap">
+        <link href="https://fonts.bunny.net/css?family=anek-bangla:400,500,600,700|bricolage-grotesque:600,700|instrument-sans:400,500,600&display=swap" rel="stylesheet" />
 
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
@@ -90,7 +100,7 @@
         <script type="text/javascript">
             function googleTranslateElementInit() {
                 new google.translate.TranslateElement({
-                    pageLanguage: 'en',
+                    pageLanguage: '{{ app()->getLocale() }}',
                     layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
                     autoDisplay: false,
                 }, 'google_translate_element');

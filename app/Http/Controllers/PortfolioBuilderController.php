@@ -11,9 +11,9 @@ use App\Models\Portfolio;
 use App\Models\PortfolioCategory;
 use App\Models\PortfolioMessage;
 use App\Models\PortfolioProject;
+use App\Services\SlugGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -124,7 +124,7 @@ class PortfolioBuilderController extends Controller
         $portfolio = $this->getOrCreatePortfolio($request);
         $validated = $request->validated();
 
-        $slug = Str::slug($validated['title']);
+        $slug = SlugGenerator::generate($validated['title']);
         $baseSlug = $slug;
         $counter = 1;
         while ($portfolio->projects()->where('slug', $slug)->exists()) {
@@ -183,7 +183,7 @@ class PortfolioBuilderController extends Controller
         // Re-generate slug if title changed
         $slug = $project->slug;
         if ($validated['title'] !== $project->title) {
-            $slug = Str::slug($validated['title']);
+            $slug = SlugGenerator::generate($validated['title']);
             $baseSlug = $slug;
             $counter = 1;
             while ($portfolio->projects()->where('slug', $slug)->where('id', '!=', $project->id)->exists()) {
@@ -270,7 +270,7 @@ class PortfolioBuilderController extends Controller
     {
         $portfolio = $this->getOrCreatePortfolio($request);
         $name = $request->validated()['name'];
-        $slug = Str::slug($name);
+        $slug = SlugGenerator::generate($name);
         $baseSlug = $slug;
         $counter = 1;
         while ($portfolio->categories()->where('slug', $slug)->exists()) {
@@ -292,7 +292,7 @@ class PortfolioBuilderController extends Controller
         abort_if($category->portfolio_id !== $portfolio->id, 403);
 
         $name = $request->validated()['name'];
-        $slug = Str::slug($name);
+        $slug = SlugGenerator::generate($name);
         $baseSlug = $slug;
         $counter = 1;
         while ($portfolio->categories()->where('slug', $slug)->where('id', '!=', $category->id)->exists()) {

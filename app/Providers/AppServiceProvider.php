@@ -53,7 +53,7 @@ class AppServiceProvider extends ServiceProvider
         PortfolioProjectMedia::observe(PortfolioProjectMediaObserver::class);
 
         RedirectIfAuthenticated::redirectUsing(
-            fn ($request) => route('dashboard', ['locale' => $request->route('locale', config('app.locale', 'en'))]),
+            fn ($request) => route('dashboard', ['locale' => $request->route('locale', config('app.locale'))]),
         );
 
         Event::listen(Registered::class, MergeGuestChatHistory::class);

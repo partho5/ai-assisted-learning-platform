@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
+use App\Services\SlugGenerator;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -36,7 +36,7 @@ class CategoryController extends Controller
 
         Category::create([
             'name' => $name,
-            'slug' => Str::slug($name),
+            'slug' => SlugGenerator::generate($name),
             'description' => $request->validated()['description'] ?? null,
         ]);
 
@@ -57,7 +57,7 @@ class CategoryController extends Controller
 
         $category->update([
             'name' => $name,
-            'slug' => Str::slug($name),
+            'slug' => SlugGenerator::generate($name),
             'description' => $request->validated()['description'] ?? null,
         ]);
 

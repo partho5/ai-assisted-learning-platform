@@ -100,7 +100,7 @@ class ForumReplyController extends Controller
             }
         }
 
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('forum.threads.show', [
             'locale' => $locale,
@@ -123,7 +123,7 @@ class ForumReplyController extends Controller
 
         SanitizeContentLinks::dispatch(ForumReply::class, $forumReply->id);
 
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('forum.threads.show', [
             'locale' => $locale,
@@ -150,7 +150,7 @@ class ForumReplyController extends Controller
             $forumThread->update(['is_resolved' => false]);
         }
 
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('forum.threads.show', [
             'locale' => $locale,
@@ -199,7 +199,7 @@ class ForumReplyController extends Controller
             $forumThread->update(['is_resolved' => false]);
         }
 
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('forum.threads.show', [
             'locale' => $locale,

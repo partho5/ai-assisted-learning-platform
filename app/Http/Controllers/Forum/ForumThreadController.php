@@ -43,6 +43,8 @@ class ForumThreadController extends Controller
             'user_id' => $user->id,
             'category_id' => $request->input('category_id'),
             'slug' => $slug,
+            /** Threads inherit the locale they were posted under — users write in the language of the forum they're browsing. */
+            'language' => app()->getLocale(),
             'title' => $request->input('title'),
             'body' => $request->input('body'),
             'tags' => $request->input('tags', []),
@@ -63,7 +65,7 @@ class ForumThreadController extends Controller
         // Dispatch AI moderation check
         AutoFlagWithAi::dispatch(ForumThread::class, $thread->id);
 
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('forum.threads.show', [
             'locale' => $locale,
@@ -171,7 +173,7 @@ class ForumThreadController extends Controller
         }
 
         $forumThread->refresh();
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('forum.threads.show', [
             'locale' => $locale,
@@ -193,7 +195,7 @@ class ForumThreadController extends Controller
 
         ForumCategory::where('id', $categoryId)->decrement('thread_count');
 
-        $locale = $request->route('locale', 'en');
+        $locale = app()->getLocale();
 
         return redirect()->route('forum.category.show', [
             'locale' => $locale,

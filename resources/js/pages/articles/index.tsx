@@ -14,6 +14,7 @@ import PublicLayout from '@/layouts/public-layout';
 import AppLayout from '@/layouts/app-layout';
 import type { Article, ArticleCategory, Paginated } from '@/types';
 import { useState } from 'react';
+import { inLanguage } from '@/lib/locale';
 
 interface PublicProps {
     articles: Paginated<Article>;
@@ -164,6 +165,7 @@ function PublicView({
                     name: `Resources | ${appName}`,
                     description: `Guides, how-tos, and knowledge articles from ${appName} mentors.`,
                     url: articleIndex.url(locale),
+                    inLanguage: inLanguage(locale),
                 })}</script>
             </Head>
 

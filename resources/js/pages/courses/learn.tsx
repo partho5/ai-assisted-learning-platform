@@ -26,6 +26,7 @@ import type {
     TestQuestion,
 } from '@/types';
 import type { ResourceType } from '@/types/course';
+import { inLanguage, ogLocale } from '@/lib/locale';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -1264,7 +1265,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
             <meta property="og:image:alt" content={`${activeTitle} — ${course.title}`} />
             <meta property="og:url" content={ogUrl} />
             <meta property="og:type" content="article" />
-            <meta property="og:locale" content="en_US" />
+            <meta property="og:locale" content={ogLocale(l)} />
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" content={`${activeTitle} — ${course.title} | ${String(name)}`} />
             <meta name="twitter:description" content={ogDescription} />
@@ -1275,6 +1276,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                 name: activeTitle,
                 description: ogDescription,
                 url: ogUrl,
+                inLanguage: inLanguage(l),
                 image: absoluteOgImage,
                 isPartOf: {
                     '@type': 'Course',

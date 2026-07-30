@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\ArticleStatus;
+use App\Enums\ContentLanguage;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,6 +24,8 @@ class ArticleFactory extends Factory
             'category_id' => Category::factory(),
             'title' => $title,
             'slug' => Str::slug($title).'-'.Str::lower(Str::random(4)),
+            /* Faker generates English text, so default the marker to match. */
+            'language' => ContentLanguage::En,
             'excerpt' => fake()->optional(0.8)->text(155),
             'body' => $body,
             'featured_image' => null,
@@ -38,6 +41,20 @@ class ArticleFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => ArticleStatus::Published,
             'published_at' => now(),
+        ]);
+    }
+
+    public function bengali(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'language' => ContentLanguage::Bn,
+        ]);
+    }
+
+    public function english(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'language' => ContentLanguage::En,
         ]);
     }
 

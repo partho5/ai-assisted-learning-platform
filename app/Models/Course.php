@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasContentLanguage;
 use App\Enums\CourseDifficulty;
 use App\Enums\CourseLanguage;
 use App\Enums\CourseStatus;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class Course extends Model
 {
     /** @use HasFactory<\Database\Factories\CourseFactory> */
-    use HasFactory;
+    use HasContentLanguage, HasFactory;
 
     protected $fillable = [
         'user_id',
