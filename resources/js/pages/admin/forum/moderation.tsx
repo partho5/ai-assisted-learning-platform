@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { index, resolve, deleteContent } from '@/actions/App/Http/Controllers/Admin/Forum/ForumModerationController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -54,11 +54,9 @@ interface Props {
 }
 
 export default function ForumModerationAdmin({ reports }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Admin', href: `/${l}/admin/dashboard` },
+        { title: 'Admin', href: '/admin/dashboard' },
         { title: 'Forum Moderation', href: index.url() },
     ];
 

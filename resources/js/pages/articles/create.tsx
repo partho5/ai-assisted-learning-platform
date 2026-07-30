@@ -168,7 +168,7 @@ export default function ArticleCreate({ categories, statuses, languages }: Props
                         <TagSuggestions
                             value={form.data.tags}
                             onChange={(v) => form.setData('tags', v)}
-                            tagsUrl={`/${l}/resources/api/tags`}
+                            tagsUrl="/resources/api/tags"
                         />
                         {form.errors.tags && <p className="text-sm text-destructive">{form.errors.tags}</p>}
                     </div>

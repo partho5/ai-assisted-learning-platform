@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { index, store, update, destroy } from '@/actions/App/Http/Controllers/Admin/Forum/ForumAiMemberAdminController';
 import { Badge } from '@/components/ui/badge';
@@ -121,15 +121,13 @@ function formFromMember(m: AiMember): FormState {
 }
 
 export default function ForumAiMembersAdmin({ aiMembers, categories }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     const [editing, setEditing] = useState<AiMember | null>(null);
     const [creating, setCreating] = useState(false);
     const [form, setForm] = useState<FormState>(emptyForm);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Admin', href: `/${l}/admin/dashboard` },
+        { title: 'Admin', href: '/admin/dashboard' },
         { title: 'AI Members', href: index.url() },
     ];
 

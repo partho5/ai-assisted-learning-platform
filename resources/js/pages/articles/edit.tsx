@@ -1,4 +1,4 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { update as articleUpdate, preview as articlePreview } from '@/actions/App/Http/Controllers/ArticleController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,8 +27,6 @@ interface Props {
 }
 
 export default function ArticleEdit({ article, categories, statuses, languages }: Props) {
-    const { locale } = usePage().props as Record<string, any>;
-    const l = String(locale);
 
     // Format existing published_at as local time for the datetime-local picker
     const existingPublishAt = article.published_at
@@ -177,7 +175,7 @@ export default function ArticleEdit({ article, categories, statuses, languages }
                         <TagSuggestions
                             value={form.data.tags}
                             onChange={(v) => form.setData('tags', v)}
-                            tagsUrl={`/${l}/resources/api/tags`}
+                            tagsUrl="/resources/api/tags"
                         />
                         {form.errors.tags && <p className="text-sm text-destructive">{form.errors.tags}</p>}
                     </div>

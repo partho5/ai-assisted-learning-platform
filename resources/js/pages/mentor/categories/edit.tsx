@@ -14,11 +14,10 @@ interface Props {
 }
 
 export default function CategoryEdit({ category }: Props) {
-    const { locale, ui } = usePage().props;
-    const l = String(locale);
+    const { ui } = usePage().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: ui.nav.dashboard, href: `/${l}/mentor/dashboard` },
+        { title: ui.nav.dashboard, href: '/mentor/dashboard' },
         { title: 'Categories', href: categoriesIndex.url() },
         { title: 'Edit Category', href: '#' },
     ];

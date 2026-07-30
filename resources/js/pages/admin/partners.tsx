@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -51,14 +51,13 @@ function fmt(amount: number): string {
 }
 
 export default function AdminPartners({ overview, partners, pendingCommissions }: Props) {
-    const { locale } = usePage().props as Record<string, string>;
 
     function confirmCommission(id: number) {
-        router.post(`/${locale}/admin/partners/commissions/${id}/confirm`, {}, { preserveScroll: true });
+        router.post(`/admin/partners/commissions/${id}/confirm`, {}, { preserveScroll: true });
     }
 
     function revokeCommission(id: number) {
-        router.post(`/${locale}/admin/partners/commissions/${id}/revoke`, {}, { preserveScroll: true });
+        router.post(`/admin/partners/commissions/${id}/revoke`, {}, { preserveScroll: true });
     }
 
     return (

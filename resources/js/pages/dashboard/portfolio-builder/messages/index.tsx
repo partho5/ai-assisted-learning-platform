@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Mail } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import PortfolioBuilderLayout from '@/layouts/portfolio-builder-layout';
@@ -18,13 +18,11 @@ interface Props {
 }
 
 export default function MessagesIndex({ messages }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     return (
         <PortfolioBuilderLayout breadcrumbs={[
-            { title: 'Portfolio Builder', href: `/${l}/dashboard/portfolio-builder` },
-            { title: 'Messages', href: `/${l}/dashboard/portfolio-builder/messages` },
+            { title: 'Portfolio Builder', href: '/dashboard/portfolio-builder' },
+            { title: 'Messages', href: '/dashboard/portfolio-builder/messages' },
         ]}>
             <Head title="Portfolio Messages" />
 
@@ -43,7 +41,7 @@ export default function MessagesIndex({ messages }: Props) {
                     {messages.data.map((msg) => (
                         <Link
                             key={msg.id}
-                            href={`/${l}/dashboard/portfolio-builder/messages/${msg.id}`}
+                            href={`/dashboard/portfolio-builder/messages/${msg.id}`}
                             className="flex items-start justify-between rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50"
                         >
                             <div className="min-w-0">

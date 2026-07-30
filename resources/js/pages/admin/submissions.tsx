@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { index as adminSubmissions } from '@/actions/App/Http/Controllers/Admin/SubmissionController';
 import { show as showAttempt } from '@/actions/App/Http/Controllers/TestAttemptController';
 import { Badge } from '@/components/ui/badge';
@@ -49,11 +49,9 @@ function statusLabel(status: string) {
 }
 
 export default function AdminSubmissions({ submissions, filters }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Admin', href: `/${l}/admin/dashboard` },
+        { title: 'Admin', href: '/admin/dashboard' },
         { title: 'Submissions', href: adminSubmissions.url() },
     ];
 
@@ -119,7 +117,7 @@ export default function AdminSubmissions({ submissions, filters }: Props) {
                                         <td className="px-4 py-3">
                                             {row.test?.testable?.module?.course ? (
                                                 <Link
-                                                    href={`/${l}/courses/${row.test.testable.module.course.slug}/submissions`}
+                                                    href={`/courses/${row.test.testable.module.course.slug}/submissions`}
                                                     className="text-xs text-primary hover:underline"
                                                 >
                                                     {row.test.testable.module.course.title}

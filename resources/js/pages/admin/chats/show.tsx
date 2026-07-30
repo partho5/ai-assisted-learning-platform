@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Bot, User as UserIcon, ArrowLeft, Globe } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
@@ -39,11 +39,9 @@ const CONTEXT_TYPE_LABEL: Record<string, string> = {
 };
 
 export default function AdminChatShow({ session }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Admin Dashboard', href: `/${l}/admin/dashboard` },
+        { title: 'Admin Dashboard', href: '/admin/dashboard' },
         { title: 'Chat Session #' + session.id, href: '#' },
     ];
 
@@ -56,7 +54,7 @@ export default function AdminChatShow({ session }: Props) {
                 <div className="flex items-start justify-between gap-4">
                     <div>
                         <Link
-                            href={`/${l}/admin/dashboard`}
+                            href="/admin/dashboard"
                             className="mb-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
                         >
                             <ArrowLeft className="h-4 w-4" />

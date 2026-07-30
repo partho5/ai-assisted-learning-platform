@@ -40,12 +40,12 @@ export default function Submissions({ course, submissions, filters }: Props) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'My Courses', href: `/${l}/courses` },
-        { title: course.title, href: `/${l}/courses/${course.slug}/edit` },
+        { title: course.title, href: `/courses/${course.slug}/edit` },
         { title: 'Submissions', href: '#' },
     ];
 
     function filterByStatus(status: string | undefined) {
-        router.get(`/${l}/courses/${course.slug}/submissions`, {
+        router.get(`/courses/${course.slug}/submissions`, {
             ...filters,
             status: status ?? '',
         });

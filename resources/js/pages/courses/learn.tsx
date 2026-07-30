@@ -808,7 +808,7 @@ function ResourceBlock({
                                                     <button
                                                         onClick={() =>
                                                             router.get(
-                                                                `/${locale}/test-attempts/${pa.id}/result`,
+                                                                `/test-attempts/${pa.id}/result`,
                                                             )
                                                         }
                                                         className="text-xs text-primary hover:underline dark:text-blue-600"
@@ -871,7 +871,7 @@ function ResourceBlock({
                     </Link>
                 ) : (
                     <Link
-                        href={`/${locale}/forum/create?resource_id=${resource.id}&title=${encodeURIComponent('Discussion: ' + resource.title)}`}
+                        href={`/forum/create?resource_id=${resource.id}&title=${encodeURIComponent('Discussion: ' + resource.title)}`}
                         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary hover:underline"
                     >
                         <span>💬</span>

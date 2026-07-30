@@ -19,8 +19,6 @@ const navItems = [
 ];
 
 export default function PortfolioBuilderLayout({ children, breadcrumbs }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
     const currentUrl = usePage().url;
 
     return (
@@ -29,7 +27,7 @@ export default function PortfolioBuilderLayout({ children, breadcrumbs }: Props)
                 <div className="mx-auto max-w-7xl px-4 sm:px-6">
                     <nav className="-mb-px flex gap-1 overflow-x-auto">
                         {navItems.map((item) => {
-                            const href = `/${l}${item.href}`;
+                            const href = `${item.href}`;
                             const urlPath = currentUrl.split('?')[0];
                             const isActive = item.routeName === 'portfolio-builder.index'
                                 ? urlPath === href

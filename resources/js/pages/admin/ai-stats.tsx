@@ -72,12 +72,11 @@ function formatNumber(num: number): string {
 }
 
 export default function AiStats({ stats, summary, costByModel, costByMethod }: Props) {
-    const { locale, ui } = usePage().props;
-    const l = String(locale);
+    const { ui } = usePage().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: ui.nav.admin, href: `/${l}/admin/dashboard` },
-        { title: 'AI Statistics', href: `/${l}/admin/ai-stats` },
+        { title: ui.nav.admin, href: '/admin/dashboard' },
+        { title: 'AI Statistics', href: '/admin/ai-stats' },
     ];
 
     return (

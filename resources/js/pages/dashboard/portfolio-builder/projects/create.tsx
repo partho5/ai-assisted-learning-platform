@@ -1,6 +1,6 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,8 +25,6 @@ interface MediaItem {
 }
 
 export default function CreateProject({ categories }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     const form = useForm({
         title: '',
@@ -91,14 +89,14 @@ export default function CreateProject({ categories }: Props) {
             form.data.media = [...form.data.media, { type: 'youtube', url: embedUrl }];
             setYoutubeUrl('');
         }
-        form.post(`/${l}/dashboard/portfolio-builder/projects`);
+        form.post('/dashboard/portfolio-builder/projects');
     }
 
     return (
         <PortfolioBuilderLayout breadcrumbs={[
-            { title: 'Portfolio Builder', href: `/${l}/dashboard/portfolio-builder` },
-            { title: 'Projects', href: `/${l}/dashboard/portfolio-builder/projects` },
-            { title: 'Create', href: `/${l}/dashboard/portfolio-builder/projects/create` },
+            { title: 'Portfolio Builder', href: '/dashboard/portfolio-builder' },
+            { title: 'Projects', href: '/dashboard/portfolio-builder/projects' },
+            { title: 'Create', href: '/dashboard/portfolio-builder/projects/create' },
         ]}>
             <Head title="Create Project" />
 

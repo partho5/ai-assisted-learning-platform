@@ -91,7 +91,7 @@ export default function AdminDashboard({ stats, recentUsers, recentCourses, rece
     const l = String(locale);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: ui.nav.dashboard, href: `/${l}/admin/dashboard` },
+        { title: ui.nav.dashboard, href: '/admin/dashboard' },
     ];
 
     return (
@@ -182,7 +182,7 @@ export default function AdminDashboard({ stats, recentUsers, recentCourses, rece
                     <div>
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-base font-semibold">Recent Users</h2>
-                            <Link href={`/${l}/admin/users`} className="text-xs text-primary hover:underline">
+                            <Link href="/admin/users" className="text-xs text-primary hover:underline">
                                 View all
                             </Link>
                         </div>
@@ -248,7 +248,7 @@ export default function AdminDashboard({ stats, recentUsers, recentCourses, rece
                                             <tr key={course.id} className="hover:bg-muted/20">
                                                 <td className="px-4 py-3">
                                                     <Link
-                                                        href={`/${l}/courses/${course.slug}/edit`}
+                                                        href={`/courses/${course.slug}/edit`}
                                                         className="font-medium hover:text-primary hover:underline"
                                                     >
                                                         {course.title}

@@ -21,25 +21,25 @@ export function AppSidebar() {
     const isMentorOrAdmin = isAdmin || isMentor;
 
     const dashboardHref = isAdmin
-        ? `/${locale}/admin/dashboard`
+        ? '/admin/dashboard'
         : isMentor
-          ? `/${locale}/mentor/dashboard`
-          : `/${locale}/dashboard`;
+          ? '/mentor/dashboard'
+          : '/dashboard';
 
     const mainNavItems: NavItem[] = isAdmin
         ? [
-            { title: ui.nav.dashboard, href: `/${locale}/admin/dashboard`, icon: LayoutGrid },
-            { title: ui.nav.users, href: `/${locale}/admin/users`, icon: Users },
-            { title: ui.nav.categories, href: `/${locale}/admin/categories`, icon: Tag },
-            { title: ui.nav.submissions, href: `/${locale}/admin/submissions`, icon: ClipboardList },
-            { title: 'AI Stats', href: `/${locale}/admin/ai-stats`, icon: Zap },
+            { title: ui.nav.dashboard, href: '/admin/dashboard', icon: LayoutGrid },
+            { title: ui.nav.users, href: '/admin/users', icon: Users },
+            { title: ui.nav.categories, href: '/admin/categories', icon: Tag },
+            { title: ui.nav.submissions, href: '/admin/submissions', icon: ClipboardList },
+            { title: 'AI Stats', href: '/admin/ai-stats', icon: Zap },
         ]
         : isMentor
           ? [
-            { title: ui.nav.dashboard, href: `/${locale}/mentor/dashboard`, icon: LayoutGrid },
+            { title: ui.nav.dashboard, href: '/mentor/dashboard', icon: LayoutGrid },
           ]
           : [
-            { title: ui.nav.dashboard, href: `/${locale}/dashboard`, icon: LayoutGrid },
+            { title: ui.nav.dashboard, href: '/dashboard', icon: LayoutGrid },
             { title: ui.nav.courses, href: `/${locale}/courses`, icon: BookOpen },
             { title: 'Resources', href: `/${locale}/resources`, icon: Newspaper },
           ];
@@ -48,8 +48,8 @@ export function AppSidebar() {
         ? [
             { title: ui.nav.my_courses, href: `/${locale}/courses`, icon: BookOpen },
             { title: 'My Articles', href: `/${locale}/resources`, icon: Newspaper },
-            ...(isMentor ? [{ title: ui.nav.categories, href: `/${locale}/mentor/categories`, icon: Tag }] : []),
-            ...(isAdmin ? [{ title: 'Partners', href: `/${locale}/admin/partners`, icon: Handshake }] : []),
+            ...(isMentor ? [{ title: ui.nav.categories, href: '/mentor/categories', icon: Tag }] : []),
+            ...(isAdmin ? [{ title: 'Partners', href: '/admin/partners', icon: Handshake }] : []),
           ]
         : [];
 
@@ -57,17 +57,17 @@ export function AppSidebar() {
         { title: 'Forum', href: `/${locale}/forum`, icon: MessagesSquare },
         ...(isAdmin
             ? [
-                { title: 'Categories', href: `/${locale}/admin/forum/categories`, icon: Tag },
-                { title: 'AI Members', href: `/${locale}/admin/forum/ai-members`, icon: Bot },
-                { title: 'Moderation', href: `/${locale}/admin/forum/moderation`, icon: ShieldAlert },
+                { title: 'Categories', href: '/admin/forum/categories', icon: Tag },
+                { title: 'AI Members', href: '/admin/forum/ai-members', icon: Bot },
+                { title: 'Moderation', href: '/admin/forum/moderation', icon: ShieldAlert },
               ]
             : []),
     ];
 
     const personalNavItems: NavItem[] = [
-        { title: 'Personal Notes', href: `/${locale}/notes`, icon: NotebookPen },
-        { title: 'Portfolio Builder', href: `/${locale}/dashboard/portfolio-builder`, icon: UserSquare },
-        ...(!isAdmin ? [{ title: 'Partner', href: `/${locale}/dashboard/partner`, icon: Handshake }] : []),
+        { title: 'Personal Notes', href: '/notes', icon: NotebookPen },
+        { title: 'Portfolio Builder', href: '/dashboard/portfolio-builder', icon: UserSquare },
+        ...(!isAdmin ? [{ title: 'Partner', href: '/dashboard/partner', icon: Handshake }] : []),
     ];
 
     return (

@@ -16,11 +16,10 @@ interface Props {
 }
 
 export default function CategoriesIndex({ categories }: Props) {
-    const { locale, ui, flash } = usePage().props;
-    const l = String(locale);
+    const { ui, flash } = usePage().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: ui.nav.dashboard, href: `/${l}/mentor/dashboard` },
+        { title: ui.nav.dashboard, href: '/mentor/dashboard' },
         { title: 'Categories', href: categoryCreate.url() },
     ];
 

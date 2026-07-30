@@ -97,7 +97,7 @@ export default function PublicLayout({
                     <div className="hidden items-center gap-2 py-3 md:flex">
                         {auth.user ? (
                             <Button asChild variant="secondary" size="compact">
-                                <Link href={`/${l}/dashboard`}>{t.dashboard}</Link>
+                                <Link href="/dashboard">{t.dashboard}</Link>
                             </Button>
                         ) : (
                             <>
@@ -162,7 +162,7 @@ export default function PublicLayout({
                     <div className="flex flex-col gap-2">
                         {auth.user ? (
                             <Button asChild variant="secondary" size="compact">
-                                <Link href={`/${l}/dashboard`} onClick={() => setMobileOpen(false)}>{t.dashboard}</Link>
+                                <Link href="/dashboard" onClick={() => setMobileOpen(false)}>{t.dashboard}</Link>
                             </Button>
                         ) : (
                             <>

@@ -10,11 +10,10 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
 export default function CategoryCreate() {
-    const { locale, ui } = usePage().props;
-    const l = String(locale);
+    const { ui } = usePage().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: ui.nav.dashboard, href: `/${l}/mentor/dashboard` },
+        { title: ui.nav.dashboard, href: '/mentor/dashboard' },
         { title: 'Categories', href: categoriesIndex.url() },
         { title: 'New Category', href: '#' },
     ];

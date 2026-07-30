@@ -719,7 +719,7 @@ export default function TestEditor({ course, module, resource, test, questions: 
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'My Courses', href: `/${l}/courses` },
-        { title: course.title, href: `/${l}/courses/${course.slug}/edit` },
+        { title: course.title, href: `/courses/${course.slug}/edit` },
         { title: resource.title, href: '#' },
         { title: 'Test Editor', href: '#' },
     ];

@@ -1,5 +1,5 @@
-import { Head, usePage } from '@inertiajs/react';
-import { BarChart3, Eye, Mail, TrendingUp } from 'lucide-react';
+import { Head } from '@inertiajs/react';
+import { Eye, Mail, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PortfolioBuilderLayout from '@/layouts/portfolio-builder-layout';
 
@@ -29,14 +29,12 @@ interface Props {
 }
 
 export default function PortfolioAnalytics({ totalVisits, visitsLast30Days, topProjects, recentVisitors, messageCount }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
     const maxCount = Math.max(...visitsLast30Days.map((d) => d.count), 1);
 
     return (
         <PortfolioBuilderLayout breadcrumbs={[
-            { title: 'Portfolio Builder', href: `/${l}/dashboard/portfolio-builder` },
-            { title: 'Analytics', href: `/${l}/dashboard/portfolio-builder/analytics` },
+            { title: 'Portfolio Builder', href: '/dashboard/portfolio-builder' },
+            { title: 'Analytics', href: '/dashboard/portfolio-builder/analytics' },
         ]}>
             <Head title="Portfolio Analytics" />
 

@@ -43,11 +43,10 @@ function StatCard({ label, value, icon: Icon, highlight }: { label: string; valu
 }
 
 export default function MentorDashboard({ stats, courses }: Props) {
-    const { locale, ui } = usePage().props;
-    const l = String(locale);
+    const { ui } = usePage().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: ui.nav.dashboard, href: `/${l}/mentor/dashboard` },
+        { title: ui.nav.dashboard, href: '/mentor/dashboard' },
     ];
 
     return (
@@ -61,7 +60,7 @@ export default function MentorDashboard({ stats, courses }: Props) {
                         <p className="mt-1 text-sm text-muted-foreground">Overview of your courses and learner activity.</p>
                     </div>
                     <Button asChild>
-                        <Link href={`/${l}/courses/create`}>New Course</Link>
+                        <Link href="/courses/create">New Course</Link>
                     </Button>
                 </div>
 
@@ -91,7 +90,7 @@ export default function MentorDashboard({ stats, courses }: Props) {
                             <BookOpen className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
                             <p className="text-sm text-muted-foreground">You have not created any courses yet.</p>
                             <Link
-                                href={`/${l}/courses/create`}
+                                href="/courses/create"
                                 className="mt-4 inline-block text-sm text-primary hover:underline"
                             >
                                 Create your first course
@@ -130,13 +129,13 @@ export default function MentorDashboard({ stats, courses }: Props) {
                                             <td className="px-4 py-3">
                                                 <div className="flex items-center gap-3">
                                                     <Link
-                                                        href={`/${l}/courses/${course.slug}/edit`}
+                                                        href={`/courses/${course.slug}/edit`}
                                                         className="text-xs text-primary hover:underline"
                                                     >
                                                         Edit
                                                     </Link>
                                                     <Link
-                                                        href={`/${l}/courses/${course.slug}/submissions`}
+                                                        href={`/courses/${course.slug}/submissions`}
                                                         className="text-xs text-muted-foreground hover:text-foreground hover:underline"
                                                     >
                                                         Submissions

@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,8 +40,6 @@ interface Props {
 }
 
 export default function EditProject({ project, categories }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     const form = useForm({
         title: project.title,
@@ -105,14 +103,14 @@ export default function EditProject({ project, categories }: Props) {
             form.data.media = [...form.data.media, { type: 'youtube', url: embedUrl }];
             setYoutubeUrl('');
         }
-        form.put(`/${l}/dashboard/portfolio-builder/projects/${project.id}`);
+        form.put(`/dashboard/portfolio-builder/projects/${project.id}`);
     }
 
     return (
         <PortfolioBuilderLayout breadcrumbs={[
-            { title: 'Portfolio Builder', href: `/${l}/dashboard/portfolio-builder` },
-            { title: 'Projects', href: `/${l}/dashboard/portfolio-builder/projects` },
-            { title: 'Edit', href: `/${l}/dashboard/portfolio-builder/projects/${project.id}/edit` },
+            { title: 'Portfolio Builder', href: '/dashboard/portfolio-builder' },
+            { title: 'Projects', href: '/dashboard/portfolio-builder/projects' },
+            { title: 'Edit', href: `/dashboard/portfolio-builder/projects/${project.id}/edit` },
         ]}>
             <Head title={`Edit: ${project.title}`} />
 

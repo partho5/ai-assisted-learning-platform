@@ -1,4 +1,4 @@
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import { Edit2, FolderOpen, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,8 +19,6 @@ interface Props {
 }
 
 export default function PortfolioCategories({ categories }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
     const [editingId, setEditingId] = useState<number | null>(null);
 
     const createForm = useForm({ name: '' });
@@ -28,7 +26,7 @@ export default function PortfolioCategories({ categories }: Props) {
 
     function handleCreate(e: FormEvent) {
         e.preventDefault();
-        createForm.post(`/${l}/dashboard/portfolio-builder/categories`, {
+        createForm.post('/dashboard/portfolio-builder/categories', {
             onSuccess: () => createForm.reset(),
         });
     }
@@ -41,20 +39,20 @@ export default function PortfolioCategories({ categories }: Props) {
     function handleUpdate(e: FormEvent) {
         e.preventDefault();
         if (!editingId) return;
-        editForm.put(`/${l}/dashboard/portfolio-builder/categories/${editingId}`, {
+        editForm.put(`/dashboard/portfolio-builder/categories/${editingId}`, {
             onSuccess: () => setEditingId(null),
         });
     }
 
     function handleDelete(id: number) {
         if (!confirm('Delete this category? Projects in it will become uncategorized.')) return;
-        router.delete(`/${l}/dashboard/portfolio-builder/categories/${id}`);
+        router.delete(`/dashboard/portfolio-builder/categories/${id}`);
     }
 
     return (
         <PortfolioBuilderLayout breadcrumbs={[
-            { title: 'Portfolio Builder', href: `/${l}/dashboard/portfolio-builder` },
-            { title: 'Categories', href: `/${l}/dashboard/portfolio-builder/categories` },
+            { title: 'Portfolio Builder', href: '/dashboard/portfolio-builder' },
+            { title: 'Categories', href: '/dashboard/portfolio-builder/categories' },
         ]}>
             <Head title="Portfolio Categories" />
 

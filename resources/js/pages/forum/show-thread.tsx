@@ -285,7 +285,7 @@ export default function ShowThread({ thread, acceptedAnswer, replies, canModerat
                         <div className="ml-auto flex items-center gap-2">
                             {(isAuthor || canModerate) && (
                                 <Link
-                                    href={`/${l}/forum/${thread.category?.slug}/${thread.slug}/edit`}
+                                    href={`/forum/${thread.category?.slug}/${thread.slug}/edit`}
                                     className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                                 >
                                     <Edit className="h-3.5 w-3.5" />

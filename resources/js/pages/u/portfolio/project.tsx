@@ -1,6 +1,6 @@
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
-import { ArrowLeft, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -70,14 +70,12 @@ function lazyLoadImages(html: string): string {
 
 
 function ContactModal({ open, onClose, username }: { open: boolean; onClose: () => void; username: string }) {
-    const { locale } = usePage().props;
-    const l = String(locale);
     const form = useForm({ sender_name: '', sender_email: '', subject: '', body: '', honeypot: '' });
     const [sent, setSent] = useState(false);
 
     function submit(e: FormEvent) {
         e.preventDefault();
-        form.post(`/${l}/u/${username}/portfolio/contact`, { onSuccess: () => setSent(true) });
+        form.post(`/u/${username}/portfolio/contact`, { onSuccess: () => setSent(true) });
     }
 
     if (!open) return null;

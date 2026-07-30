@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { BarChart3, Eye, FolderOpen, Mail } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,8 +27,6 @@ interface Props {
 }
 
 export default function PortfolioBuilderIndex({ portfolio, stats, recentMessages, portfolioUrl }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     const statCards = [
         { label: 'Projects', value: stats.totalProjects, icon: FolderOpen, color: 'text-blue-500' },
@@ -38,7 +36,7 @@ export default function PortfolioBuilderIndex({ portfolio, stats, recentMessages
     ];
 
     return (
-        <PortfolioBuilderLayout breadcrumbs={[{ title: 'Portfolio Builder', href: `/${l}/dashboard/portfolio-builder` }]}>
+        <PortfolioBuilderLayout breadcrumbs={[{ title: 'Portfolio Builder', href: '/dashboard/portfolio-builder' }]}>
             <Head title="Portfolio Builder" />
 
             <div className="mb-6 flex items-center justify-between">
@@ -76,7 +74,7 @@ export default function PortfolioBuilderIndex({ portfolio, stats, recentMessages
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Recent Messages</CardTitle>
-                    <Link href={`/${l}/dashboard/portfolio-builder/messages`}>
+                    <Link href="/dashboard/portfolio-builder/messages">
                         <Button variant="ghost" size="sm">View All</Button>
                     </Link>
                 </CardHeader>
@@ -88,7 +86,7 @@ export default function PortfolioBuilderIndex({ portfolio, stats, recentMessages
                             {recentMessages.map((msg) => (
                                 <Link
                                     key={msg.id}
-                                    href={`/${l}/dashboard/portfolio-builder/messages/${msg.id}`}
+                                    href={`/dashboard/portfolio-builder/messages/${msg.id}`}
                                     className="flex items-start justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
                                 >
                                     <div className="min-w-0">

@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,8 +32,6 @@ interface Props {
 }
 
 export default function PortfolioSettings({ portfolio }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     const form = useForm({
         bio: portfolio.bio ?? '',
@@ -51,7 +49,7 @@ export default function PortfolioSettings({ portfolio }: Props) {
     useEffect(() => {
         if (autoSaveRef.current) {
             autoSaveRef.current = false;
-            form.put(`/${l}/dashboard/portfolio-builder/settings`, { preserveScroll: true });
+            form.put('/dashboard/portfolio-builder/settings', { preserveScroll: true });
         }
     }, [form.data.services]);
 
@@ -83,13 +81,13 @@ export default function PortfolioSettings({ portfolio }: Props) {
 
     function submit(e: FormEvent) {
         e.preventDefault();
-        form.put(`/${l}/dashboard/portfolio-builder/settings`);
+        form.put('/dashboard/portfolio-builder/settings');
     }
 
     return (
         <PortfolioBuilderLayout breadcrumbs={[
-            { title: 'Portfolio Builder', href: `/${l}/dashboard/portfolio-builder` },
-            { title: 'Settings', href: `/${l}/dashboard/portfolio-builder/settings` },
+            { title: 'Portfolio Builder', href: '/dashboard/portfolio-builder' },
+            { title: 'Settings', href: '/dashboard/portfolio-builder/settings' },
         ]}>
             <Head title="Portfolio Settings" />
 

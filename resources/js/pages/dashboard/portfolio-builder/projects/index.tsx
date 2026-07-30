@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Edit2, FolderOpen, GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -42,9 +42,6 @@ interface Props {
 }
 
 export default function PortfolioProjects({ projects }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
-
     const [items, setItems] = useState<Project[]>(projects);
 
     useEffect(() => setItems(projects), [projects]);
@@ -55,7 +52,7 @@ export default function PortfolioProjects({ projects }: Props) {
 
     function handleDelete(id: number) {
         if (!confirm('Delete this project? This cannot be undone.')) return;
-        router.delete(`/${l}/dashboard/portfolio-builder/projects/${id}`);
+        router.delete(`/dashboard/portfolio-builder/projects/${id}`);
     }
 
     function handleDragEnd(event: DragEndEvent) {
@@ -70,7 +67,7 @@ export default function PortfolioProjects({ projects }: Props) {
         setItems(reordered);
 
         router.post(
-            `/${l}/dashboard/portfolio-builder/projects/reorder`,
+            '/dashboard/portfolio-builder/projects/reorder',
             { order: reordered.map((p) => p.id) },
             { preserveScroll: true, preserveState: true },
         );
@@ -78,8 +75,8 @@ export default function PortfolioProjects({ projects }: Props) {
 
     return (
         <PortfolioBuilderLayout breadcrumbs={[
-            { title: 'Portfolio Builder', href: `/${l}/dashboard/portfolio-builder` },
-            { title: 'Projects', href: `/${l}/dashboard/portfolio-builder/projects` },
+            { title: 'Portfolio Builder', href: '/dashboard/portfolio-builder' },
+            { title: 'Projects', href: '/dashboard/portfolio-builder/projects' },
         ]}>
             <Head title="Portfolio Projects" />
 
@@ -92,7 +89,7 @@ export default function PortfolioProjects({ projects }: Props) {
                         </p>
                     )}
                 </div>
-                <Link href={`/${l}/dashboard/portfolio-builder/projects/create`}>
+                <Link href="/dashboard/portfolio-builder/projects/create">
                     <Button><Plus className="mr-2 h-4 w-4" /> New Project</Button>
                 </Link>
             </div>
@@ -102,7 +99,7 @@ export default function PortfolioProjects({ projects }: Props) {
                     <CardContent className="flex flex-col items-center py-12 text-muted-foreground">
                         <FolderOpen className="mb-3 h-12 w-12" />
                         <p className="mb-4 text-lg font-medium">No projects yet</p>
-                        <Link href={`/${l}/dashboard/portfolio-builder/projects/create`}>
+                        <Link href="/dashboard/portfolio-builder/projects/create">
                             <Button><Plus className="mr-2 h-4 w-4" /> Create Your First Project</Button>
                         </Link>
                     </CardContent>
@@ -115,7 +112,6 @@ export default function PortfolioProjects({ projects }: Props) {
                                 <SortableProjectRow
                                     key={project.id}
                                     project={project}
-                                    locale={l}
                                     onDelete={() => handleDelete(project.id)}
                                 />
                             ))}
@@ -129,11 +125,9 @@ export default function PortfolioProjects({ projects }: Props) {
 
 function SortableProjectRow({
     project,
-    locale,
     onDelete,
 }: {
     project: Project;
-    locale: string;
     onDelete: () => void;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: project.id });
@@ -191,7 +185,7 @@ function SortableProjectRow({
 
                 {/* Actions */}
                 <div className="flex shrink-0 gap-1">
-                    <Link href={`/${locale}/dashboard/portfolio-builder/projects/${project.id}/edit`}>
+                    <Link href={`/dashboard/portfolio-builder/projects/${project.id}/edit`}>
                         <Button variant="ghost"><Edit2 className="h-4 w-4" /></Button>
                     </Link>
                     <Button

@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { index, store, update, destroy } from '@/actions/App/Http/Controllers/Admin/Forum/ForumCategoryAdminController';
 import { Button } from '@/components/ui/button';
@@ -41,15 +41,13 @@ interface FormState {
 const emptyForm: FormState = { name: '', description: '', color: 'indigo', sort_order: 0 };
 
 export default function ForumCategoriesAdmin({ categories }: Props) {
-    const { locale } = usePage().props;
-    const l = String(locale);
 
     const [editing, setEditing] = useState<CategoryWithCount | null>(null);
     const [creating, setCreating] = useState(false);
     const [form, setForm] = useState<FormState>(emptyForm);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Admin', href: `/${l}/admin/dashboard` },
+        { title: 'Admin', href: '/admin/dashboard' },
         { title: 'Forum Categories', href: index.url() },
     ];
 

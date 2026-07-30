@@ -88,7 +88,7 @@ export default function Dashboard({ enrolledCourses, payments, stats }: Props) {
     const l = String(locale);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: ui.nav.dashboard, href: `/${l}/dashboard` },
+        { title: ui.nav.dashboard, href: '/dashboard' },
     ];
 
     const chatContext = {

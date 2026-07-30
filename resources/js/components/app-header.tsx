@@ -46,27 +46,27 @@ function buildNavItems(role: string, locale: string, nav: UiTranslations['nav'])
 
     if (role === 'admin') {
         return [
-            { title: nav.dashboard, href: `${prefix}/admin/dashboard`, icon: LayoutGrid },
-            { title: nav.users, href: `${prefix}/admin/users`, icon: Users },
+            { title: nav.dashboard, href: '/admin/dashboard', icon: LayoutGrid },
+            { title: nav.users, href: '/admin/users', icon: Users },
             { title: nav.courses, href: `${prefix}/courses`, icon: BookOpen },
-            { title: nav.analytics, href: `${prefix}/admin/analytics`, icon: BarChart2 },
-            { title: 'AI Stats', href: `${prefix}/admin/ai-stats`, icon: Zap },
+            { title: nav.analytics, href: '/admin/analytics', icon: BarChart2 },
+            { title: 'AI Stats', href: '/admin/ai-stats', icon: Zap },
         ];
     }
 
     if (role === 'mentor') {
         return [
-            { title: nav.dashboard, href: `${prefix}/mentor/dashboard`, icon: LayoutGrid },
+            { title: nav.dashboard, href: '/mentor/dashboard', icon: LayoutGrid },
             { title: nav.my_courses, href: `${prefix}/courses`, icon: BookMarked },
-            { title: nav.profile, href: `${prefix}/profile`, icon: User },
+            { title: nav.profile, href: '/profile', icon: User },
         ];
     }
 
     // Learner
     return [
-        { title: nav.dashboard, href: `${prefix}/dashboard`, icon: LayoutGrid },
+        { title: nav.dashboard, href: '/dashboard', icon: LayoutGrid },
         { title: nav.my_courses, href: `${prefix}/courses`, icon: BookMarked },
-        { title: nav.profile, href: `${prefix}/profile`, icon: User },
+        { title: nav.profile, href: '/profile', icon: User },
     ];
 }
 

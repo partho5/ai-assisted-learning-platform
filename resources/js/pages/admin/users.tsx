@@ -34,7 +34,7 @@ export default function AdminUsers({ users, filters }: Props) {
     const l = String(locale);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Admin', href: `/${l}/admin/dashboard` },
+        { title: 'Admin', href: '/admin/dashboard' },
         { title: 'Users', href: adminUsers.url() },
     ];
 

@@ -50,9 +50,8 @@ function SpinBadge() {
 }
 
 export default function PortfolioLanding() {
-    const { auth, locale } = usePage().props;
-    const l = String(locale || 'en');
-    const ctaHref = auth?.user ? `/${l}/dashboard/portfolio-builder` : `/register`;
+    const { auth} = usePage().props;
+    const ctaHref = auth?.user ? '/dashboard/portfolio-builder' : '/register';
     const ctaLabel = auth?.user ? 'My Portfolio Builder' : 'Create My Portfolio';
 
     const coreFeatures = [
