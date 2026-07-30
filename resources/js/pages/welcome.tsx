@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, BookOpen, CheckCircle, ChevronRight, Sparkles, Users } from 'lucide-react';
+import { ArrowRight, BookOpen, CheckCircle, ChevronRight, RefreshCw, Sparkles, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RotatingText } from '@/components/rotating-text';
 import PublicLayout from '@/layouts/public-layout';
@@ -8,6 +8,8 @@ import { trackLandingCta } from '@/lib/analytics';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { register } from '@/routes';
 import { inLanguage, ogLocale } from '@/lib/locale';
+import { landingCopy } from '@/lib/landing-copy';
+import { BRAND_EXPANSION, BRAND_FULL, BRAND_NAME } from '@/lib/brand';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -83,20 +85,34 @@ function FadeIn({ children, className = '', delay = 0, id }: { children: React.R
 
 // ─── Schema JSON-LD ──────────────────────────────────────────────────────────
 
-function SchemaOrg({ courses, appUrl, appName, locale }: { courses: FeaturedCourse[]; appUrl: string; appName: string; locale: string }) {
+function SchemaOrg({
+    courses,
+    appUrl,
+    appName,
+    locale,
+    description,
+}: {
+    courses: FeaturedCourse[];
+    appUrl: string;
+    appName: string;
+    locale: string;
+    description: string;
+}) {
     const org = {
         '@context': 'https://schema.org',
         '@type': 'EducationalOrganization',
-        name: appName,
+        name: BRAND_NAME,
+        alternateName: BRAND_EXPANSION,
         url: appUrl,
         logo: `${appUrl}/logo.png`,
-        description: 'Mentor-led online courses with verified skill portfolios. Learn, prove, and showcase your skills.',
+        description,
     };
 
     const website = {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        name: appName,
+        name: BRAND_NAME,
+        alternateName: BRAND_EXPANSION,
         url: appUrl,
         inLanguage: inLanguage(locale),
         potentialAction: {
@@ -134,7 +150,17 @@ function SchemaOrg({ courses, appUrl, appName, locale }: { courses: FeaturedCour
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function CourseCard({ course, locale }: { course: FeaturedCourse; locale: string }) {
+function CourseCard({
+    course,
+    locale,
+    byLabel,
+    resourcesLabel,
+}: {
+    course: FeaturedCourse;
+    locale: string;
+    byLabel: string;
+    resourcesLabel: string;
+}) {
     return (
         <Link
             href={`/${locale}/courses/${course.slug}`}
@@ -174,11 +200,18 @@ function CourseCard({ course, locale }: { course: FeaturedCourse; locale: string
                 <p className="mb-4 line-clamp-2 flex-1 text-sm text-muted-foreground">{stripHtml(course.description ?? '')}</p>
 
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    {course.mentor_name && <span>by {course.mentor_name}</span>}
+                    {course.mentor_name && (
+                        <span>
+                            {byLabel} {course.mentor_name}
+                        </span>
+                    )}
                     {course.resources_count > 0 && (
                         <>
                             <span>·</span>
-                            <span>{course.resources_count} resources</span>
+                            <span>
+                                {course.resources_count}
+                                {resourcesLabel}
+                            </span>
                         </>
                     )}
                 </div>
@@ -207,50 +240,40 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
     const appUrl = String(serverAppUrl ?? '');
 
     const courses = featuredCourses ?? [];
+    const c = landingCopy(l);
+
+    const trustIcons = [
+        { icon: <BookOpen className="h-5 w-5" />, color: 'bg-orange-50 text-orange-600 border-orange-100' },
+        { icon: <RefreshCw className="h-5 w-5" />, color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
+        { icon: <Users className="h-5 w-5" />, color: 'bg-violet-50 text-violet-600 border-violet-100' },
+    ];
 
     return (
         <PublicLayout isLandingPage hidePlatformChat={false}>
-            <Head title={`${String(appName)} - Learn, Prove, Get Hired`}>
-                <meta
-                    name="description"
-                    content="Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers actually trust. Free to start."
-                />
-                <meta
-                    name="keywords"
-                    content="skill evidence, online courses, verified learning, skill portfolio, mentor courses, learn online"
-                />
+            <Head title={`${BRAND_FULL} | ${c.meta.titleSuffix}`}>
+                <meta name="description" content={c.meta.description} />
+                <meta name="keywords" content={c.meta.keywords} />
                 <link rel="canonical" href={`${appUrl}/${l}/`} />
-                <meta property="og:site_name" content={String(appName)} />
+                <meta property="og:site_name" content={BRAND_NAME} />
                 <meta property="og:type" content="website" />
-                <meta
-                    property="og:title"
-                    content={`${String(appName)} — Learn, Prove, Get Hired`}
-                />
-                <meta
-                    property="og:description"
-                    content="Take mentor-led courses, complete real tests and assignments, and build a verified skill portfolio employers actually trust."
-                />
+                <meta property="og:title" content={`${BRAND_FULL} | ${c.meta.ogTitleSuffix}`} />
+                <meta property="og:description" content={c.meta.ogDescription} />
                 <meta property="og:url" content={`${appUrl}/${l}/`} />
                 <meta property="og:image" content={`${appUrl}/og-image.png`} />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
-                <meta property="og:image:alt" content={`${String(appName)} — Learn, Prove, Get Hired`} />
+                <meta property="og:image:alt" content={`${BRAND_FULL} | ${c.meta.ogTitleSuffix}`} />
                 <meta property="og:locale" content={ogLocale(l)} />
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta
-                    name="twitter:title"
-                    content={`${String(appName)} — Learn, Prove, Get Hired`}
-                />
-                <meta
-                    name="twitter:description"
-                    content="Build a verified skill portfolio with real mentor-reviewed work."
-                />
+                <meta name="twitter:title" content={`${BRAND_FULL} | ${c.meta.ogTitleSuffix}`} />
+                <meta name="twitter:description" content={c.meta.twitterDescription} />
                 <meta name="twitter:image" content={`${appUrl}/og-image.png`} />
                 <SchemaOrg
                     courses={courses}
                     appUrl={appUrl}
                     appName={String(appName)}
                     locale={l}
+                    description={c.meta.schemaDescription}
                 />
             </Head>
 
@@ -313,61 +336,56 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <div className="relative mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28 lg:py-36">
                     <div className="mx-auto max-w-3xl text-center">
                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-black px-4 py-1.5 text-sky-400 shadow-sm backdrop-blur-sm">
-                            <span
-                                className="hero-badge-dot h-1.5 w-1.5 rounded-full bg-green-400"
-                            />
-                            Recruiters don't care about your certificates
+                            <span className="hero-badge-dot h-1.5 w-1.5 shrink-0 rounded-full bg-green-400" />
+                            {c.hero.badge}
                         </div>
 
+                        {/* Each sentence owns its own line: the two halves are a
+                            problem/promise pair and must never wrap into each other. */}
                         <h1
                             style={{
                                 fontFamily: "'Bricolage Grotesque', sans-serif",
                             }}
-                            className="mb-4 text-4xl leading-tight font-bold tracking-tight text-slate-900 md:text-5xl lg:text-6xl dark:text-gray-200"
+                            className="mb-5 text-4xl leading-[1.15] font-bold tracking-tight text-slate-900 md:text-5xl lg:text-6xl dark:text-gray-200"
                         >
-                            Stop chasing certificates.{' '}
+                            <span className="block">{c.hero.titleStatic}</span>
                             <span
-                                className="hero-gradient-text bg-clip-text text-transparent"
+                                className="hero-gradient-text mt-1 block bg-clip-text text-transparent"
                                 style={{
                                     backgroundImage:
                                         'linear-gradient(90deg, #0f172a, #2563eb, #0ea5e9, #6366f1, #0f172a)',
                                     backgroundSize: '300% auto',
                                 }}
                             >
-                                Build real work that gets you hired.
+                                {c.hero.titleGradient}
                             </span>
                         </h1>
 
-                        <p className="mx-auto mb-10 max-w-xl text-lg text-slate-600 dark:text-slate-300">
-                            Learners get direct help from industry experts
+                        <p className="mx-auto mb-4 max-w-xl text-lg text-slate-600 dark:text-slate-300">
+                            {c.hero.subtitle}
+                        </p>
+
+                        {/* The brand is an acronym; spell it out once, prominently. */}
+                        <p className="mb-9 text-sm font-medium tracking-wide text-slate-500 dark:text-slate-400">
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">{BRAND_NAME}</span>
+                            {' — '}
+                            {BRAND_EXPANSION}
                         </p>
 
                         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                            {/*{canRegister && (*/}
-                            {/*    <Button*/}
-                            {/*        asChild*/}
-                            {/*        variant="hero"*/}
-                            {/*        size="lg"*/}
-                            {/*        className="bg-indigo-700 hover:bg-black"*/}
-                            {/*    >*/}
-                            {/*        <Link href={register()}>Join now</Link>*/}
-                            {/*    </Button>*/}
-                            {/*)}*/}
                             <Button
                                 asChild
                                 size="lg"
                                 className="group bg-gradient-to-r from-sky-600 to-blue-700 text-white shadow-md hover:from-black hover:to-blue-700"
                             >
                                 <Link href={coursesIndex.url(l)} onClick={() => trackLandingCta('hero_browse_courses')}>
-                                    Browse courses
+                                    {c.hero.cta}
                                     <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                                 </Link>
                             </Button>
                         </div>
 
-                        <p className="mt-4 text-xs text-slate-400">
-                            No credit card required
-                        </p>
+                        <p className="mt-4 text-xs text-slate-400">{c.hero.note}</p>
                     </div>
                 </div>
             </section>
@@ -376,29 +394,13 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             <div className="border-b border-border bg-white">
                 <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                        {[
-                            {
-                                icon: <BookOpen className="h-5 w-5" />,
-                                label: 'High-value courses',
-                                color: 'bg-orange-50 text-orange-600 border-orange-100 text-sm md:text-lg',
-                            },
-                            {
-                                icon: <CheckCircle className="h-5 w-5" />,
-                                label: 'Mentor-endorsed work',
-                                color: 'bg-indigo-50 text-indigo-600 border-indigo-100 text-sm md:text-lg',
-                            },
-                            {
-                                icon: <Users className="h-5 w-5" />,
-                                label: 'Public skill portfolio',
-                                color: 'bg-violet-50 text-violet-600 border-violet-100 text-sm md:text-lg',
-                            },
-                        ].map(({ icon, label, color }) => (
+                        {trustIcons.map(({ icon, color }, i) => (
                             <div
-                                key={label}
-                                className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${color}`}
+                                key={c.trust[i]}
+                                className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm md:text-lg ${color}`}
                             >
                                 <span className="shrink-0">{icon}</span>
-                                <span className="">{label}</span>
+                                <span>{c.trust[i]}</span>
                             </div>
                         ))}
                         {/* AI card — Google-style rainbow gradient border */}
@@ -409,19 +411,61 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     'linear-gradient(135deg, #4285F4, #EA4335, #FBBC04, #34A853)',
                             }}
                         >
-                            <div className="flex items-center gap-3 rounded-[10px] bg-white px-4 py-3">
+                            <div className="flex h-full items-center gap-3 rounded-[10px] bg-white px-4 py-3">
                                 <Sparkles
                                     className="h-5 w-5 shrink-0"
                                     style={{ color: '#4285F4' }}
                                 />
-                                <span className="text-sm font-medium text-slate-700 md:text-lg ">
-                                    AI-native learning
+                                <span className="text-sm font-medium text-slate-700 md:text-lg">
+                                    {c.trust[3]}
                                 </span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* ── THE BROKEN SYSTEM ────────────────────────────────────── */}
+            <section aria-label="Why Jovoc" id="why" className="border-b border-border">
+                <FadeIn className="mx-auto max-w-5xl px-4 py-20 md:px-6 md:py-24">
+                    <div className="mx-auto max-w-2xl text-center">
+                        <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                            {c.problem.badge}
+                        </div>
+                        <h2
+                            style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                            className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
+                        >
+                            {c.problem.headline}
+                        </h2>
+                        <p className="text-muted-foreground">{c.problem.lead}</p>
+                    </div>
+
+                    <div className="mt-12 grid gap-4 sm:grid-cols-2">
+                        {c.problem.points.map(({ label, body }) => (
+                            <div
+                                key={label}
+                                className="rounded-xl border border-border bg-card p-6"
+                            >
+                                <p className="mb-2 text-sm font-semibold tracking-wide text-destructive/80 uppercase">
+                                    {label}
+                                </p>
+                                <p className="leading-relaxed text-muted-foreground">{body}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="mt-10 rounded-2xl border border-primary/30 bg-primary/5 p-8 text-center">
+                        <p
+                            style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                            className="mb-3 text-2xl font-bold tracking-tight text-foreground md:text-3xl"
+                        >
+                            {c.problem.punchline}
+                        </p>
+                        <p className="mx-auto max-w-2xl text-muted-foreground">{c.problem.punchlineSub}</p>
+                    </div>
+                </FadeIn>
+            </section>
 
             {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
             <FadeIn
@@ -435,85 +479,42 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         }}
                         className="mb-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                     >
-                        How it works
+                        {c.how.headline}
                     </h2>
-                    <p className="text-muted-foreground">
-                        Three steps from enrolled to someone recruiters actually
-                        call back.
-                    </p>
+                    <p className="text-muted-foreground">{c.how.subtitle}</p>
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-3">
-                    {[
-                        {
-                            step: '01',
-                            titleBefore: 'Pick a ',
-                            rotatingWords: [
-                                'skill gap',
-                                'weak spot',
-                                'blind spot',
-                                'career gap',
-                            ],
-                            titleAfter: ' to close',
-                            initialDelay: 0,
-                            body: 'Not another course to add to your list — a real gap to close. Mentor-built content with videos, articles, and assignments designed around hireable outcomes.',
-                            gradient: 'from-sky-500 to-cyan-400',
-                            bg: 'bg-sky-50 dark:bg-sky-950/30',
-                            border: 'border-sky-100 dark:border-sky-900',
-                        },
-                        {
-                            step: '02',
-                            titleBefore: 'Do work a ',
-                            rotatingWords: [
-                                'recruiter',
-                                'hiring manager',
-                                'client',
-                                'CEO',
-                            ],
-                            titleAfter: ' can read',
-                            initialDelay: 900,
-                            body: "Assignments aren't busywork. They're portfolio pieces. Submit real work a hiring manager can open, read, and evaluate — not a multiple-choice score.",
-                            gradient: 'from-indigo-500 to-violet-500',
-                            bg: 'bg-indigo-50 dark:bg-indigo-950/30',
-                            border: 'border-indigo-100 dark:border-indigo-900',
-                        },
-                        {
-                            step: '03',
-                            titleBefore: 'Get a ',
-                            rotatingWords: [
-                                "mentor's",
-                                "expert's",
-                                "professional's",
-                            ],
-                            titleAfter: ' public verdict',
-                            initialDelay: 1800,
-                            body: 'A real mentor reviews your submission and writes a public endorsement — permanently recorded on your portfolio. Not a certificate. A verdict from someone who knows.',
-                            gradient: 'from-violet-500 to-fuchsia-500',
-                            bg: 'bg-violet-50 dark:bg-violet-950/30',
-                            border: 'border-violet-100 dark:border-violet-900',
-                        },
-                    ].map(
-                        ({
-                            step,
-                            titleBefore,
-                            rotatingWords,
-                            titleAfter,
-                            initialDelay,
-                            body,
-                            gradient,
-                            bg,
-                            border,
-                        }) => (
+                    {c.how.steps.map(({ step, titleBefore, rotatingWords, titleAfter, body }, i) => {
+                        const theme = [
+                            {
+                                gradient: 'from-sky-500 to-cyan-400',
+                                bg: 'bg-sky-50 dark:bg-sky-950/30',
+                                border: 'border-sky-100 dark:border-sky-900',
+                            },
+                            {
+                                gradient: 'from-indigo-500 to-violet-500',
+                                bg: 'bg-indigo-50 dark:bg-indigo-950/30',
+                                border: 'border-indigo-100 dark:border-indigo-900',
+                            },
+                            {
+                                gradient: 'from-violet-500 to-fuchsia-500',
+                                bg: 'bg-violet-50 dark:bg-violet-950/30',
+                                border: 'border-violet-100 dark:border-violet-900',
+                            },
+                        ][i];
+
+                        return (
                             <div
                                 key={step}
-                                className={`relative flex flex-col gap-4 rounded-2xl border p-8 ${bg} ${border}`}
+                                className={`relative flex flex-col gap-4 rounded-2xl border p-8 ${theme.bg} ${theme.border}`}
                             >
                                 <span
                                     style={{
                                         fontFamily:
                                             "'Bricolage Grotesque', sans-serif",
                                     }}
-                                    className={`bg-gradient-to-r ${gradient} bg-clip-text text-6xl leading-none font-black text-transparent`}
+                                    className={`bg-gradient-to-r ${theme.gradient} bg-clip-text text-6xl leading-none font-black text-transparent`}
                                 >
                                     {step}
                                 </span>
@@ -521,15 +522,15 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     {titleBefore}
                                     <RotatingText
                                         words={rotatingWords}
-                                        initialDelay={initialDelay}
+                                        initialDelay={i * 900}
                                         className="text-primary"
                                     />
                                     {titleAfter}
                                 </h3>
                                 <p className="text-muted-foreground">{body}</p>
                             </div>
-                        ),
-                    )}
+                        );
+                    })}
                 </div>
             </FadeIn>
 
@@ -548,9 +549,8 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 }}
                                 className="mb-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                             >
-                                Recent courses
+                                {c.recentCourses}
                             </h2>
-
                         </div>
                         <Button
                             asChild
@@ -559,8 +559,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             className="hidden md:flex"
                         >
                             <Link href={coursesIndex.url(l)}>
-                                View all{' '}
-                                <ChevronRight className="ml-1 h-4 w-4" />
+                                {c.viewAll} <ChevronRight className="ml-1 h-4 w-4" />
                             </Link>
                         </Button>
                     </div>
@@ -572,6 +571,8 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                       key={course.id}
                                       course={course}
                                       locale={l}
+                                      byLabel={c.by}
+                                      resourcesLabel={c.resourcesCount}
                                   />
                               ))
                             : Array.from({ length: 3 }).map((_, i) => (
@@ -582,10 +583,53 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     <div className="mt-8 text-center md:hidden">
                         <Button asChild variant="ghost">
                             <Link href={coursesIndex.url(l)}>
-                                View all courses{' '}
-                                <ChevronRight className="ml-1 h-4 w-4" />
+                                {c.viewAllLong} <ChevronRight className="ml-1 h-4 w-4" />
                             </Link>
                         </Button>
+                    </div>
+                </FadeIn>
+            </section>
+
+            {/* ── 2 YEARS, NOT 20 ──────────────────────────────────────── */}
+            <section id="two-years" aria-label="Two years, not twenty" className="border-t border-border">
+                <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
+                    <div className="mx-auto max-w-2xl text-center">
+                        <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+                            {c.timeline.badge}
+                        </div>
+                        <h2
+                            style={{
+                                fontFamily: "'Bricolage Grotesque', sans-serif",
+                            }}
+                            className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
+                        >
+                            {c.timeline.headline}
+                        </h2>
+                        <p className="mb-6 text-muted-foreground">{c.timeline.body}</p>
+                        <p className="mb-8 border-l-2 border-primary pl-4 text-left text-lg font-medium text-foreground italic">
+                            {c.timeline.callout}
+                        </p>
+                        <Button asChild variant="enroll">
+                            <Link href={coursesIndex.url(l)} onClick={() => trackLandingCta('two_years_curriculum')}>
+                                {c.timeline.cta}
+                            </Link>
+                        </Button>
+                    </div>
+
+                    <div className="mt-14 grid gap-6 sm:grid-cols-3">
+                        {c.timeline.cards.map(({ title, body }) => (
+                            <div
+                                key={title}
+                                className="rounded-xl border border-border bg-card p-5"
+                            >
+                                <h3 className="mb-2 font-semibold text-foreground">
+                                    {title}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {body}
+                                </p>
+                            </div>
+                        ))}
                     </div>
                 </FadeIn>
             </section>
@@ -595,7 +639,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <div className="grid items-center gap-12 lg:grid-cols-2">
                     <div>
                         <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                            Your public portfolio
+                            {c.portfolio.badge}
                         </div>
                         <h2
                             style={{
@@ -603,28 +647,22 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             }}
                             className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                         >
-                            A certificate says you sat through it.
+                            {c.portfolio.headlineTop}
                             <br />
-                            This shows what you can actually do.
+                            {c.portfolio.headlineBottom}
                         </h2>
                         <p className="mb-6 text-muted-foreground">
-                            Every assignment a mentor endorses, every test you
-                            pass — it's all publicly verified at{' '}
+                            {c.portfolio.bodyBefore}
                             <code className="rounded bg-muted px-1.5 py-0.5 text-sm text-foreground">
                                 {typeof window !== 'undefined'
                                     ? window.location.host
                                     : 'yoursite.com'}
-                                /en/u/yourname
+                                /{l}/u/yourname
                             </code>
-                            . One link. No PDFs. No "trust me."
+                            {c.portfolio.bodyAfter}
                         </p>
                         <ul className="mb-8 space-y-3">
-                            {[
-                                'Recruiters see your actual work — not a completion badge',
-                                'Mentors write public endorsements that vouch for your output',
-                                'Pin your strongest pieces — up to 5 featured submissions',
-                                'Share one URL in job applications, LinkedIn, anywhere',
-                            ].map((item) => (
+                            {c.portfolio.points.map((item) => (
                                 <li
                                     key={item}
                                     className="flex items-start gap-3"
@@ -638,9 +676,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         </ul>
                         {canRegister && (
                             <Button asChild variant="enroll">
-                                <Link href={register()}>
-                                    Build your portfolio
-                                </Link>
+                                <Link href={register()}>{c.portfolio.cta}</Link>
                             </Button>
                         )}
                     </div>
@@ -656,7 +692,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     Alex Johnson
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    Full-Stack Developer
+                                    {c.portfolio.mockRole}
                                 </p>
                             </div>
                         </div>
@@ -708,7 +744,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                         </span>
                                         {endorsed && (
                                             <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
-                                                Endorsed
+                                                {c.portfolio.mockEndorsed}
                                             </span>
                                         )}
                                     </div>
@@ -720,7 +756,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             {typeof window !== 'undefined'
                                 ? window.location.host
                                 : 'yoursite.com'}
-                            /en/u/alexjohnson
+                            /{l}/u/alexjohnson
                         </p>
                     </div>
                 </div>
@@ -735,7 +771,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
                     <div className="mx-auto max-w-2xl text-center">
                         <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                            For mentors
+                            {c.mentors.badge}
                         </div>
                         <h2
                             style={{
@@ -743,16 +779,11 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             }}
                             className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                         >
-                            Share what you know.
+                            {c.mentors.headlineTop}
                             <br />
-                            Earn from what you teach.
+                            {c.mentors.headlineBottom}
                         </h2>
-                        <p className="mb-8 text-muted-foreground">
-                            Build structured courses with modules, rich-text
-                            lessons, videos, and real assignments. Review
-                            student submissions, write endorsements, and set
-                            your own price.
-                        </p>
+                        <p className="mb-8 text-muted-foreground">{c.mentors.body}</p>
                         <div className="flex flex-wrap justify-center gap-3">
                             {canRegister && (
                                 <Button asChild variant="enroll">
@@ -761,97 +792,20 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                             register().url + '?join_as=mentor'
                                         }
                                     >
-                                        Start teaching
+                                        {c.mentors.ctaTeach}
                                     </Link>
                                 </Button>
                             )}
                             <Button asChild variant="ghost">
                                 <Link href={`/${l}/about-us`}>
-                                    Our philosophy
+                                    {c.mentors.ctaPhilosophy}
                                 </Link>
                             </Button>
                         </div>
                     </div>
 
                     <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        {[
-                            {
-                                title: 'Rich course builder',
-                                body: 'Modules, lessons, videos, articles, and assignments — all in one editor.',
-                            },
-                            {
-                                title: 'AI-assisted tests',
-                                body: 'Auto-generate quiz questions and rubrics, then fine-tune to your standards.',
-                            },
-                            {
-                                title: 'Submission review',
-                                body: 'Review student work, leave written feedback, and endorse strong submissions.',
-                            },
-                            {
-                                title: 'Flexible pricing',
-                                body: 'Set one-time or subscription pricing. Offer coupon codes to your community.',
-                            },
-                        ].map(({ title, body }) => (
-                            <div
-                                key={title}
-                                className="rounded-xl border border-border bg-card p-5"
-                            >
-                                <h3 className="mb-2 font-semibold text-foreground">
-                                    {title}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    {body}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </FadeIn>
-            </section>
-
-            {/* ── FOR FOUNDERS ─────────────────────────────────────────── */}
-            <section id="for-founders" aria-label="For founders">
-                <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
-                    <div className="mx-auto max-w-2xl text-center">
-                        <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                            Start a business
-                        </div>
-                        <h2
-                            style={{
-                                fontFamily: "'Bricolage Grotesque', sans-serif",
-                            }}
-                            className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
-                        >
-                            Build a business that runs on technology.
-                        </h2>
-                        <p className="mb-8 text-muted-foreground">
-                            Not every learner wants a job. Some want clients.
-                            These courses teach the skills that run a real
-                            business — web apps, databases, systems, automation.
-                            When you finish, you will be able to create or speed
-                            up your own business.
-                        </p>
-                        {canRegister && (
-                            <Button asChild variant="enroll">
-                                <Link href={register()}>Start building</Link>
-                            </Button>
-                        )}
-                    </div>
-
-                    <div className="mt-14 grid gap-6 sm:grid-cols-3">
-                        {[
-                            {
-                                title: 'Take client work',
-                                body: 'Your portfolio shows real, endorsed work. Clients can see what you built — not just what you studied.',
-                            },
-                            {
-                                title: 'Build and sell products',
-                                body: 'Use your skills to build software products. Launch them, sell them, run them yourself.',
-                            },
-                            {
-                                title: 'Hire and grow',
-                                body: 'When your business grows, recruit people with verified skills. Or teach your own team on this platform.',
-                            },
-                        ].map(({ title, body }) => (
+                        {c.mentors.cards.map(({ title, body }) => (
                             <div
                                 key={title}
                                 className="rounded-xl border border-border bg-card p-5"
@@ -878,18 +832,16 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             }}
                             className="mb-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                         >
-                            Simple pricing
+                            {c.pricing.headline}
                         </h2>
-                        <p className="text-muted-foreground">
-                            No subscriptions required. Pay for what you want.
-                        </p>
+                        <p className="text-muted-foreground">{c.pricing.subtitle}</p>
                     </div>
 
                     <div className="mx-auto grid max-w-3xl gap-6 md:grid-cols-2">
                         {/* Free */}
                         <div className="flex flex-col rounded-2xl border border-border bg-card p-8">
                             <p className="mb-1 text-sm font-medium text-muted-foreground">
-                                Free forever
+                                {c.pricing.freeLabel}
                             </p>
                             <p
                                 style={{
@@ -901,13 +853,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 $0
                             </p>
                             <ul className="mb-8 flex-1 space-y-3">
-                                {[
-                                    'Browse full course catalog',
-                                    'Access all free resources',
-                                    'AI learning assistant',
-                                    'Public portfolio page',
-                                    'Chat with the platform AI',
-                                ].map((item) => (
+                                {c.pricing.freePoints.map((item) => (
                                     <li
                                         key={item}
                                         className="flex items-center gap-3 text-sm text-muted-foreground"
@@ -924,7 +870,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     className="w-full"
                                 >
                                     <Link href={register()} onClick={() => trackLandingCta('pricing_get_started')}>
-                                        Get started free
+                                        {c.pricing.freeCta}
                                     </Link>
                                 </Button>
                             )}
@@ -933,7 +879,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         {/* Per course */}
                         <div className="flex flex-col rounded-2xl border border-primary/50 bg-card p-8 shadow-sm ring-1 ring-primary/20">
                             <p className="mb-1 text-sm font-medium text-primary">
-                                Per course
+                                {c.pricing.paidLabel}
                             </p>
                             <p
                                 style={{
@@ -942,20 +888,13 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                 }}
                                 className="mb-1 text-4xl font-bold text-foreground"
                             >
-                                Mentor's price
+                                {c.pricing.paidPrice}
                             </p>
                             <p className="mb-6 text-sm text-muted-foreground">
-                                One-time or subscription, set by the mentor.
+                                {c.pricing.paidNote}
                             </p>
                             <ul className="mb-8 flex-1 space-y-3">
-                                {[
-                                    'Everything in Free',
-                                    'Full course access',
-                                    'Submit assignments',
-                                    'Mentor review & endorsement',
-                                    'Achievements on your portfolio',
-                                    'Coupon codes accepted',
-                                ].map((item) => (
+                                {c.pricing.paidPoints.map((item) => (
                                     <li
                                         key={item}
                                         className="flex items-center gap-3 text-sm text-muted-foreground"
@@ -967,7 +906,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             </ul>
                             <Button asChild variant="enroll" className="w-full">
                                 <Link href={coursesIndex.url(l)} onClick={() => trackLandingCta('pricing_browse_courses')}>
-                                    Browse courses
+                                    {c.pricing.paidCta}
                                 </Link>
                             </Button>
                         </div>
@@ -987,28 +926,23 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         }}
                         className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                     >
-                        Your next{' '}
+                        {c.final.headlineBefore}
                         <RotatingText
-                            words={['job', 'business', 'career', 'client']}
+                            words={c.final.rotatingWords}
                             className="text-primary"
-                        />{' '}
-                        should start here.
+                        />
+                        {c.final.headlineAfter}
                     </h2>
-                    <p className="mb-8 text-muted-foreground">
-                        Stop attaching PDFs. Build a portfolio of
-                        mentor-endorsed work and send one link that does the
-                        talking for you.
-                    </p>
+                    <p className="mb-8 text-muted-foreground">{c.final.body}</p>
                     {canRegister && (
                         <Button asChild variant="enroll" size="lg">
                             <Link href={register()} onClick={() => trackLandingCta('final_sign_up')}>
-                                Sign up free{' '}
-                                <ArrowRight className="ml-2 h-4 w-4" />
+                                {c.final.cta} <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
                         </Button>
                     )}
                     <p className="mt-3 text-xs text-muted-foreground">
-                        No credit card required.
+                        {c.final.note}
                     </p>
                 </FadeIn>
             </section>

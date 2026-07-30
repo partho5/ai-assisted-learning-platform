@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/public-layout';
+import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
+import { aboutCopy, type AboutBenefit } from '@/lib/about-copy';
+import { BRAND_EXPANSION, BRAND_FULL, BRAND_NAME } from '@/lib/brand';
 
 // ─── useFadeIn (same pattern as welcome.tsx) ──────────────────────────────────
 
@@ -108,16 +112,6 @@ function EyeIcon() {
     );
 }
 
-function GlobeIcon() {
-    return (
-        <svg {...sw}>
-            <circle cx="12" cy="12" r="10" />
-            <line x1="2" y1="12" x2="22" y2="12" />
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-        </svg>
-    );
-}
-
 function BroadcastIcon() {
     return (
         <svg {...sw}>
@@ -153,24 +147,6 @@ function MessageIcon() {
     );
 }
 
-function LayersIcon() {
-    return (
-        <svg {...sw}>
-            <polygon points="12 2 2 7 12 12 22 7 12 2" />
-            <polyline points="2 17 12 22 22 17" />
-            <polyline points="2 12 12 17 22 12" />
-        </svg>
-    );
-}
-
-function KeyIcon() {
-    return (
-        <svg {...sw}>
-            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-        </svg>
-    );
-}
-
 function RefreshIcon() {
     return (
         <svg {...sw}>
@@ -181,31 +157,30 @@ function RefreshIcon() {
     );
 }
 
-function ShieldCheckIcon() {
-    return (
-        <svg {...sw}>
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            <polyline points="9 12 11 14 15 10" />
-        </svg>
-    );
-}
-
-// ─── Benefit types ────────────────────────────────────────────────────────────
-
-interface Benefit {
-    icon: React.ReactNode;
-    headline: string;
-    body: string;
-}
+/** Copy files reference icons by key so the narrative stays free of JSX. */
+const ICONS: Record<string, () => React.ReactElement> = {
+    book: BookIcon,
+    zap: ZapIcon,
+    bot: BotIcon,
+    idcard: IdCardIcon,
+    eye: EyeIcon,
+    refresh: RefreshIcon,
+    broadcast: BroadcastIcon,
+    checksquare: CheckSquareIcon,
+    award: AwardIcon,
+    message: MessageIcon,
+};
 
 // ─── Benefit row ─────────────────────────────────────────────────────────────
 
-function BenefitRow({ benefit, delay }: { benefit: Benefit; delay: number }) {
+function BenefitRow({ benefit, delay }: { benefit: AboutBenefit; delay: number }) {
+    const Icon = ICONS[benefit.icon] ?? BookIcon;
+
     return (
         <FadeIn delay={delay}>
             <div className="flex gap-5 py-7 border-b border-border">
                 <div className="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-lg mt-0.5 bg-primary/10 text-primary">
-                    {benefit.icon}
+                    <Icon />
                 </div>
                 <div>
                     <h3 className="mb-2 text-base font-semibold leading-snug text-foreground">
@@ -234,7 +209,7 @@ function SectionBadge({ label }: { label: string }) {
 
 function SectionHeadline({ children }: { children: React.ReactNode }) {
     return (
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-10 leading-tight">
+        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-8 leading-tight">
             {children}
         </h2>
     );
@@ -243,156 +218,121 @@ function SectionHeadline({ children }: { children: React.ReactNode }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AboutUs() {
-    // ── Learner benefits ──────────────────────────────────────────────────────
-
-    const learnerBenefits: Benefit[] = [
-        {
-            icon: <BookIcon />,
-            headline: 'You get structured courses that actually teach',
-            body: 'Every course here is built in order. Each lesson prepares you for the next. Your mentor did not just upload files. They built a clear path from start to finish. When you follow it, you feel yourself getting better — step by step.',
-        },
-        {
-            icon: <ZapIcon />,
-            headline: 'You get your answer in seconds, not days',
-            body: "Write your answer. Submit it. In seconds, you see your score and the reason for it. The AI grades your answer against your mentor's standard. If your work needs a human expert to review it, your mentor does that. You always know exactly where you stand.",
-        },
-        {
-            icon: <BotIcon />,
-            headline: 'You get an AI tutor that knows your course',
-            body: 'The AI tutor knows which course you are in. It knows how far you have gone. It knows what you just read. Ask it any question — at any hour. It answers from your course material, not from random internet sources. It gives you hints when you are stuck. It explains things again when you do not understand.',
-        },
-        {
-            icon: <IdCardIcon />,
-            headline: 'You get a public portfolio that proves your skills',
-            body: "When you finish a course, it goes into your public profile — at a real web address with your name. When a mentor reviews your work and approves it, that approval stays on your profile permanently. This is not a certificate anyone can print at home. It is a verified record of what you actually know. Send the link to an employer. Send it to a client. Let them see for themselves.",
-        },
-        {
-            icon: <EyeIcon />,
-            headline: 'You can read free lessons before you pay anything',
-            body: 'Free lessons are open. No account needed. Read them. Watch them. Decide if the quality is worth your money. When you are ready, enroll and unlock everything — assessments, progress tracking, your portfolio. You only pay after you already know it is good.',
-        },
-        {
-            icon: <GlobeIcon />,
-            headline: 'You can learn in English or Bengali',
-            body: 'The full platform — every page, every course — works in both English and Bengali. Learning hard topics is already difficult. The language of the platform should not make it harder.',
-        },
-    ];
-
-    // ── Mentor benefits ───────────────────────────────────────────────────────
-
-    const mentorBenefits: Benefit[] = [
-        {
-            icon: <BroadcastIcon />,
-            headline: 'Your knowledge reaches learners at any time',
-            body: 'You write your lesson once. A learner reads it at night after work. Another reads it in a different language. You do not need to repeat yourself. You focus on making the lesson excellent. The platform handles everything else.',
-        },
-        {
-            icon: <CheckSquareIcon />,
-            headline: 'Your grading standard stays consistent at any scale',
-            body: 'You write the rubric — the rules for a good answer. The AI grades every open-ended answer against your rules, automatically. Simple tests never reach you. Only the complex assignments that need your judgment come to you for review. You stay involved where it matters.',
-        },
-        {
-            icon: <AwardIcon />,
-            headline: 'Your endorsement has real value',
-            body: "When you approve a learner's assignment, your name is attached to their portfolio permanently. You do not approve automatically. You read the work and decide. Learners know this. They work harder because your approval means something real.",
-        },
-        {
-            icon: <MessageIcon />,
-            headline: 'Learners get help even when you are offline',
-            body: 'AI members in the community forum answer course questions when you are not available. They know the course. They can explain and help. The questions that need a real expert still come to you — but you are not the only source of help anymore.',
-        },
-    ];
-
-    // ── Admin benefits ────────────────────────────────────────────────────────
-
-    const adminBenefits: Benefit[] = [
-        {
-            icon: <LayersIcon />,
-            headline: 'You design exactly how learning works',
-            body: 'Build courses from modules. Build modules from resources — written lessons, videos, reference links. Choose the order. Choose the depth. The learning path reflects your exact intention. Learners follow the path you designed.',
-        },
-        {
-            icon: <KeyIcon />,
-            headline: 'You control who sees what',
-            body: 'Some content is free and open to everyone. Some content is for enrolled learners. Some content is for paid members only. Payment goes through PayPal — access unlocks automatically after payment is confirmed. You set the rules. The platform follows them.',
-        },
-        {
-            icon: <RefreshIcon />,
-            headline: 'The AI tutor stays accurate without any work from you',
-            body: 'Every night, the platform automatically updates what the AI tutor knows. If you edit a lesson today, the AI will answer questions from the updated version by tomorrow. You do not press any buttons. It happens on its own.',
-        },
-        {
-            icon: <ShieldCheckIcon />,
-            headline: 'Human approval protects the quality of every portfolio',
-            body: "No learner skill appears in their public portfolio without a mentor's approval first. Automated grading handles the volume. Human experts make the final decision on what counts as real competence. This is what keeps the platform credible — and keeps learners motivated to do their best work.",
-        },
-    ];
-
-    // ── Render ────────────────────────────────────────────────────────────────
+    const { locale } = usePage().props;
+    const l = String(locale);
+    const c = aboutCopy(l);
 
     return (
         <PublicLayout hidePlatformChat>
-            <Head title="About">
-                <meta
-                    name="description"
-                    content="How this platform works — for learners, mentors, and administrators."
-                />
+            <Head title={`${c.meta.title} | ${BRAND_FULL}`}>
+                <meta name="description" content={c.meta.description} />
             </Head>
 
-            {/* ── Section 1: Learners ───────────────────────────────────────── */}
+            {/* ── The name ──────────────────────────────────────────────── */}
+            <section className="border-b border-border bg-primary/5 py-12">
+                <div className="mx-auto max-w-3xl px-5 text-center">
+                    <p className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                        {BRAND_NAME}
+                    </p>
+                    <p className="mt-2 text-lg font-medium text-primary sm:text-xl">
+                        {BRAND_EXPANSION}
+                    </p>
+                    <p className="mt-3 text-sm text-muted-foreground">{c.nameNote}</p>
+                </div>
+            </section>
+
+            {/* ── Section 1: The broken system ──────────────────────────── */}
             <section className="border-b border-border py-20">
-                <div className="mx-auto max-w-4xl px-5">
+                <div className="mx-auto max-w-3xl px-5">
                     <FadeIn>
-                        <SectionBadge label="For Learners" />
-                        <div className="text-center">
-                            <SectionHeadline>
-                                Every step of learning automatically
-                                creates a proof.
-                                <br />
-                                And shown as a public portfolio
-                            </SectionHeadline>
+                        <SectionBadge label={c.problem.badge} />
+                        <SectionHeadline>{c.problem.headline}</SectionHeadline>
+                        <div className="space-y-5">
+                            {c.problem.paragraphs.map((p) => (
+                                <p key={p} className="text-base leading-[1.9] text-muted-foreground">
+                                    {p}
+                                </p>
+                            ))}
                         </div>
+                        <p className="mt-10 border-l-4 border-primary pl-6 text-xl font-semibold leading-relaxed text-foreground">
+                            {c.problem.pullquote}
+                        </p>
                     </FadeIn>
-                    {learnerBenefits.map((b, i) => (
-                        <BenefitRow key={i} benefit={b} delay={i * 65} />
-                    ))}
                 </div>
             </section>
 
-            {/* ── Section 2: Mentors ────────────────────────────────────────── */}
+            {/* ── Section 2: Our answer ─────────────────────────────────── */}
             <section className="border-b border-border bg-muted/30 py-20">
-                <div className="mx-auto max-w-4xl px-5">
+                <div className="mx-auto max-w-3xl px-5">
                     <FadeIn>
-                        <SectionBadge label="For Mentors" />
-                        <div className="text-center">
-                            <SectionHeadline>
-                                Teach once. Keep helping
-                                <br />
-                                learners long after.
-                            </SectionHeadline>
-                        </div>
+                        <SectionBadge label={c.answer.badge} />
+                        <SectionHeadline>{c.answer.headline}</SectionHeadline>
+                        <p className="mb-6 text-lg leading-[1.8] text-foreground">{c.answer.lead}</p>
                     </FadeIn>
-                    {mentorBenefits.map((b, i) => (
-                        <BenefitRow key={i} benefit={b} delay={i * 65} />
+                    {c.answer.benefits.map((b, i) => (
+                        <BenefitRow key={b.headline} benefit={b} delay={i * 65} />
                     ))}
                 </div>
             </section>
 
-            {/* ── Section 3: Admins ─────────────────────────────────────────── */}
-            <section className="py-20">
-                <div className="mx-auto max-w-4xl px-5">
+            {/* ── Section 3: 2 years, not 20 ────────────────────────────── */}
+            <section className="border-b border-border py-20">
+                <div className="mx-auto max-w-3xl px-5">
                     <FadeIn>
-                        <SectionBadge label="For Administrators" />
-                        <div className="text-center">
-                            <SectionHeadline>
-                                You build the experience
-                                <br />
-                                every learner remembers.
-                            </SectionHeadline>
+                        <SectionBadge label={c.timeline.badge} />
+                        <SectionHeadline>{c.timeline.headline}</SectionHeadline>
+                        <div className="space-y-5">
+                            {c.timeline.paragraphs.map((p) => (
+                                <p key={p} className="text-base leading-[1.9] text-muted-foreground">
+                                    {p}
+                                </p>
+                            ))}
                         </div>
+                        <p className="my-9 rounded-xl border border-primary/30 bg-primary/5 p-6 text-lg leading-relaxed font-medium text-foreground">
+                            {c.timeline.callout}
+                        </p>
+                        <p className="text-base leading-[1.9] font-semibold text-foreground">
+                            {c.timeline.closing}
+                        </p>
+                        <Button asChild variant="enroll" className="mt-8">
+                            <Link href={coursesIndex.url(l)}>{c.timeline.cta}</Link>
+                        </Button>
                     </FadeIn>
-                    {adminBenefits.map((b, i) => (
-                        <BenefitRow key={i} benefit={b} delay={i * 65} />
+                </div>
+            </section>
+
+            {/* ── Section 4: Founder's note ─────────────────────────────── */}
+            <section className="border-b border-border bg-muted/30 py-20">
+                <div className="mx-auto max-w-3xl px-5">
+                    <FadeIn>
+                        <SectionBadge label={c.founder.badge} />
+                        <SectionHeadline>{c.founder.headline}</SectionHeadline>
+                        <div className="space-y-5">
+                            {c.founder.paragraphs.map((p) => (
+                                <p key={p} className="text-base leading-[1.9] text-muted-foreground">
+                                    {p}
+                                </p>
+                            ))}
+                        </div>
+                        <p className="my-9 border-l-4 border-primary pl-6 text-xl font-semibold leading-relaxed text-foreground">
+                            {c.founder.pullquote}
+                        </p>
+                        <p className="text-base leading-[1.9] text-muted-foreground">{c.founder.closing}</p>
+                        <p className="mt-8 text-sm font-semibold text-foreground">{c.founder.signature}</p>
+                    </FadeIn>
+                </div>
+            </section>
+
+            {/* ── Section 5: For mentors ────────────────────────────────── */}
+            <section className="py-20">
+                <div className="mx-auto max-w-3xl px-5">
+                    <FadeIn>
+                        <SectionBadge label={c.mentors.badge} />
+                        <SectionHeadline>{c.mentors.headline}</SectionHeadline>
+                        <p className="mb-6 text-lg leading-[1.8] text-foreground">{c.mentors.lead}</p>
+                    </FadeIn>
+                    {c.mentors.benefits.map((b, i) => (
+                        <BenefitRow key={b.headline} benefit={b} delay={i * 65} />
                     ))}
                 </div>
             </section>

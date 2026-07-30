@@ -38,6 +38,33 @@ export type UiTranslations = {
         profile: string;
     };
     locale: Record<string, string>;
+    public: {
+        log_in: string;
+        sign_up: string;
+        dashboard: string;
+        nav: {
+            how_it_works: string;
+            for_mentors: string;
+            two_years: string;
+            pricing: string;
+            courses: string;
+            about: string;
+        };
+        footer: {
+            tagline: string;
+            platform: string;
+            support: string;
+            legal: string;
+            forum: string;
+            resources: string;
+            portfolio_builder: string;
+            contact: string;
+            refund_policy: string;
+            privacy_policy: string;
+            terms: string;
+            rights: string;
+        };
+    };
 };
 
 declare module '@inertiajs/core' {

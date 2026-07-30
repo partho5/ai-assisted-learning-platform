@@ -88,7 +88,14 @@ Route::prefix('{locale}')
         Route::get('/', [WelcomeController::class, 'index'])->name('home');
 
         Route::get('about-us', function () {
-            return Inertia::render('about-us');
+            return Inertia::render('about-us', [
+                'meta' => [
+                    'title' => trans('meta.about.title'),
+                    'description' => trans('meta.about.description'),
+                    'image' => config('seo.og_image'),
+                    'url' => url()->current(),
+                ],
+            ]);
         })->name('about-us');
 
         Route::get('privacy-policy', function () {

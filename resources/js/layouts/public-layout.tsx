@@ -11,6 +11,7 @@ import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumC
 import { index as articlesIndex } from '@/actions/App/Http/Controllers/ArticleController';
 import { index as portfolioLanding } from '@/actions/App/Http/Controllers/PortfolioLandingController';
 import { login, register } from '@/routes';
+import { BRAND_EXPANSION } from '@/lib/brand';
 
 interface NavLinkProps {
     href: string;
@@ -45,8 +46,9 @@ export default function PublicLayout({
     hideFooter?: boolean;
     isLandingPage?: boolean;
 }) {
-    const { auth, locale } = usePage().props;
+    const { auth, locale, ui } = usePage().props;
     const l = String(locale);
+    const t = ui.public;
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showTop, setShowTop] = useState(false);
 
@@ -61,14 +63,14 @@ export default function PublicLayout({
 
     const navLinks = isLandingPage
         ? [
-              { label: 'How It Works', href: '#how-it-works' },
-              { label: 'For Mentors', href: '#for-mentors' },
-              { label: 'Business Minded', href: '#for-founders' },
-              { label: 'Pricing', href: '#pricing' },
-              { label: 'Courses', href: coursesIndex.url(l) },
-              { label: 'About', href: `/${l}/about-us` },
+              { label: t.nav.how_it_works, href: '#how-it-works' },
+              { label: t.nav.for_mentors, href: '#for-mentors' },
+              { label: t.nav.two_years, href: '#two-years' },
+              { label: t.nav.pricing, href: '#pricing' },
+              { label: t.nav.courses, href: coursesIndex.url(l) },
+              { label: t.nav.about, href: `/${l}/about-us` },
           ]
-        : [{ label: 'Courses', href: coursesIndex.url(l) }];
+        : [{ label: t.nav.courses, href: coursesIndex.url(l) }];
 
     return (
         <div className="min-h-screen bg-background text-foreground">
@@ -95,15 +97,15 @@ export default function PublicLayout({
                     <div className="hidden items-center gap-2 py-3 md:flex">
                         {auth.user ? (
                             <Button asChild variant="secondary" size="compact">
-                                <Link href={`/${l}/dashboard`}>Dashboard</Link>
+                                <Link href={`/${l}/dashboard`}>{t.dashboard}</Link>
                             </Button>
                         ) : (
                             <>
                                 <Button asChild variant="ghost" size="compact">
-                                    <Link href={login()}>Log in</Link>
+                                    <Link href={login()}>{t.log_in}</Link>
                                 </Button>
                                 <Button asChild variant="enroll" size="compact">
-                                    <Link href={register()}>Sign up free</Link>
+                                    <Link href={register()}>{t.sign_up}</Link>
                                 </Button>
                             </>
                         )}
@@ -160,15 +162,15 @@ export default function PublicLayout({
                     <div className="flex flex-col gap-2">
                         {auth.user ? (
                             <Button asChild variant="secondary" size="compact">
-                                <Link href={`/${l}/dashboard`} onClick={() => setMobileOpen(false)}>Dashboard</Link>
+                                <Link href={`/${l}/dashboard`} onClick={() => setMobileOpen(false)}>{t.dashboard}</Link>
                             </Button>
                         ) : (
                             <>
                                 <Button asChild variant="ghost" size="compact">
-                                    <Link href={login()} onClick={() => setMobileOpen(false)}>Log in</Link>
+                                    <Link href={login()} onClick={() => setMobileOpen(false)}>{t.log_in}</Link>
                                 </Button>
                                 <Button asChild variant="enroll" size="compact">
-                                    <Link href={register()} onClick={() => setMobileOpen(false)}>Sign up free</Link>
+                                    <Link href={register()} onClick={() => setMobileOpen(false)}>{t.sign_up}</Link>
                                 </Button>
                             </>
                         )}
@@ -191,45 +193,46 @@ export default function PublicLayout({
                                         {import.meta.env.VITE_APP_NAME}
                                     </span>
                                 </Link>
+                                <p className="mb-2 text-xs font-medium text-foreground">{BRAND_EXPANSION}</p>
                                 <p className="max-w-[200px] text-xs leading-relaxed text-muted-foreground">
-                                    Skill-based learning with verified portfolios and AI-powered feedback.
+                                    {t.footer.tagline}
                                 </p>
                             </div>
 
                             {/* Platform */}
                             <div>
-                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Platform</p>
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">{t.footer.platform}</p>
                                 <ul className="space-y-3">
-                                    <li><Link href={coursesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Courses</Link></li>
-                                    <li><Link href={forumIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Forum</Link></li>
-                                    <li><Link href={articlesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">Resources</Link></li>
-                                    <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground hover:text-primary">About</Link></li>
-                                    <li><Link href={portfolioLanding.url({ locale: l })} className="text-sm text-muted-foreground hover:text-primary">Portfolio Builder</Link></li>
+                                    <li><Link href={coursesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">{t.nav.courses}</Link></li>
+                                    <li><Link href={forumIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">{t.footer.forum}</Link></li>
+                                    <li><Link href={articlesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">{t.footer.resources}</Link></li>
+                                    <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground hover:text-primary">{t.nav.about}</Link></li>
+                                    <li><Link href={portfolioLanding.url({ locale: l })} className="text-sm text-muted-foreground hover:text-primary">{t.footer.portfolio_builder}</Link></li>
                                 </ul>
                             </div>
 
                             {/* Support */}
                             <div>
-                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Support</p>
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">{t.footer.support}</p>
                                 <ul className="space-y-3">
-                                    <li><Link href={`/${l}/contact`} className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link></li>
-                                    <li><Link href={`/${l}/refund-policy`} className="text-sm text-muted-foreground hover:text-primary">Refund Policy</Link></li>
+                                    <li><Link href={`/${l}/contact`} className="text-sm text-muted-foreground hover:text-primary">{t.footer.contact}</Link></li>
+                                    <li><Link href={`/${l}/refund-policy`} className="text-sm text-muted-foreground hover:text-primary">{t.footer.refund_policy}</Link></li>
                                 </ul>
                             </div>
 
                             {/* Legal */}
                             <div>
-                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">Legal</p>
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">{t.footer.legal}</p>
                                 <ul className="space-y-3">
-                                    <li><Link href={`/${l}/privacy-policy`} className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
-                                    <li><Link href={`/${l}/terms`} className="text-sm text-muted-foreground hover:text-primary">Terms &amp; Conditions</Link></li>
+                                    <li><Link href={`/${l}/privacy-policy`} className="text-sm text-muted-foreground hover:text-primary">{t.footer.privacy_policy}</Link></li>
+                                    <li><Link href={`/${l}/terms`} className="text-sm text-muted-foreground hover:text-primary">{t.footer.terms}</Link></li>
                                 </ul>
                             </div>
                         </div>
 
                         <div className="mt-12 border-t border-border pt-6">
                             <p className="text-xs text-muted-foreground">
-                                &copy; {new Date().getFullYear()} {import.meta.env.VITE_APP_NAME}. All rights reserved.
+                                &copy; {new Date().getFullYear()} {import.meta.env.VITE_APP_NAME}. {t.footer.rights}
                             </p>
                         </div>
                     </div>
