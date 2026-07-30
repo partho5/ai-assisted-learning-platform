@@ -75,7 +75,7 @@ class LinkOnlyCourseTest extends TestCase
     {
         $mentor = User::factory()->mentor()->create();
         $course = Course::factory()->for($mentor, 'mentor')->draft()->create(['is_link_only' => false]);
-        $course->authors()->attach($mentor->id, ['role' => 'lead', 'added_by' => $mentor->id]);
+        $course->authors()->syncWithoutDetaching([$mentor->id => ['role' => 'lead', 'added_by' => $mentor->id]]);
 
         $this->actingAs($mentor)
             ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [

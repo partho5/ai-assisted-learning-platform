@@ -386,7 +386,7 @@ class PartnerProgramTest extends TestCase
     {
         $mentor = User::factory()->mentor()->create();
         $course = Course::factory()->published()->create(['user_id' => $mentor->id]);
-        $course->authors()->attach($mentor->id, ['role' => 'lead', 'added_by' => $mentor->id]);
+        $course->authors()->syncWithoutDetaching([$mentor->id => ['role' => 'lead', 'added_by' => $mentor->id]]);
 
         $this->actingAs($mentor)
             ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [
@@ -407,7 +407,7 @@ class PartnerProgramTest extends TestCase
     {
         $mentor = User::factory()->mentor()->create();
         $course = Course::factory()->published()->create(['user_id' => $mentor->id]);
-        $course->authors()->attach($mentor->id, ['role' => 'lead', 'added_by' => $mentor->id]);
+        $course->authors()->syncWithoutDetaching([$mentor->id => ['role' => 'lead', 'added_by' => $mentor->id]]);
 
         $this->actingAs($mentor)
             ->put(route('courses.update', ['locale' => 'en', 'course' => $course->slug]), [

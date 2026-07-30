@@ -72,14 +72,24 @@ class PortfolioBuilderTest extends TestCase
         $user = User::factory()->create();
         Portfolio::factory()->create(['user_id' => $user->id]);
 
+        /**
+         * `services` is a list of {headline, description} objects, matching
+         * StorePortfolioSettingsRequest and what the settings form submits.
+         * Plain strings fail validation, which still returns a redirect — so
+         * assert no session errors, or the failure hides behind assertRedirect.
+         */
         $this->actingAs($user)
             ->put(route('portfolio-builder.settings.update', ['locale' => 'en']), [
                 'bio' => 'Updated bio',
                 'secondary_bio' => 'Secondary',
-                'services' => ['Web Dev', 'Consulting'],
+                'services' => [
+                    ['headline' => 'Web Dev', 'description' => 'Building web apps'],
+                    ['headline' => 'Consulting', 'description' => ''],
+                ],
                 'skill_tags' => ['PHP', 'React'],
                 'is_published' => true,
             ])
+            ->assertSessionHasNoErrors()
             ->assertRedirect();
 
         $this->assertDatabaseHas('portfolios', [

@@ -105,7 +105,7 @@ class EnsureContentLocaleTest extends TestCase
     {
         $mentor = User::factory()->mentor()->create();
         $course = Course::factory()->bengali()->create(['user_id' => $mentor->id]);
-        $course->authors()->attach($mentor->id, ['role' => 'lead', 'added_by' => $mentor->id]);
+        $course->authors()->syncWithoutDetaching([$mentor->id => ['role' => 'lead', 'added_by' => $mentor->id]]);
 
         $this->actingAs($mentor)
             ->get("/en/courses/{$course->slug}/preview")

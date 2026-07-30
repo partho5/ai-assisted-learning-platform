@@ -28,6 +28,11 @@ class PublicProfileTest extends TestCase
         return route('portfolio.showcase', ['locale' => 'en', 'attempt' => $attemptId]);
     }
 
+    private function profileRoute(User $user): string
+    {
+        return route('portfolio.show', ['locale' => 'en', 'username' => $user->username]);
+    }
+
     // ─── Public visibility ────────────────────────────────────────────────────
 
     public function test_public_portfolio_is_accessible_by_anyone(): void
@@ -179,10 +184,15 @@ class PublicProfileTest extends TestCase
             'status' => AttemptStatus::Endorsed,
         ]);
 
+        /**
+         * The endpoint is Inertia, not JSON: both UI call sites use
+         * router.post() and PortfolioController::toggleShowcase returns back().
+         * The persisted state is the contract that matters.
+         */
         $this->actingAs($learner)
+            ->from($this->profileRoute($learner))
             ->post($this->showcaseRoute($attempt->id))
-            ->assertOk()
-            ->assertJson(['showcased' => true]);
+            ->assertRedirect($this->profileRoute($learner));
 
         $this->assertContains($attempt->id, $learner->fresh()->showcased_attempt_ids ?? []);
     }
@@ -198,9 +208,9 @@ class PublicProfileTest extends TestCase
         $learner->update(['showcased_attempt_ids' => [$attempt->id]]);
 
         $this->actingAs($learner)
+            ->from($this->profileRoute($learner))
             ->post($this->showcaseRoute($attempt->id))
-            ->assertOk()
-            ->assertJson(['showcased' => false]);
+            ->assertRedirect($this->profileRoute($learner));
 
         $this->assertNotContains($attempt->id, $learner->fresh()->showcased_attempt_ids ?? []);
     }

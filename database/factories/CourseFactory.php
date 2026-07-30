@@ -6,6 +6,7 @@ use App\Enums\CourseDifficulty;
 use App\Enums\CourseLanguage;
 use App\Enums\CourseStatus;
 use App\Models\Category;
+use App\Models\Course;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -15,6 +16,28 @@ use Illuminate\Support\Str;
  */
 class CourseFactory extends Factory
 {
+    /**
+     * Register the owning user as the course's lead author.
+     *
+     * Course authorization reads the `course_authors` pivot
+     * ({@see Course::isAuthor()}), not `user_id`, and real creation always
+     * attaches the creator as lead in CourseController::store. A course with no
+     * lead author is not a reachable domain state, so the factory must not
+     * produce one — otherwise every "mentor acts on own course" test 403s.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Course $course) {
+            if ($course->user_id === null) {
+                return;
+            }
+
+            $course->authors()->syncWithoutDetaching([
+                $course->user_id => ['role' => 'lead', 'added_by' => $course->user_id],
+            ]);
+        });
+    }
+
     public function definition(): array
     {
         $title = fake()->unique()->sentence(4, false);
