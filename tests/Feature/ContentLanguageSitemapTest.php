@@ -111,6 +111,54 @@ class ContentLanguageSitemapTest extends TestCase
         $this->assertNotFalse(simplexml_load_string($xml), 'sitemap is not well-formed XML');
     }
 
+    /**
+     * Marking a course link-only is the author opting that resource out of
+     * discovery. That intent is locale-independent and applies to LLM crawlers
+     * as much as to search engines.
+     */
+    public function test_link_only_courses_are_excluded_from_discovery_surfaces(): void
+    {
+        $bengali = Course::factory()->published()->bengali()->create(['is_link_only' => true]);
+        $english = Course::factory()->published()->english()->create(['is_link_only' => true]);
+
+        $sitemap = $this->get('/sitemap.xml')->assertOk();
+        $llms = $this->get('/llms.txt')->assertOk();
+
+        foreach ([$bengali, $english] as $course) {
+            $sitemap->assertDontSee("/courses/{$course->slug}", false);
+            $llms->assertDontSee("/courses/{$course->slug}", false);
+        }
+    }
+
+    public function test_non_link_only_courses_remain_discoverable(): void
+    {
+        $course = Course::factory()->published()->bengali()->create(['is_link_only' => false]);
+
+        $this->get('/sitemap.xml')->assertOk()->assertSee("/bn/courses/{$course->slug}", false);
+        $this->get('/llms.txt')->assertOk()->assertSee("/bn/courses/{$course->slug}", false);
+    }
+
+    /**
+     * Forum threads are the highest-value indexable forum content, so every
+     * live thread must be listed. Soft-deleted threads must not be.
+     */
+    public function test_every_live_forum_thread_is_listed(): void
+    {
+        $category = ForumCategory::factory()->create();
+
+        $threads = ForumThread::factory()->english()->count(3)->create(['category_id' => $category->id]);
+        $deleted = ForumThread::factory()->english()->create(['category_id' => $category->id]);
+        $deleted->delete();
+
+        $response = $this->get('/sitemap.xml')->assertOk();
+
+        foreach ($threads as $thread) {
+            $response->assertSee("/en/forum/{$category->slug}/{$thread->slug}", false);
+        }
+
+        $response->assertDontSee("/en/forum/{$category->slug}/{$deleted->slug}", false);
+    }
+
     public function test_llms_txt_uses_each_record_own_locale(): void
     {
         $bengali = Article::factory()->published()->bengali()->create();

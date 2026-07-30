@@ -30,8 +30,14 @@ class LlmsTxtController extends Controller
             '## Published Courses',
         ];
 
+        /**
+         * Link-only courses are excluded here for the same reason the sitemap
+         * excludes them: the author opted that resource out of discovery.
+         * That intent applies to LLM crawlers as much as to search engines.
+         */
         $courses = Course::query()
             ->published()
+            ->notLinkOnly()
             ->select(['title', 'slug', 'language', 'subtitle', 'description', 'difficulty', 'price', 'currency'])
             ->with('mentor:id,name')
             ->orderBy('title')
