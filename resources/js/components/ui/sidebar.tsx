@@ -252,10 +252,11 @@ function Sidebar({
 function SidebarTrigger({
   className,
   onClick,
+  highlightWhenExpanded = false,
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: React.ComponentProps<typeof Button> & { highlightWhenExpanded?: boolean }) {
   const { toggleSidebar, isMobile, state } = useSidebar()
-  const highlight = !isMobile && state === "expanded"
+  const highlight = highlightWhenExpanded && !isMobile && state === "expanded"
 
   return (
     <Button
