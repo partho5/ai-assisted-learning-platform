@@ -92,6 +92,34 @@ class CourseManagementTest extends TestCase
         ]);
     }
 
+    public function test_mentor_can_create_a_course_with_blank_optional_numeric_fields(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('courses.store'), [
+                'language' => 'en',
+                'title' => 'Blank Optionals Course',
+                'description' => 'A great course.',
+                'what_you_will_learn' => 'You will learn things.',
+                'difficulty' => CourseDifficulty::Beginner->value,
+                'estimated_duration' => '',
+                'category_id' => '',
+                'price' => '',
+                'subscription_duration_months' => '',
+                'currency' => 'USD',
+                'billing_type' => 'one_time',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('courses', [
+            'title' => 'Blank Optionals Course',
+            'user_id' => $mentor->id,
+            'category_id' => null,
+            'estimated_duration' => null,
+        ]);
+    }
+
     public function test_course_slug_is_auto_generated(): void
     {
         $mentor = User::factory()->mentor()->create();

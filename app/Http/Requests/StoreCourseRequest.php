@@ -14,6 +14,21 @@ class StoreCourseRequest extends FormRequest
         return true;
     }
 
+    /**
+     * Numeric fields are sent as an empty string by the frontend when left
+     * blank, which Postgres rejects for integer/decimal columns even though
+     * validation treats them as empty. Normalize to null before validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge(
+            collect(['estimated_duration', 'category_id', 'price', 'subscription_duration_months', 'partner_commission_rate'])
+                ->filter(fn (string $field) => $this->input($field) === '')
+                ->mapWithKeys(fn (string $field) => [$field => null])
+                ->all()
+        );
+    }
+
     /** @return array<string, mixed> */
     public function rules(): array
     {

@@ -68,8 +68,15 @@ Route::permanentRedirect('/', '/'.config('app.locale'));
 
 // Un-prefixed public paths (hand-typed URLs, legacy links, pasted links with the
 // locale stripped) redirect to the default locale rather than 404/405.
+// GET/HEAD only: several of these bare segments (e.g. "courses", "resources")
+// also carry POST/PUT/DELETE routes registered elsewhere for back-office
+// actions (courses.store, articles.store, etc). Route::permanentRedirect()
+// registers for every HTTP verb, which previously shadowed those routes and
+// silently 301'd form submissions into a GET on the public catalog page.
 foreach (['courses', 'resources', 'forum', 'portfolio-builder', 'about-us', 'contact', 'terms', 'privacy-policy', 'refund-policy'] as $publicPath) {
-    Route::permanentRedirect($publicPath, '/'.config('app.locale').'/'.$publicPath);
+    Route::get($publicPath, '\Illuminate\Routing\RedirectController')
+        ->defaults('destination', '/'.config('app.locale').'/'.$publicPath)
+        ->defaults('status', 301);
 }
 
 // All content routes live under /{locale}/ for SEO (BN/EN URL routing)
