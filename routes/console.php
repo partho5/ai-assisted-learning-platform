@@ -27,7 +27,9 @@ Schedule::command('bots:enroll-count')
 
 // Back up the PostgreSQL database and upload to Dropbox every N hours (DB_BACKUP_INTERVAL_HOURS).
 // Keeps only the last 2 copies on Dropbox; local dump is deleted after upload.
+// Restricted to production so local/staging environments never spend Dropbox quota.
 Schedule::command('backup:database')
     ->cron(sprintf('0 */%d * * *', config('backup.interval_hours', 24)))
     ->withoutOverlapping()
-    ->runInBackground();
+    ->runInBackground()
+    ->when(fn () => app()->environment('production'));
