@@ -1150,6 +1150,44 @@ function ModulePanel({
 
 // ─── JSON Import Form ─────────────────────────────────────────────────────────
 
+/** Downloadable sample: a whole new curriculum — modules with nested lessons. */
+const SAMPLE_MODULES_JSON = [
+    {
+        type: 'module',
+        title: 'Module A: Basics',
+        description: 'Intro to the basics',
+        lessons: [
+            { type: 'lesson', title: 'Lesson A1', resource_type: 'text', importance: 'Foundational', content: 'This is lesson A1 content.' },
+            { type: 'lesson', title: 'Lesson A2', resource_type: 'assignment', content: 'Complete assignment A2.' },
+        ],
+    },
+    {
+        type: 'module',
+        title: 'Module B: Next Steps',
+        description: 'Building on the basics',
+        lessons: [
+            { type: 'lesson', title: 'Lesson B1', resource_type: 'text', importance: 'Key concept', content: 'This is lesson B1 content.' },
+        ],
+    },
+];
+
+/** Downloadable sample: lessons only, to be added to a module picked in the UI. */
+const SAMPLE_LESSONS_JSON = [
+    { type: 'lesson', title: 'Extra Lesson 1', resource_type: 'text', importance: 'Quick note', content: 'This is extra lesson 1.' },
+    { type: 'lesson', title: 'Extra Lesson 2', resource_type: 'text', importance: 'Quick note', content: 'This is extra lesson 2.' },
+    { type: 'lesson', title: 'Extra Lesson 3', resource_type: 'assignment', content: 'Complete extra assignment 3.' },
+];
+
+function downloadJson(filename: string, data: unknown) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
 function CourseImportForm({ courseSlug, modules }: { courseSlug: string; modules: CourseModule[] }) {
     const [open, setOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1174,72 +1212,96 @@ function CourseImportForm({ courseSlug, modules }: { courseSlug: string; modules
         });
     }
 
-    if (!open) {
-        return (
-            <Button type="button" variant="secondary" onClick={() => setOpen(true)}>
-                Import from JSON
-            </Button>
-        );
-    }
-
     return (
-        <form onSubmit={submit} className="overflow-hidden rounded-xl border border-violet-200 bg-card dark:border-violet-800/50">
+        <div className="overflow-hidden rounded-xl border border-violet-200 bg-card dark:border-violet-800/50">
             <div className="border-b border-violet-200 bg-violet-50/60 px-4 py-2.5 dark:border-violet-800/50 dark:bg-violet-950/25">
                 <h3 className="text-[11px] font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">
                     Import Modules &amp; Lessons from JSON
                 </h3>
             </div>
             <div className="flex flex-col gap-3 p-4">
-                <Field label="JSON file" required>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".json,application/json"
-                        onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)}
-                        disabled={form.processing}
-                        className="text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm"
-                    />
-                </Field>
+                <p className="text-xs text-muted-foreground">
+                    Download a sample file below and give it to an AI (ChatGPT, Claude, etc.) along with your course
+                    outline — ask it to produce a real JSON file in the same format, then upload that file here.
+                </p>
 
-                {modules.length > 0 && (
-                    <Field
-                        label="Target module — only needed if the file contains lessons only (not modules)"
-                        error={form.errors.module_id}
+                <div className="flex flex-wrap gap-2">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="compact"
+                        onClick={() => downloadJson('sample-modules-and-lessons.json', SAMPLE_MODULES_JSON)}
                     >
-                        <select
-                            value={form.data.module_id}
-                            onChange={(e) => form.setData('module_id', e.target.value)}
-                            disabled={form.processing}
-                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                        >
-                            <option value="">— None —</option>
-                            {modules.map((m) => (
-                                <option key={m.id} value={m.id}>
-                                    {m.title}
-                                </option>
-                            ))}
-                        </select>
-                    </Field>
-                )}
-
-                {form.errors.file && (
-                    <ul className="list-disc space-y-0.5 rounded-md bg-destructive/10 p-2 pl-6 text-xs text-destructive">
-                        {form.errors.file.split('\n').map((line, i) => (
-                            <li key={i}>{line}</li>
-                        ))}
-                    </ul>
-                )}
-
-                <div className="flex justify-end gap-2 border-t border-sidebar-border pt-3">
-                    <Button type="button" variant="ghost" size="compact" onClick={() => setOpen(false)} disabled={form.processing}>
-                        Cancel
+                        Sample: new modules + lessons
                     </Button>
-                    <Button type="submit" variant="progress" size="compact" disabled={form.processing || !form.data.file}>
-                        {form.processing ? 'Inserting...' : 'Insert course data'}
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="compact"
+                        onClick={() => downloadJson('sample-lessons-only.json', SAMPLE_LESSONS_JSON)}
+                    >
+                        Sample: lessons for an existing module
                     </Button>
                 </div>
+
+                {!open ? (
+                    <Button type="button" variant="progress" size="compact" className="self-start" onClick={() => setOpen(true)}>
+                        Import from JSON
+                    </Button>
+                ) : (
+                    <form onSubmit={submit} className="flex flex-col gap-3 border-t border-sidebar-border pt-3">
+                        <Field label="JSON file" required>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".json,application/json"
+                                onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)}
+                                disabled={form.processing}
+                                className="text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm"
+                            />
+                        </Field>
+
+                        {modules.length > 0 && (
+                            <Field
+                                label="Target module — only needed if the file contains lessons only (not modules)"
+                                error={form.errors.module_id}
+                            >
+                                <select
+                                    value={form.data.module_id}
+                                    onChange={(e) => form.setData('module_id', e.target.value)}
+                                    disabled={form.processing}
+                                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                                >
+                                    <option value="">— None —</option>
+                                    {modules.map((m) => (
+                                        <option key={m.id} value={m.id}>
+                                            {m.title}
+                                        </option>
+                                    ))}
+                                </select>
+                            </Field>
+                        )}
+
+                        {form.errors.file && (
+                            <ul className="list-disc space-y-0.5 rounded-md bg-destructive/10 p-2 pl-6 text-xs text-destructive">
+                                {form.errors.file.split('\n').map((line, i) => (
+                                    <li key={i}>{line}</li>
+                                ))}
+                            </ul>
+                        )}
+
+                        <div className="flex justify-end gap-2">
+                            <Button type="button" variant="ghost" size="compact" onClick={() => setOpen(false)} disabled={form.processing}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" variant="progress" size="compact" disabled={form.processing || !form.data.file}>
+                                {form.processing ? 'Inserting...' : 'Insert course data'}
+                            </Button>
+                        </div>
+                    </form>
+                )}
             </div>
-        </form>
+        </div>
     );
 }
 
@@ -1372,10 +1434,9 @@ export default function CourseEdit({ course, categories, difficulties, languages
                         </SortableContext>
                     </DndContext>
 
-                    <div className="flex flex-wrap gap-2">
-                        <AddModuleForm courseSlug={course.slug} locale={l} />
-                        <CourseImportForm courseSlug={course.slug} modules={modules} />
-                    </div>
+                    <AddModuleForm courseSlug={course.slug} locale={l} />
+
+                    <CourseImportForm courseSlug={course.slug} modules={modules} />
                 </section>
             </div>
         </AppLayout>
