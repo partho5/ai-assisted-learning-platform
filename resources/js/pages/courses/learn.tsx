@@ -1061,7 +1061,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
             {/* ── Sidebar ── */}
             <aside
                 ref={sidebarRef}
-                className="w-full shrink-0 overflow-y-auto border-b border-border md:w-80 md:border-b-0 md:border-r md:sticky md:top-0 md:h-screen"
+                className="w-full shrink-0 overflow-y-auto border-b border-border md:w-80 md:border-b-0 md:border-l-2 md:border-r-2 md:border-border md:sticky md:top-0 md:h-screen"
             >
                 <div className="p-0">
                     {/* Progress bar — enrolled only */}
@@ -1205,7 +1205,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
             </aside>
 
             {/* ── Main content — continuous scroll ── */}
-            <main ref={mainRef} className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto max-w-6xl mx-auto px-1 py-6 md:py-8">
+            <main ref={mainRef} className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto max-w-6xl mx-auto px-1 py-6 md:py-8 md:pl-6">
                 {resources.map((resource, index) => {
                     const lessonNumber = resources.slice(0, index).filter(r => r.module_id === resource.module_id).length + 1;
                     const moduleNumber = [...new Set(resources.slice(0, index + 1).map(r => r.module_id))].indexOf(resource.module_id) + 1;

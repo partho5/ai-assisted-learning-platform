@@ -255,6 +255,7 @@ function SidebarTrigger({
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar, isMobile, state } = useSidebar()
+  const highlight = !isMobile && state === "expanded"
 
   return (
     <Button
@@ -262,7 +263,12 @@ function SidebarTrigger({
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
-      className={cn("h-7 w-7", className)}
+      className={cn(
+        "h-7 w-7",
+        highlight && "animate-pulse ring-4 ring-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.8)]",
+        className,
+      )}
+      title={state === "collapsed" ? "Expand sidebar" : "Minimize sidebar"}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
