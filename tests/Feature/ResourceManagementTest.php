@@ -94,6 +94,29 @@ class ResourceManagementTest extends TestCase
             ->assertSessionDoesntHaveErrors('url');
     }
 
+    public function test_resource_content_html_is_sanitized(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->create();
+        $module = Module::factory()->for($course)->create();
+
+        $this->actingAs($mentor)
+            ->post($this->resourceRoute('resources.store', $course, $module), [
+                'title' => 'Text Resource',
+                'type' => ResourceType::Text->value,
+                'content' => '<p onclick="alert(1)">Hello <script>alert(1)</script>world</p>',
+                'why_this_resource' => '<img src=x onerror=alert(1)>Because it matters',
+            ])
+            ->assertRedirect();
+
+        $resource = Resource::where('module_id', $module->id)->firstOrFail();
+        $this->assertStringNotContainsString('<script>', $resource->content);
+        $this->assertStringNotContainsString('onclick', $resource->content);
+        $this->assertStringContainsString('Hello', $resource->content);
+        $this->assertStringNotContainsString('onerror', $resource->why_this_resource);
+        $this->assertStringContainsString('Because it matters', $resource->why_this_resource);
+    }
+
     public function test_mentor_can_update_resource(): void
     {
         $mentor = User::factory()->mentor()->create();

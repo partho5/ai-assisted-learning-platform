@@ -7,11 +7,14 @@ use App\Http\Requests\UpdateResourceRequest;
 use App\Models\Course;
 use App\Models\Module;
 use App\Models\Resource;
+use App\Services\HtmlSanitizerService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ResourceController extends Controller
 {
+    public function __construct(private readonly HtmlSanitizerService $sanitizer) {}
+
     public function store(StoreResourceRequest $request, Course $course, Module $module): RedirectResponse
     {
         $this->authorizeOwner($course);
@@ -20,6 +23,7 @@ class ResourceController extends Controller
         $data = $request->validated();
         $data['module_id'] = $module->id;
         $data['order'] = $module->resources()->max('order') + 1;
+        $data = $this->sanitizeHtmlFields($data);
 
         $module->resources()->create($data);
 
@@ -49,7 +53,7 @@ class ResourceController extends Controller
         abort_unless($module->course_id === $course->id, 404);
         abort_unless($resource->module_id === $module->id, 404);
 
-        $resource->update($request->validated());
+        $resource->update($this->sanitizeHtmlFields($request->validated()));
 
         return back()->with('success', 'Resource updated.');
     }
@@ -72,5 +76,20 @@ class ResourceController extends Controller
         if (! $user->isAdmin() && ! $course->isAuthor($user)) {
             abort(403);
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function sanitizeHtmlFields(array $data): array
+    {
+        foreach (['content', 'why_this_resource', 'caption', 'mentor_note'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $data[$field] = $this->sanitizer->sanitize($data[$field]);
+            }
+        }
+
+        return $data;
     }
 }

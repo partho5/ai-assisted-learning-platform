@@ -44,6 +44,24 @@ class ModuleManagementTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_module_description_html_is_sanitized(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->create();
+
+        $this->actingAs($mentor)
+            ->post(route('modules.store', ['course' => $course->slug]), [
+                'title' => 'Getting Started',
+                'description' => '<p onclick="alert(1)">Intro <script>alert(1)</script>module</p>',
+            ])
+            ->assertRedirect();
+
+        $module = Module::where('course_id', $course->id)->firstOrFail();
+        $this->assertStringNotContainsString('<script>', $module->description);
+        $this->assertStringNotContainsString('onclick', $module->description);
+        $this->assertStringContainsString('Intro', $module->description);
+    }
+
     public function test_mentor_can_update_module_in_own_course(): void
     {
         $mentor = User::factory()->mentor()->create();

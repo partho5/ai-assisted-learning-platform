@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateCourseRequest;
 use App\Models\Category;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Services\HtmlSanitizerService;
 use App\Services\SlugGenerator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,8 @@ use Inertia\Response;
 class CourseController extends Controller
 {
     use BuildsMetaDescription;
+
+    public function __construct(private readonly HtmlSanitizerService $sanitizer) {}
 
     /**
      * Role-aware index: mentors/admins see their own course management,
@@ -174,6 +177,7 @@ class CourseController extends Controller
         $data = $request->validated();
         $data['user_id'] = auth()->id();
         $data['slug'] = $this->uniqueSlug($data['title']);
+        $data = $this->sanitizeHtmlFields($data);
 
         if (! auth()->user()->isAdmin()) {
             unset($data['is_featured']);
@@ -220,7 +224,7 @@ class CourseController extends Controller
     {
         $this->authorizeOwner($course);
 
-        $data = $request->validated();
+        $data = $this->sanitizeHtmlFields($request->validated());
 
         if (! auth()->user()->isAdmin()) {
             unset($data['is_featured']);
@@ -302,6 +306,21 @@ class CourseController extends Controller
         if (! $user->isAdmin() && ! $course->isAuthor($user)) {
             abort(403);
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function sanitizeHtmlFields(array $data): array
+    {
+        foreach (['description', 'what_you_will_learn', 'prerequisites'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $data[$field] = $this->sanitizer->sanitize($data[$field]);
+            }
+        }
+
+        return $data;
     }
 
     private function uniqueSlug(string $title, ?int $excludeId = null): string

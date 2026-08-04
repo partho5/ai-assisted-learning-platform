@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     DndContext,
     PointerSensor,
@@ -43,6 +43,7 @@ import {
     store as resourceStore,
     update as resourceUpdate,
 } from '@/actions/App/Http/Controllers/ResourceController';
+import { store as courseImportStore } from '@/actions/App/Http/Controllers/CourseImportController';
 import { edit as testEdit } from '@/actions/App/Http/Controllers/TestController';
 import { GripVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -1147,6 +1148,101 @@ function ModulePanel({
     );
 }
 
+// ─── JSON Import Form ─────────────────────────────────────────────────────────
+
+function CourseImportForm({ courseSlug, modules }: { courseSlug: string; modules: CourseModule[] }) {
+    const [open, setOpen] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const form = useForm<{ file: File | null; module_id: string }>({ file: null, module_id: '' });
+
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+        if (!form.data.file) {
+            return;
+        }
+
+        form.submit(courseImportStore({ course: courseSlug }), {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                form.reset();
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+                setOpen(false);
+            },
+        });
+    }
+
+    if (!open) {
+        return (
+            <Button type="button" variant="secondary" onClick={() => setOpen(true)}>
+                Import from JSON
+            </Button>
+        );
+    }
+
+    return (
+        <form onSubmit={submit} className="overflow-hidden rounded-xl border border-violet-200 bg-card dark:border-violet-800/50">
+            <div className="border-b border-violet-200 bg-violet-50/60 px-4 py-2.5 dark:border-violet-800/50 dark:bg-violet-950/25">
+                <h3 className="text-[11px] font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">
+                    Import Modules &amp; Lessons from JSON
+                </h3>
+            </div>
+            <div className="flex flex-col gap-3 p-4">
+                <Field label="JSON file" required>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".json,application/json"
+                        onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)}
+                        disabled={form.processing}
+                        className="text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm"
+                    />
+                </Field>
+
+                {modules.length > 0 && (
+                    <Field
+                        label="Target module — only needed if the file contains lessons only (not modules)"
+                        error={form.errors.module_id}
+                    >
+                        <select
+                            value={form.data.module_id}
+                            onChange={(e) => form.setData('module_id', e.target.value)}
+                            disabled={form.processing}
+                            className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                        >
+                            <option value="">— None —</option>
+                            {modules.map((m) => (
+                                <option key={m.id} value={m.id}>
+                                    {m.title}
+                                </option>
+                            ))}
+                        </select>
+                    </Field>
+                )}
+
+                {form.errors.file && (
+                    <ul className="list-disc space-y-0.5 rounded-md bg-destructive/10 p-2 pl-6 text-xs text-destructive">
+                        {form.errors.file.split('\n').map((line, i) => (
+                            <li key={i}>{line}</li>
+                        ))}
+                    </ul>
+                )}
+
+                <div className="flex justify-end gap-2 border-t border-sidebar-border pt-3">
+                    <Button type="button" variant="ghost" size="compact" onClick={() => setOpen(false)} disabled={form.processing}>
+                        Cancel
+                    </Button>
+                    <Button type="submit" variant="progress" size="compact" disabled={form.processing || !form.data.file}>
+                        {form.processing ? 'Inserting...' : 'Insert course data'}
+                    </Button>
+                </div>
+            </div>
+        </form>
+    );
+}
+
 // ─── Add Module Form ─────────────────────────────────────────────────────────
 
 function AddModuleForm({ courseSlug, locale }: { courseSlug: string; locale: string }) {
@@ -1276,7 +1372,10 @@ export default function CourseEdit({ course, categories, difficulties, languages
                         </SortableContext>
                     </DndContext>
 
-                    <AddModuleForm courseSlug={course.slug} locale={l} />
+                    <div className="flex flex-wrap gap-2">
+                        <AddModuleForm courseSlug={course.slug} locale={l} />
+                        <CourseImportForm courseSlug={course.slug} modules={modules} />
+                    </div>
                 </section>
             </div>
         </AppLayout>

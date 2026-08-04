@@ -6,11 +6,14 @@ use App\Http\Requests\StoreModuleRequest;
 use App\Http\Requests\UpdateModuleRequest;
 use App\Models\Course;
 use App\Models\Module;
+use App\Services\HtmlSanitizerService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ModuleController extends Controller
 {
+    public function __construct(private readonly HtmlSanitizerService $sanitizer) {}
+
     public function store(StoreModuleRequest $request, Course $course): RedirectResponse
     {
         $this->authorizeOwner($course);
@@ -18,6 +21,7 @@ class ModuleController extends Controller
         $data = $request->validated();
         $data['course_id'] = $course->id;
         $data['order'] = $data['order'] ?? $course->modules()->max('order') + 1;
+        $data['description'] = $this->sanitizer->sanitize($data['description'] ?? null);
 
         $course->modules()->create($data);
 
@@ -45,7 +49,12 @@ class ModuleController extends Controller
         $this->authorizeOwner($course);
         abort_unless($module->course_id === $course->id, 404);
 
-        $module->update($request->validated());
+        $data = $request->validated();
+        if (array_key_exists('description', $data)) {
+            $data['description'] = $this->sanitizer->sanitize($data['description']);
+        }
+
+        $module->update($data);
 
         return back()->with('success', 'Module updated.');
     }

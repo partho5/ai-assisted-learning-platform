@@ -92,6 +92,28 @@ class CourseManagementTest extends TestCase
         ]);
     }
 
+    public function test_course_description_html_is_sanitized_on_create(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $category = Category::factory()->create();
+
+        $this->actingAs($mentor)
+            ->post(route('courses.store'), [
+                'language' => 'en',
+                'title' => 'Intro to Laravel',
+                'description' => '<p onclick="alert(1)">Great <script>alert(1)</script>course.</p>',
+                'what_you_will_learn' => 'You will learn Laravel.',
+                'difficulty' => CourseDifficulty::Beginner->value,
+                'category_id' => $category->id,
+            ])
+            ->assertRedirect();
+
+        $course = Course::where('title', 'Intro to Laravel')->firstOrFail();
+        $this->assertStringNotContainsString('<script>', $course->description);
+        $this->assertStringNotContainsString('onclick', $course->description);
+        $this->assertStringContainsString('Great', $course->description);
+    }
+
     public function test_mentor_can_create_a_course_with_blank_optional_numeric_fields(): void
     {
         $mentor = User::factory()->mentor()->create();

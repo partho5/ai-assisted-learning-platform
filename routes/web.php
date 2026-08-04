@@ -17,6 +17,7 @@ use App\Http\Controllers\ChatHistoryController;
 use App\Http\Controllers\CouponCodeController;
 use App\Http\Controllers\CourseAuthorController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseImportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\Forum\ForumBookmarkController;
@@ -315,6 +316,9 @@ Route::middleware('backoffice.locale')
                 ->name('courses.authors.store');
             Route::delete('courses/{course}/authors/{author}', [CourseAuthorController::class, 'destroy'])
                 ->name('courses.authors.destroy');
+
+            Route::post('courses/{course}/import', [CourseImportController::class, 'store'])
+                ->name('courses.import');
 
             Route::post('courses/{course}/modules', [ModuleController::class, 'store'])
                 ->name('modules.store');
