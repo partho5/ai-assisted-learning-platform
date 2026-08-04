@@ -21,10 +21,11 @@ class WelcomeController extends Controller
             ],
             'featuredCourses' => Inertia::defer(fn () => Course::query()
                 ->published()
+                ->notLinkOnly()
                 ->byLanguage(app()->getLocale())
                 ->with('mentor:id,name,username')
                 ->withCount('resources')
-                ->select(['id', 'user_id', 'title', 'subtitle', 'slug', 'description', 'thumbnail', 'difficulty', 'price', 'currency', 'billing_type', 'estimated_duration', 'is_featured'])
+                ->select(['id', 'user_id', 'title', 'subtitle', 'slug', 'description', 'thumbnail', 'difficulty', 'price', 'currency', 'billing_type', 'subscription_duration_months', 'estimated_duration', 'is_featured'])
                 ->orderByDesc('is_featured')
                 ->limit(3)
                 ->get()
@@ -38,6 +39,12 @@ class WelcomeController extends Controller
                     'difficulty' => $course->difficulty?->value,
                     'resources_count' => $course->resources_count,
                     'price' => $course->formattedPrice() ?? 'Free',
+                    /** Raw pricing alongside the display string: JSON-LD needs the numbers, not "$10.00/month". */
+                    'raw_price' => $course->price,
+                    'currency' => $course->currency,
+                    'billing_type' => $course->billing_type,
+                    'subscription_duration_months' => $course->subscription_duration_months,
+                    'estimated_duration' => $course->estimated_duration,
                     'mentor_name' => $course->mentor?->name,
                     'mentor_username' => $course->mentor?->username,
                 ])

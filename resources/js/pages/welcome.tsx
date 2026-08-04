@@ -9,6 +9,7 @@ import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseCont
 import { register } from '@/routes';
 import { inLanguage, ogLocale } from '@/lib/locale';
 import { landingCopy } from '@/lib/landing-copy';
+import { courseSchema } from '@/lib/schema';
 import { BRAND_EXPANSION, BRAND_FULL, BRAND_NAME } from '@/lib/brand';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -22,7 +23,13 @@ interface FeaturedCourse {
     thumbnail: string | null;
     difficulty: string | null;
     resources_count: number;
+    /** Display string ("Free", "$10.00/month") — use the raw fields below for JSON-LD. */
     price: string;
+    raw_price: string | null;
+    currency: string | null;
+    billing_type: string | null;
+    subscription_duration_months: number | null;
+    estimated_duration: number | null;
     mentor_name: string | null;
     mentor_username: string | null;
 }
@@ -83,9 +90,71 @@ function FadeIn({ children, className = '', delay = 0, id }: { children: React.R
     );
 }
 
+// ─── Small vector face avatars ───────────────────────────────────────────────
+// Flat, brand-toned illustrations used to give a couple of quote-like moments
+// a human face instead of a decorative border.
+
+function FaceAvatar({ variant, className = '' }: { variant: 'skeptical' | 'confident'; className?: string }) {
+    const isSkeptical = variant === 'skeptical';
+
+    return (
+        <svg viewBox="0 0 56 56" className={className} aria-hidden>
+            <path
+                d="M4 56c0-11 10.7-18 24-18s24 7 24 18"
+                className={isSkeptical ? 'fill-slate-200 dark:fill-slate-800' : 'fill-indigo-200 dark:fill-indigo-900/50'}
+            />
+            <circle
+                cx="28"
+                cy="24"
+                r="17"
+                className={isSkeptical ? 'fill-slate-100 dark:fill-slate-800/70' : 'fill-indigo-100 dark:fill-indigo-950/60'}
+            />
+            <path
+                d="M11 22c0-10 8-16 17-16s17 6 17 16c-2-3-7-5-11-4-3-8-13-8-16-1-3 0-6 2-7 5z"
+                className={isSkeptical ? 'fill-slate-300 dark:fill-slate-600' : 'fill-indigo-300 dark:fill-indigo-700'}
+            />
+            {isSkeptical ? (
+                <>
+                    <path d="M17 20.5h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-slate-500 dark:text-slate-400" />
+                    <path d="M33 17.5c2-1.4 4.4-1.4 6 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" className="text-slate-500 dark:text-slate-400" />
+                    <circle cx="20" cy="24.5" r="1.6" className="fill-slate-600 dark:fill-slate-300" />
+                    <path d="M35 24.2c1.6-.8 3.4-.8 5 0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" fill="none" className="text-slate-600 dark:text-slate-300" />
+                    <path d="M22 32c2 1.4 8 1.8 11-.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" className="text-slate-500 dark:text-slate-400" />
+                </>
+            ) : (
+                <>
+                    <path d="M17 20.5h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-indigo-500 dark:text-indigo-300" />
+                    <path d="M33 20.5h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-indigo-500 dark:text-indigo-300" />
+                    <circle cx="20" cy="25" r="1.7" className="fill-indigo-600 dark:fill-indigo-300" />
+                    <circle cx="36" cy="25" r="1.7" className="fill-indigo-600 dark:fill-indigo-300" />
+                    <path d="M21 31.5c3 2.6 11 2.6 14 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" className="text-indigo-500 dark:text-indigo-300" />
+                </>
+            )}
+        </svg>
+    );
+}
+
+function FaceAvatarBadge({ variant, className = '' }: { variant: 'skeptical' | 'confident'; className?: string }) {
+    return (
+        <div
+            className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm ring-1 ring-border dark:bg-card ${className}`}
+        >
+            <FaceAvatar variant={variant} className="h-full w-full" />
+        </div>
+    );
+}
+
 // ─── Schema JSON-LD ──────────────────────────────────────────────────────────
 
-function SchemaOrg({
+/**
+ * Returns the landing page's JSON-LD documents as plain objects.
+ *
+ * Deliberately not a component. Inertia's `<Head>` does not render React —
+ * it stringifies each child's `type` straight into a tag name, so a custom
+ * component inside `<Head>` emits its own source code into the document.
+ * `<Head>` may only ever contain plain elements.
+ */
+function landingSchemas({
     courses,
     appUrl,
     appName,
@@ -97,7 +166,7 @@ function SchemaOrg({
     appName: string;
     locale: string;
     description: string;
-}) {
+}): Record<string, unknown>[] {
     const org = {
         '@context': 'https://schema.org',
         '@type': 'EducationalOrganization',
@@ -122,30 +191,26 @@ function SchemaOrg({
         },
     };
 
-    const courseSchemas = courses.map((c) => ({
-        '@context': 'https://schema.org',
-        '@type': 'Course',
-        name: c.title,
-        description: c.description,
-        inLanguage: inLanguage(locale),
-        provider: { '@type': 'Person', name: c.mentor_name ?? appName },
-        offers: {
-            '@type': 'Offer',
-            price: c.price === 'Free' ? '0' : c.price.replace(/[^0-9.]/g, ''),
-            priceCurrency: 'USD',
-            availability: 'https://schema.org/InStock',
-        },
-    }));
-
-    return (
-        <>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(org) }} />
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }} />
-            {courseSchemas.map((s, i) => (
-                <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
-            ))}
-        </>
+    const courseSchemas = courses.map((c) =>
+        courseSchema({
+            title: c.title,
+            description: c.description,
+            url: `${appUrl}/${locale}/courses/${c.slug}`,
+            locale,
+            image: c.thumbnail ?? `${appUrl}/logo.png`,
+            appName,
+            appUrl,
+            price: c.raw_price,
+            currency: c.currency,
+            billingType: c.billing_type,
+            subscriptionDurationMonths: c.subscription_duration_months,
+            estimatedDuration: c.estimated_duration,
+            difficulty: c.difficulty,
+            instructorNames: c.mentor_name ? [c.mentor_name] : [],
+        }),
     );
+
+    return [org, website, ...courseSchemas];
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -243,9 +308,9 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
     const c = landingCopy(l);
 
     const trustIcons = [
-        { icon: <BookOpen className="h-5 w-5" />, color: 'bg-orange-50 text-orange-600 border-orange-100' },
-        { icon: <RefreshCw className="h-5 w-5" />, color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
-        { icon: <Users className="h-5 w-5" />, color: 'bg-violet-50 text-violet-600 border-violet-100' },
+        { icon: <BookOpen className="h-5 w-5" />, color: 'bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900' },
+        { icon: <RefreshCw className="h-5 w-5" />, color: 'bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-900' },
+        { icon: <Users className="h-5 w-5" />, color: 'bg-violet-50 text-violet-600 border-violet-100 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-900' },
     ];
 
     return (
@@ -268,13 +333,15 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 <meta name="twitter:title" content={`${BRAND_FULL} | ${c.meta.ogTitleSuffix}`} />
                 <meta name="twitter:description" content={c.meta.twitterDescription} />
                 <meta name="twitter:image" content={`${appUrl}/og-image.png`} />
-                <SchemaOrg
-                    courses={courses}
-                    appUrl={appUrl}
-                    appName={String(appName)}
-                    locale={l}
-                    description={c.meta.schemaDescription}
-                />
+                {landingSchemas({
+                    courses,
+                    appUrl,
+                    appName: String(appName),
+                    locale: l,
+                    description: c.meta.schemaDescription,
+                }).map((schema, i) => (
+                    <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+                ))}
             </Head>
 
             {/* ── HERO ─────────────────────────────────────────────────── */}
@@ -391,7 +458,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             </section>
 
             {/* ── TRUST BAR ────────────────────────────────────────────── */}
-            <div className="border-b border-border bg-white">
+            <div className="border-b border-border bg-sky-50/60 dark:bg-sky-950/10">
                 <div className="mx-auto max-w-7xl px-4 py-6 md:px-6">
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                         {trustIcons.map(({ icon, color }, i) => (
@@ -411,12 +478,12 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                                     'linear-gradient(135deg, #4285F4, #EA4335, #FBBC04, #34A853)',
                             }}
                         >
-                            <div className="flex h-full items-center gap-3 rounded-[10px] bg-white px-4 py-3">
+                            <div className="flex h-full items-center gap-3 rounded-[10px] bg-white px-4 py-3 dark:bg-gray-950">
                                 <Sparkles
                                     className="h-5 w-5 shrink-0"
                                     style={{ color: '#4285F4' }}
                                 />
-                                <span className="text-sm font-medium text-slate-700 md:text-lg">
+                                <span className="text-sm font-medium text-slate-700 md:text-lg dark:text-slate-200">
                                     {c.trust[3]}
                                 </span>
                             </div>
@@ -426,8 +493,16 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             </div>
 
             {/* ── THE BROKEN SYSTEM ────────────────────────────────────── */}
-            <section aria-label="Why Jovoc" id="why" className="border-b border-border">
-                <FadeIn className="mx-auto max-w-5xl px-4 py-20 md:px-6 md:py-24">
+            <section aria-label="Why Jovoc" id="why" className="relative overflow-hidden border-b border-border bg-slate-50 dark:bg-slate-900/20">
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute -top-16 -right-24 h-72 w-72 rounded-full bg-rose-200/30 blur-[100px] dark:bg-rose-900/20"
+                />
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-sky-200/30 blur-[100px] dark:bg-sky-900/15"
+                />
+                <FadeIn className="relative mx-auto max-w-5xl px-4 py-20 md:px-6 md:py-24">
                     <div className="mx-auto max-w-2xl text-center">
                         <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
                             {c.problem.badge}
@@ -445,7 +520,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                         {c.problem.points.map(({ label, body }) => (
                             <div
                                 key={label}
-                                className="rounded-xl border border-border bg-card p-6"
+                                className="rounded-xl border border-border bg-card p-6 shadow-sm"
                             >
                                 <p className="mb-2 text-sm font-semibold tracking-wide text-destructive/80 uppercase">
                                     {label}
@@ -456,6 +531,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                     </div>
 
                     <div className="mt-10 rounded-2xl border border-primary/30 bg-primary/5 p-8 text-center">
+                        <FaceAvatarBadge variant="confident" className="mx-auto mb-4 h-14 w-14 ring-primary/30 md:h-16 md:w-16" />
                         <p
                             style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
                             className="mb-3 text-2xl font-bold tracking-tight text-foreground md:text-3xl"
@@ -470,9 +546,13 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             {/* ── HOW IT WORKS ─────────────────────────────────────────── */}
             <FadeIn
                 id="how-it-works"
-                className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24"
+                className="relative mx-auto max-w-7xl overflow-hidden px-4 py-20 md:px-6 md:py-24"
             >
-                <div className="mb-14 text-center">
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute top-10 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-sky-200/20 blur-[120px] dark:bg-sky-900/10"
+                />
+                <div className="relative mb-14 text-center">
                     <h2
                         style={{
                             fontFamily: "'Bricolage Grotesque', sans-serif",
@@ -537,9 +617,30 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             {/* ── FEATURED COURSES ─────────────────────────────────────── */}
             <section
                 aria-label="Courses"
-                className="border-t border-border bg-muted/30"
+                className="relative overflow-hidden border-t border-border bg-indigo-50/50 dark:bg-indigo-950/10"
             >
-                <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
+                <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full opacity-60 dark:opacity-20">
+                    <defs>
+                        <pattern id="dot-grid-courses" width="28" height="28" patternUnits="userSpaceOnUse">
+                            <circle cx="2" cy="2" r="1.5" fill="currentColor" />
+                        </pattern>
+                        <radialGradient id="dot-fade-courses" cx="50%" cy="0%" r="75%">
+                            <stop offset="0%" stopColor="white" stopOpacity="1" />
+                            <stop offset="100%" stopColor="white" stopOpacity="0" />
+                        </radialGradient>
+                        <mask id="dot-mask-courses">
+                            <rect width="100%" height="100%" fill="url(#dot-fade-courses)" />
+                        </mask>
+                    </defs>
+                    <rect
+                        width="100%"
+                        height="100%"
+                        fill="url(#dot-grid-courses)"
+                        mask="url(#dot-mask-courses)"
+                        className="text-indigo-300 dark:text-indigo-700"
+                    />
+                </svg>
+                <FadeIn className="relative mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
                     <div className="mb-10 flex items-end justify-between">
                         <div>
                             <h2
@@ -591,8 +692,16 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             </section>
 
             {/* ── 2 YEARS, NOT 20 ──────────────────────────────────────── */}
-            <section id="two-years" aria-label="Two years, not twenty" className="border-t border-border">
-                <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
+            <section id="two-years" aria-label="Two years, not twenty" className="relative overflow-hidden border-t border-border bg-violet-50/50 dark:bg-violet-950/10">
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute top-0 right-1/4 h-80 w-80 -translate-y-1/2 rounded-full bg-violet-300/25 blur-[110px] dark:bg-violet-800/20"
+                />
+                <div
+                    aria-hidden
+                    className="pointer-events-none absolute bottom-0 left-1/4 h-64 w-64 translate-y-1/2 rounded-full bg-indigo-300/20 blur-[100px] dark:bg-indigo-800/15"
+                />
+                <FadeIn className="relative mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
                     <div className="mx-auto max-w-2xl text-center">
                         <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
                             {c.timeline.badge}
@@ -606,9 +715,12 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                             {c.timeline.headline}
                         </h2>
                         <p className="mb-6 text-muted-foreground">{c.timeline.body}</p>
-                        <p className="mb-8 border-l-2 border-primary pl-4 text-left text-lg font-medium text-foreground italic">
-                            {c.timeline.callout}
-                        </p>
+                        <div className="mb-8 flex items-start gap-4 text-left">
+                            <FaceAvatarBadge variant="skeptical" className="h-14 w-14 md:h-16 md:w-16" />
+                            <p className="pt-1 text-lg font-medium text-foreground italic">
+                                {c.timeline.callout}
+                            </p>
+                        </div>
                         <Button asChild variant="enroll">
                             <Link href={coursesIndex.url(l)} onClick={() => trackLandingCta('two_years_curriculum')}>
                                 {c.timeline.cta}
@@ -634,141 +746,34 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
                 </FadeIn>
             </section>
 
-            {/* ── PORTFOLIO ANGLE ───────────────────────────────────────── */}
-            <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
-                <div className="grid items-center gap-12 lg:grid-cols-2">
-                    <div>
-                        <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-                            {c.portfolio.badge}
-                        </div>
-                        <h2
-                            style={{
-                                fontFamily: "'Bricolage Grotesque', sans-serif",
-                            }}
-                            className="mb-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
-                        >
-                            {c.portfolio.headlineTop}
-                            <br />
-                            {c.portfolio.headlineBottom}
-                        </h2>
-                        <p className="mb-6 text-muted-foreground">
-                            {c.portfolio.bodyBefore}
-                            <code className="rounded bg-muted px-1.5 py-0.5 text-sm text-foreground">
-                                {typeof window !== 'undefined'
-                                    ? window.location.host
-                                    : 'yoursite.com'}
-                                /{l}/u/yourname
-                            </code>
-                            {c.portfolio.bodyAfter}
-                        </p>
-                        <ul className="mb-8 space-y-3">
-                            {c.portfolio.points.map((item) => (
-                                <li
-                                    key={item}
-                                    className="flex items-start gap-3"
-                                >
-                                    <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                                    <span className="text-muted-foreground">
-                                        {item}
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
-                        {canRegister && (
-                            <Button asChild variant="enroll">
-                                <Link href={register()}>{c.portfolio.cta}</Link>
-                            </Button>
-                        )}
-                    </div>
-
-                    {/* Portfolio card mock */}
-                    <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
-                        <div className="mb-5 flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-                                A
-                            </div>
-                            <div>
-                                <p className="font-semibold text-foreground">
-                                    Alex Johnson
-                                </p>
-                                <p className="text-sm text-muted-foreground">
-                                    {c.portfolio.mockRole}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="mb-5 flex flex-wrap gap-2">
-                            {[
-                                'React',
-                                'Laravel',
-                                'TypeScript',
-                                'PostgreSQL',
-                            ].map((skill) => (
-                                <span
-                                    key={skill}
-                                    className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
-                                >
-                                    {skill}
-                                </span>
-                            ))}
-                        </div>
-
-                        <div className="space-y-3">
-                            {[
-                                {
-                                    course: 'Advanced Laravel',
-                                    score: '94%',
-                                    endorsed: true,
-                                },
-                                {
-                                    course: 'React Patterns',
-                                    score: '88%',
-                                    endorsed: true,
-                                },
-                                {
-                                    course: 'TypeScript Deep Dive',
-                                    score: '91%',
-                                    endorsed: false,
-                                },
-                            ].map(({ course, score, endorsed }) => (
-                                <div
-                                    key={course}
-                                    className="flex items-center justify-between rounded-lg bg-muted/60 px-4 py-3"
-                                >
-                                    <span className="text-sm font-medium text-foreground">
-                                        {course}
-                                    </span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm text-muted-foreground">
-                                            {score}
-                                        </span>
-                                        {endorsed && (
-                                            <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
-                                                {c.portfolio.mockEndorsed}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <p className="mt-4 text-center text-xs text-muted-foreground">
-                            {typeof window !== 'undefined'
-                                ? window.location.host
-                                : 'yoursite.com'}
-                            /{l}/u/alexjohnson
-                        </p>
-                    </div>
-                </div>
-            </FadeIn>
-
             {/* ── FOR MENTORS ──────────────────────────────────────────── */}
             <section
                 aria-label="For mentors"
                 id="for-mentors"
-                className="border-t border-border bg-muted/30"
+                className="relative overflow-hidden border-t border-border bg-sky-50/60 dark:bg-sky-950/10"
             >
-                <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
+                <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full opacity-60 dark:opacity-20">
+                    <defs>
+                        <pattern id="dot-grid-mentors" width="28" height="28" patternUnits="userSpaceOnUse">
+                            <circle cx="2" cy="2" r="1.5" fill="currentColor" />
+                        </pattern>
+                        <radialGradient id="dot-fade-mentors" cx="50%" cy="100%" r="75%">
+                            <stop offset="0%" stopColor="white" stopOpacity="1" />
+                            <stop offset="100%" stopColor="white" stopOpacity="0" />
+                        </radialGradient>
+                        <mask id="dot-mask-mentors">
+                            <rect width="100%" height="100%" fill="url(#dot-fade-mentors)" />
+                        </mask>
+                    </defs>
+                    <rect
+                        width="100%"
+                        height="100%"
+                        fill="url(#dot-grid-mentors)"
+                        mask="url(#dot-mask-mentors)"
+                        className="text-sky-300 dark:text-sky-700"
+                    />
+                </svg>
+                <FadeIn className="relative mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
                     <div className="mx-auto max-w-2xl text-center">
                         <div className="mb-4 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
                             {c.mentors.badge}
@@ -823,7 +828,7 @@ export default function Welcome({ canRegister, featuredCourses }: Props) {
             </section>
 
             {/* ── PRICING ──────────────────────────────────────────────── */}
-            <section aria-label="Pricing" id="pricing">
+            <section aria-label="Pricing" id="pricing" className="border-t border-border">
                 <FadeIn className="mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-24">
                     <div className="mb-12 text-center">
                         <h2

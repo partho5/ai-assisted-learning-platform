@@ -16,13 +16,15 @@ import PublicLayout from '@/layouts/public-layout';
 import { trackCourseView, trackEnroll } from '@/lib/analytics';
 import { captureReferral } from '@/lib/referral';
 import type { Course, Enrollment } from '@/types';
-import { inLanguage, ogLocale } from '@/lib/locale';
+import { ogLocale } from '@/lib/locale';
+import { courseSchema } from '@/lib/schema';
 
 interface Props {
     course: Course;
     enrollment: Enrollment | null;
     ogUrl: string;
     isPreview?: boolean;
+    noindex?: boolean;
 }
 
 const RESOURCE_TYPE_LABELS: Record<string, string> = {
@@ -35,7 +37,7 @@ const RESOURCE_TYPE_LABELS: Record<string, string> = {
     assignment: 'Assignment',
 };
 
-export default function CourseShow({ course, enrollment, ogUrl, isPreview = false }: Props) {
+export default function CourseShow({ course, enrollment, ogUrl, isPreview = false, noindex = false }: Props) {
     const { auth, locale, name, appUrl: serverAppUrl } = usePage().props as Record<string, any>;
     const appUrl = String(serverAppUrl ?? '');
     const l = String(locale);
@@ -101,6 +103,13 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
           ? course.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)
           : '';
     const ogImage = course.thumbnail ?? '/logo.png';
+    const absoluteOgImage = ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`;
+
+    const instructorNames = course.authors && course.authors.length > 0
+        ? course.authors.map((a) => a.name)
+        : course.mentor
+          ? [course.mentor.name]
+          : [];
 
     return (
         <PublicLayout hidePlatformChat>
@@ -111,11 +120,12 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
             )}
             <Head title={course.title}>
                 <meta name="description" content={ogDescription} />
+                {noindex && <meta name="robots" content="noindex, follow" />}
                 <link rel="canonical" href={ogUrl} />
                 <meta property="og:site_name" content={String(name)} />
                 <meta property="og:title" content={`${course.title} | ${String(name)}`} />
                 <meta property="og:description" content={ogDescription} />
-                <meta property="og:image" content={ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`} />
+                <meta property="og:image" content={absoluteOgImage} />
                 <meta property="og:image:width" content="1200" />
                 <meta property="og:image:height" content="630" />
                 <meta property="og:image:alt" content={course.title} />
@@ -125,38 +135,27 @@ export default function CourseShow({ course, enrollment, ogUrl, isPreview = fals
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={`${course.title} | ${String(name)}`} />
                 <meta name="twitter:description" content={ogDescription} />
-                <meta name="twitter:image" content={ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`} />
-                <script type="application/ld+json">{JSON.stringify({
-                    '@context': 'https://schema.org',
-                    '@type': 'Course',
-                    name: course.title,
+                <meta name="twitter:image" content={absoluteOgImage} />
+                <script type="application/ld+json">{JSON.stringify(courseSchema({
+                    title: course.title,
                     description: ogDescription,
                     url: ogUrl,
-                    inLanguage: inLanguage(l),
-                    image: ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`,
-                    provider: {
-                        '@type': 'Organization',
-                        name: String(name),
-                        url: appUrl,
-                    },
-                    ...((course.authors && course.authors.length > 0) || course.mentor ? {
-                        hasCourseInstance: {
-                            '@type': 'CourseInstance',
-                            courseMode: 'online',
-                            instructor: course.authors && course.authors.length > 0
-                                ? course.authors.map((a) => ({ '@type': 'Person', name: a.name }))
-                                : { '@type': 'Person', name: course.mentor!.name },
-                        },
-                    } : {}),
-                    ...(course.price != null && {
-                        offers: {
-                            '@type': 'Offer',
-                            price: parseFloat(String(course.price)) > 0 ? String(course.price) : '0',
-                            priceCurrency: course.currency ?? 'USD',
-                            availability: 'https://schema.org/InStock',
-                        },
-                    }),
-                })}</script>
+                    locale: l,
+                    image: absoluteOgImage,
+                    appName: String(name),
+                    appUrl,
+                    price: course.price,
+                    currency: course.currency,
+                    billingType: course.billing_type,
+                    subscriptionDurationMonths: course.subscription_duration_months,
+                    estimatedDuration: course.estimated_duration,
+                    difficulty: course.difficulty,
+                    whatYouWillLearn: course.what_you_will_learn,
+                    prerequisites: course.prerequisites,
+                    instructorNames,
+                    createdAt: course.created_at,
+                    updatedAt: course.updated_at,
+                }))}</script>
                 <script type="application/ld+json">{JSON.stringify({
                     '@context': 'https://schema.org',
                     '@type': 'BreadcrumbList',

@@ -105,6 +105,7 @@ export type Course = {
     enrollments_count?: number;
     enrolled_count?: number;
     coupon_codes?: CouponCode[];
+    created_at?: string;
     updated_at?: string;
 };
 

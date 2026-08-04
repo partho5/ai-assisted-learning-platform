@@ -126,6 +126,8 @@ class CourseController extends Controller
             'course' => $course,
             'enrollment' => $enrollment,
             'ogUrl' => url()->current(),
+            /** Link-only courses are shareable but must stay out of the index. */
+            'noindex' => $course->is_link_only,
             'meta' => [
                 'title' => $course->title.' | '.config('app.name'),
                 'description' => $ogDescription,
@@ -153,6 +155,7 @@ class CourseController extends Controller
             'enrollment' => null,
             'ogUrl' => route('courses.show', ['locale' => app()->getLocale(), 'course' => $course->slug]),
             'isPreview' => true,
+            'noindex' => true,
         ]);
     }
 

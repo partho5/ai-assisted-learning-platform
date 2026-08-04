@@ -27,6 +27,7 @@ import type {
 } from '@/types';
 import type { ResourceType } from '@/types/course';
 import { inLanguage, ogLocale } from '@/lib/locale';
+import { courseId, isoDuration } from '@/lib/schema';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -104,6 +105,7 @@ interface Props {
     enrollment: Enrollment | null;
     ogUrl: string;
     isPreview?: boolean;
+    noindex?: boolean;
 }
 
 // ─── Status icon ──────────────────────────────────────────────────────────────
@@ -885,7 +887,7 @@ function ResourceBlock({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function Learn({ course, initialResourceId, resources, enrollment, ogUrl, isPreview = false }: Props) {
+export default function Learn({ course, initialResourceId, resources, enrollment, ogUrl, isPreview = false, noindex = false }: Props) {
     const { locale, auth, name, appUrl: serverAppUrl } = usePage().props;
     const appUrl = String(serverAppUrl ?? '');
     const l = String(locale);
@@ -1252,9 +1254,12 @@ export default function Learn({ course, initialResourceId, resources, enrollment
         : '';
     const ogImage = course.thumbnail ?? '/logo.png';
     const absoluteOgImage = ogImage.startsWith('http') ? ogImage : `${appUrl}${ogImage}`;
+    const courseUrl = `${appUrl}/${l}/courses/${course.slug}`;
+    const lessonDuration = isoDuration(activeResource?.estimated_time);
     const ogHead = (
         <Head title={`${activeTitle} — ${course.title}`}>
             <meta name="description" content={`${activeTitle} — ${ogDescription}`} />
+            {noindex && <meta name="robots" content="noindex, follow" />}
             <link rel="canonical" href={ogUrl} />
             <meta property="og:site_name" content={String(name)} />
             <meta property="og:title" content={`${activeTitle} — ${course.title} | ${String(name)}`} />
@@ -1278,10 +1283,15 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                 url: ogUrl,
                 inLanguage: inLanguage(l),
                 image: absoluteOgImage,
+                learningResourceType: activeResource?.type ?? 'lesson',
+                isAccessibleForFree: activeResource?.is_free ?? false,
+                ...(lessonDuration ? { timeRequired: lessonDuration } : {}),
                 isPartOf: {
                     '@type': 'Course',
+                    /** Same `@id` the course page emits, so both describe one entity. */
+                    '@id': courseId(courseUrl),
                     name: course.title,
-                    url: `${appUrl}/${l}/courses/${course.slug}`,
+                    url: courseUrl,
                 },
                 provider: { '@type': 'Organization', name: String(name), url: appUrl },
             })}</script>
@@ -1290,7 +1300,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                 '@type': 'BreadcrumbList',
                 itemListElement: [
                     { '@type': 'ListItem', position: 1, name: 'Courses', item: `${appUrl}/${l}/courses` },
-                    { '@type': 'ListItem', position: 2, name: course.title, item: `${appUrl}/${l}/courses/${course.slug}` },
+                    { '@type': 'ListItem', position: 2, name: course.title, item: courseUrl },
                     { '@type': 'ListItem', position: 3, name: activeTitle, item: ogUrl },
                 ],
             })}</script>

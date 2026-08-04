@@ -142,6 +142,8 @@ class LearnController extends Controller
             'enrollment' => $enrollment,
             'ogUrl' => url()->route('learn.show', ['locale' => app()->getLocale(), 'course' => $course->slug, 'resource' => $resource->id]),
             'isPreview' => $isPreview,
+            /** A lesson of a hidden course is itself hidden; previews are never public. */
+            'noindex' => $course->is_link_only || $isPreview,
         ]);
     }
 }
