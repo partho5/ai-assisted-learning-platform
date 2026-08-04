@@ -45,7 +45,7 @@ import {
 } from '@/actions/App/Http/Controllers/ResourceController';
 import { store as courseImportStore } from '@/actions/App/Http/Controllers/CourseImportController';
 import { edit as testEdit } from '@/actions/App/Http/Controllers/TestController';
-import { GripVertical } from 'lucide-react';
+import { Braces, Download, GripVertical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -1157,8 +1157,8 @@ const SAMPLE_MODULES_JSON = [
         title: 'Module A: Basics',
         description: 'Intro to the basics',
         lessons: [
-            { type: 'lesson', title: 'Lesson A1', resource_type: 'text', importance: 'Foundational', content: 'This is lesson A1 content.' },
-            { type: 'lesson', title: 'Lesson A2', resource_type: 'assignment', content: 'Complete assignment A2.' },
+            { type: 'lesson', title: 'Lesson A1', resource_type: 'text', importance: '1 or 2 lines narrative to convince how this lesson will benefit you', content: 'This is lesson A1 content.' },
+            { type: 'lesson', title: 'Lesson A2', resource_type: 'assignment', content: 'Write an assignment if required to assess learning before the next lesson.' },
         ],
     },
     {
@@ -1166,16 +1166,16 @@ const SAMPLE_MODULES_JSON = [
         title: 'Module B: Next Steps',
         description: 'Building on the basics',
         lessons: [
-            { type: 'lesson', title: 'Lesson B1', resource_type: 'text', importance: 'Key concept', content: 'This is lesson B1 content.' },
+            { type: 'lesson', title: 'Lesson B1', resource_type: 'text', importance: '1 or 2 lines narrative to convince how this lesson will benefit you', content: 'Lesson content here' },
         ],
     },
 ];
 
 /** Downloadable sample: lessons only, to be added to a module picked in the UI. */
 const SAMPLE_LESSONS_JSON = [
-    { type: 'lesson', title: 'Extra Lesson 1', resource_type: 'text', importance: 'Quick note', content: 'This is extra lesson 1.' },
-    { type: 'lesson', title: 'Extra Lesson 2', resource_type: 'text', importance: 'Quick note', content: 'This is extra lesson 2.' },
-    { type: 'lesson', title: 'Extra Lesson 3', resource_type: 'assignment', content: 'Complete extra assignment 3.' },
+    { type: 'lesson', title: 'Extra Lesson 1', resource_type: 'text', importance: '1 or 2 lines narrative to convince how this lesson will benefit you', content: 'Lesson content here' },
+    { type: 'lesson', title: 'Extra Lesson 2', resource_type: 'text', importance: '1 or 2 lines narrative to convince how this lesson will benefit you', content: 'Lesson content here' },
+    { type: 'lesson', title: 'Extra Lesson 3', resource_type: 'assignment', content: 'Write an assignment if required to assess learning before the next lesson.' },
 ];
 
 function downloadJson(filename: string, data: unknown) {
@@ -1215,7 +1215,10 @@ function CourseImportForm({ courseSlug, modules }: { courseSlug: string; modules
     return (
         <div className="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/40">
             <div className="border-b border-slate-300 bg-slate-100 px-4 py-2.5 dark:border-slate-700 dark:bg-slate-900/60">
-                <h3 className="text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">Import modules &amp; lessons from JSON</h3>
+                <h3 className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">
+                    <Braces className="size-3.5" />
+                    Import modules &amp; lessons from JSON
+                </h3>
             </div>
             <div className="flex flex-col gap-3 p-4">
                 <p className="text-xs text-muted-foreground">
@@ -1230,6 +1233,7 @@ function CourseImportForm({ courseSlug, modules }: { courseSlug: string; modules
                         size="compact"
                         onClick={() => downloadJson('sample-modules-and-lessons.json', SAMPLE_MODULES_JSON)}
                     >
+                        <Download className="size-3.5" />
                         Sample: new modules + lessons
                     </Button>
                     <Button
@@ -1238,6 +1242,7 @@ function CourseImportForm({ courseSlug, modules }: { courseSlug: string; modules
                         size="compact"
                         onClick={() => downloadJson('sample-lessons-only.json', SAMPLE_LESSONS_JSON)}
                     >
+                        <Download className="size-3.5" />
                         Sample: lessons for an existing module
                     </Button>
                 </div>
