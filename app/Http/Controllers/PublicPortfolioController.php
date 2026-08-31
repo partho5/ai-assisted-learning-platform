@@ -124,6 +124,36 @@ class PublicPortfolioController extends Controller
     }
 
     /**
+     * Project proposal / contact page.
+     */
+    public function proposal(Request $request, string $username): Response
+    {
+        $user = User::where('username', $username)->firstOrFail();
+        $portfolio = Portfolio::where('user_id', $user->id)
+            ->where('is_published', true)
+            ->firstOrFail();
+
+        $portfolio->load(['skillTags', 'categories']);
+
+        $appUrl = rtrim(config('app.url'), '/');
+        $locale = app()->getLocale();
+
+        return Inertia::render('u/portfolio/proposal', [
+            'owner' => [
+                'name' => $user->name,
+                'username' => $user->username,
+                'avatar' => $user->avatar,
+                'headline' => $user->headline,
+            ],
+            'portfolio' => $portfolio,
+            'categories' => $portfolio->categories,
+            'appUrl' => $appUrl,
+            'canonicalUrl' => "{$appUrl}/{$locale}/u/{$user->username}/proposal",
+            'hasCourses' => Course::query()->where('user_id', $user->id)->published()->exists(),
+        ]);
+    }
+
+    /**
      * Handle contact form submission.
      */
     public function sendMessage(SendPortfolioMessageRequest $request, string $username): RedirectResponse

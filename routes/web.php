@@ -147,6 +147,7 @@ Route::prefix('{locale}')
         // Public portfolio builder pages
         Route::get('u/{username}/portfolio', [PublicPortfolioController::class, 'show'])->name('public-portfolio.show');
         Route::get('u/{username}/portfolio/{project_slug}', [PublicPortfolioController::class, 'showProject'])->name('public-portfolio.project');
+        Route::get('u/{username}/proposal', [PublicPortfolioController::class, 'proposal'])->name('public-portfolio.proposal');
 
         // -----------------------------------------------------------------------
         // Forum — public reading; auth required for writes

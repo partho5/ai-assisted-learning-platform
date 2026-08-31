@@ -223,6 +223,17 @@ export default function PortfolioLayout({ children, owner, portfolio, categories
                         </div>
                     )}
 
+                    {/* Send a Proposal link */}
+                    <div className="text-center">
+                        <Link
+                            href={`/${l}/u/${owner.username}/proposal`}
+                            onClick={() => setMobileOpen(false)}
+                            className="inline-block rounded-full bg-blue-500 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-600"
+                        >
+                            Send a Proposal
+                        </Link>
+                    </div>
+
                     {/* Category nav — least priority, at bottom */}
                     {categories.length > 0 && (
                         <div className="border-t border-gray-200 pt-4">
@@ -350,12 +361,22 @@ export default function PortfolioLayout({ children, owner, portfolio, categories
 
                         {/* Hire Me button */}
                         {onContactClick && (
-                            <div className="pb-4 text-center">
+                            <div className="text-center">
                                 <button onClick={onContactClick} className="portfolio-btn portfolio-btn-hire">
                                     Hire Me
                                 </button>
                             </div>
                         )}
+
+                        {/* Send a Proposal link */}
+                        <div className="pb-4 text-center">
+                            <Link
+                                href={`/${l}/u/${owner.username}/proposal`}
+                                className="inline-block rounded-full bg-blue-500 px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-600"
+                            >
+                                Send a Proposal
+                            </Link>
+                        </div>
                     </div>
                 </aside>
 

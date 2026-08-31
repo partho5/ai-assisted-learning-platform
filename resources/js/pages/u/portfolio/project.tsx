@@ -70,7 +70,7 @@ function lazyLoadImages(html: string): string {
 
 
 function ContactModal({ open, onClose, username }: { open: boolean; onClose: () => void; username: string }) {
-    const form = useForm({ sender_name: '', sender_email: '', subject: '', body: '', honeypot: '' });
+    const form = useForm({ sender_name: '', sender_email: '', subject: '', body: '', honeypot: '', confirm_human: true });
     const [sent, setSent] = useState(false);
 
     function submit(e: FormEvent) {

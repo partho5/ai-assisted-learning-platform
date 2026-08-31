@@ -1215,10 +1215,7 @@ function CourseImportForm({ courseSlug, modules }: { courseSlug: string; modules
     return (
         <div className="overflow-hidden rounded-xl border border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/40">
             <div className="border-b border-slate-300 bg-slate-100 px-4 py-2.5 dark:border-slate-700 dark:bg-slate-900/60">
-                <h3 className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">
-                    <Braces className="size-3.5" />
-                    Import modules &amp; lessons from JSON
-                </h3>
+                <h3 className="text-xs font-semibold tracking-wide text-slate-600 dark:text-slate-300">Import modules &amp; lessons from JSON</h3>
             </div>
             <div className="flex flex-col gap-3 p-4">
                 <p className="text-xs text-muted-foreground">
@@ -1233,7 +1230,6 @@ function CourseImportForm({ courseSlug, modules }: { courseSlug: string; modules
                         size="compact"
                         onClick={() => downloadJson('sample-modules-and-lessons.json', SAMPLE_MODULES_JSON)}
                     >
-                        <Download className="size-3.5" />
                         Sample: new modules + lessons
                     </Button>
                     <Button
@@ -1242,7 +1238,6 @@ function CourseImportForm({ courseSlug, modules }: { courseSlug: string; modules
                         size="compact"
                         onClick={() => downloadJson('sample-lessons-only.json', SAMPLE_LESSONS_JSON)}
                     >
-                        <Download className="size-3.5" />
                         Sample: lessons for an existing module
                     </Button>
                 </div>
