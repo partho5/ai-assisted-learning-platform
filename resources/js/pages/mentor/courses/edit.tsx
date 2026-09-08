@@ -1060,12 +1060,11 @@ function ModulePanel({
                             />
                         </Field>
                         <Field label="Description (optional)" error={moduleForm.errors.description}>
-                            <Textarea
+                            <RichTextEditor
                                 value={moduleForm.data.description}
-                                onChange={(e) => moduleForm.setData('description', e.target.value)}
+                                onChange={(content) => moduleForm.setData('description', content)}
                                 disabled={moduleForm.processing}
                                 placeholder="Brief module description"
-                                rows={2}
                             />
                         </Field>
                         <div className="flex items-center gap-2">
@@ -1094,7 +1093,7 @@ function ModulePanel({
                                     {module.title}
                                 </h3>
                                 {module.description && (
-                                    <p className="truncate text-xs text-violet-700/80 dark:text-violet-300/70">{module.description}</p>
+                                    <p className="truncate text-xs text-violet-700/80 dark:text-violet-300/70">{stripHtml(module.description)}</p>
                                 )}
                             </div>
                         </div>
@@ -1362,9 +1361,9 @@ function AddModuleForm({ courseSlug, locale }: { courseSlug: string; locale: str
                     />
                 </Field>
                 <Field label="Description (optional)" error={form.errors.description}>
-                    <Input
+                    <RichTextEditor
                         value={form.data.description}
-                        onChange={(e) => form.setData('description', e.target.value)}
+                        onChange={(content) => form.setData('description', content)}
                         disabled={form.processing}
                         placeholder="Brief module description"
                     />
@@ -1550,6 +1549,12 @@ function SortableResourceRow({
 
 // ─── Shared primitives ───────────────────────────────────────────────────────
 
+function stripHtml(html: string): string {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent ?? '';
+}
+
 function Field({
     label,
     error,
@@ -1570,22 +1575,6 @@ function Field({
             {children}
             {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
-    );
-}
-
-function Textarea({
-    rows = 3,
-    ...props
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { rows?: number }) {
-    return (
-        <textarea
-            rows={rows}
-            {...props}
-            className={
-                'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ' +
-                (props.className ?? '')
-            }
-        />
     );
 }
 
