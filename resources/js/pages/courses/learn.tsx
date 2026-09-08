@@ -1218,7 +1218,7 @@ export default function Learn({ course, initialResourceId, resources, enrollment
                             if (el) resourceRefs.current.set(resource.id, el);
                             else resourceRefs.current.delete(resource.id);
                         }}
-                        className="mb-16 scroll-mt-4 border-border pb-16 last:border-0 last:pb-0"
+                        className="mb-16 scroll-mt-20 border-border pb-16 last:border-0 last:pb-0"
                     >
                         <ResourceBlock
                             resource={resource}
