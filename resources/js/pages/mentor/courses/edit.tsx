@@ -1049,20 +1049,33 @@ function ModulePanel({
             {/* Module header */}
             <div className="flex items-center justify-between border-b border-violet-200 bg-violet-50/60 px-4 py-3 dark:border-violet-800/50 dark:bg-violet-950/25">
                 {editingModule ? (
-                    <form onSubmit={saveModule} className="flex flex-1 items-center gap-2">
-                        <Input
-                            value={moduleForm.data.title}
-                            onChange={(e) => moduleForm.setData('title', e.target.value)}
-                            className="h-8"
-                            disabled={moduleForm.processing}
-                            autoFocus
-                        />
-                        <Button type="submit" size="compact" variant="progress" disabled={moduleForm.processing}>
-                            Save
-                        </Button>
-                        <Button type="button" size="compact" variant="ghost" onClick={() => setEditingModule(false)}>
-                            Cancel
-                        </Button>
+                    <form onSubmit={saveModule} className="flex flex-1 flex-col gap-2">
+                        <Field label="Module Title" error={moduleForm.errors.title} required>
+                            <Input
+                                value={moduleForm.data.title}
+                                onChange={(e) => moduleForm.setData('title', e.target.value)}
+                                className="h-8"
+                                disabled={moduleForm.processing}
+                                autoFocus
+                            />
+                        </Field>
+                        <Field label="Description (optional)" error={moduleForm.errors.description}>
+                            <Textarea
+                                value={moduleForm.data.description}
+                                onChange={(e) => moduleForm.setData('description', e.target.value)}
+                                disabled={moduleForm.processing}
+                                placeholder="Brief module description"
+                                rows={2}
+                            />
+                        </Field>
+                        <div className="flex items-center gap-2">
+                            <Button type="submit" size="compact" variant="progress" disabled={moduleForm.processing}>
+                                Save
+                            </Button>
+                            <Button type="button" size="compact" variant="ghost" onClick={() => setEditingModule(false)}>
+                                Cancel
+                            </Button>
+                        </div>
                     </form>
                 ) : (
                     <>
@@ -1075,10 +1088,15 @@ function ModulePanel({
                             >
                                 <GripVertical className="h-4 w-4" />
                             </button>
-                            <h3 className="truncate font-semibold text-violet-900 dark:text-violet-100">
-                                <span className="mr-1 text-xs font-normal bg-gray-900 text-gray-200 px-1 py-0.5 rounded">Module {moduleIndex + 1}</span>
-                                {module.title}
-                            </h3>
+                            <div className="min-w-0">
+                                <h3 className="truncate font-semibold text-violet-900 dark:text-violet-100">
+                                    <span className="mr-1 text-xs font-normal bg-gray-900 text-gray-200 px-1 py-0.5 rounded">Module {moduleIndex + 1}</span>
+                                    {module.title}
+                                </h3>
+                                {module.description && (
+                                    <p className="truncate text-xs text-violet-700/80 dark:text-violet-300/70">{module.description}</p>
+                                )}
+                            </div>
                         </div>
                         <div className="flex items-center gap-1">
                             <Button type="button" variant="ghost" size="compact" onClick={() => setEditingModule(true)}>
