@@ -8,6 +8,8 @@
     "nightwatch_mcp": false,
     "sail": false,
     "skills": [
-        "wayfinder-development"
+        "wayfinder-development",
+        "inertia-react-development",
+        "tailwindcss-development"
     ]
 }
