@@ -69,6 +69,16 @@ class ModuleController extends Controller
         return back()->with('success', 'Module deleted.');
     }
 
+    public function markFree(Course $course, Module $module): RedirectResponse
+    {
+        $this->authorizeOwner($course);
+        abort_unless($module->course_id === $course->id, 404);
+
+        $module->resources()->update(['is_free' => true]);
+
+        return back()->with('success', 'All lessons in this module are now free.');
+    }
+
     private function authorizeOwner(Course $course): void
     {
         $user = auth()->user();

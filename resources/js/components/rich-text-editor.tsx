@@ -506,9 +506,10 @@ interface RichTextEditorProps {
     disabled?: boolean;
     placeholder?: string;
     autoFocus?: boolean;
+    minHeightClass?: string;
 }
 
-export default function RichTextEditor({ value, onChange, disabled = false, placeholder, autoFocus = false }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, disabled = false, placeholder, autoFocus = false, minHeightClass = 'min-h-48' }: RichTextEditorProps) {
     const editor = useEditor({
         autofocus: autoFocus ? 'end' : false,
         extensions: [
@@ -545,7 +546,7 @@ export default function RichTextEditor({ value, onChange, disabled = false, plac
     return (
         <div className={`tiptap-editor rounded-md border border-input bg-card text-sm ${disabled ? 'pointer-events-none opacity-50' : ''}`}>
             <Toolbar editor={editor} />
-            <div className="min-h-48 max-h-[60vh] overflow-y-auto rounded-b-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1">
+            <div className={`${minHeightClass} max-h-[60vh] overflow-y-auto rounded-b-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1`}>
                 <EditorContent
                     editor={editor}
                     placeholder={placeholder}

@@ -329,6 +329,8 @@ Route::middleware('backoffice.locale')
                 ->name('modules.update');
             Route::delete('courses/{course}/modules/{module}', [ModuleController::class, 'destroy'])
                 ->name('modules.destroy');
+            Route::post('courses/{course}/modules/{module}/mark-free', [ModuleController::class, 'markFree'])
+                ->name('modules.mark-free');
 
             Route::post('courses/{course}/modules/{module}/resources', [ResourceController::class, 'store'])
                 ->name('resources.store');

@@ -33,6 +33,7 @@ import {
 } from '@/actions/App/Http/Controllers/CourseAuthorController';
 import {
     destroy as moduleDestroy,
+    markFree as moduleMarkFree,
     reorder as moduleReorder,
     store as moduleStore,
     update as moduleUpdate,
@@ -284,6 +285,7 @@ function CourseDetailsForm({
                                 form.setData('prerequisites', val)
                             }
                             disabled={form.processing}
+                            minHeightClass="min-h-20"
                         />
                     </Field>
                 </div>
@@ -1037,6 +1039,11 @@ function ModulePanel({
         router.delete(moduleDestroy.url({ course: courseSlug, module: module.id }), { preserveScroll: true });
     }
 
+    function markModuleFree() {
+        if (!confirm('Mark every lesson in this module as free?')) { return; }
+        router.post(moduleMarkFree.url({ course: courseSlug, module: module.id }), {}, { preserveScroll: true });
+    }
+
     function deleteResource(resourceId: number) {
         if (!confirm('Delete this lesson?')) { return; }
         router.delete(resourceDestroy.url({ course: courseSlug, module: module.id, resource: resourceId }), {
@@ -1065,6 +1072,7 @@ function ModulePanel({
                                 onChange={(content) => moduleForm.setData('description', content)}
                                 disabled={moduleForm.processing}
                                 placeholder="Brief module description"
+                                minHeightClass="min-h-20"
                             />
                         </Field>
                         <div className="flex items-center gap-2">
@@ -1073,6 +1081,9 @@ function ModulePanel({
                             </Button>
                             <Button type="button" size="compact" variant="ghost" onClick={() => setEditingModule(false)}>
                                 Cancel
+                            </Button>
+                            <Button type="button" size="compact" variant="secondary" onClick={markModuleFree}>
+                                Mark Free
                             </Button>
                         </div>
                     </form>
@@ -1366,6 +1377,7 @@ function AddModuleForm({ courseSlug, locale }: { courseSlug: string; locale: str
                         onChange={(content) => form.setData('description', content)}
                         disabled={form.processing}
                         placeholder="Brief module description"
+                        minHeightClass="min-h-20"
                     />
                 </Field>
                 <div className="flex justify-end gap-2 border-t border-sidebar-border pt-3">

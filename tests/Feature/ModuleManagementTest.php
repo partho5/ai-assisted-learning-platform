@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Course;
 use App\Models\Module;
+use App\Models\Resource;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -100,6 +101,34 @@ class ModuleManagementTest extends TestCase
                 'description' => 'No title here.',
             ])
             ->assertSessionHasErrors('title');
+    }
+
+    public function test_mentor_can_mark_all_lessons_in_module_free(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->create();
+        $module = Module::factory()->for($course)->create();
+        $resources = Resource::factory()->for($module)->count(3)->create(['is_free' => false]);
+
+        $this->actingAs($mentor)
+            ->post(route('modules.mark-free', ['course' => $course->slug, 'module' => $module->id]))
+            ->assertRedirect();
+
+        foreach ($resources as $resource) {
+            $this->assertDatabaseHas('resources', ['id' => $resource->id, 'is_free' => true]);
+        }
+    }
+
+    public function test_mentor_cannot_mark_free_on_another_mentors_module(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $other = User::factory()->mentor()->create();
+        $course = Course::factory()->for($other, 'mentor')->create();
+        $module = Module::factory()->for($course)->create();
+
+        $this->actingAs($mentor)
+            ->post(route('modules.mark-free', ['course' => $course->slug, 'module' => $module->id]))
+            ->assertForbidden();
     }
 
     public function test_module_belongs_to_course_is_enforced(): void
