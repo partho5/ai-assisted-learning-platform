@@ -1039,9 +1039,12 @@ function ModulePanel({
         router.delete(moduleDestroy.url({ course: courseSlug, module: module.id }), { preserveScroll: true });
     }
 
-    function markModuleFree() {
-        if (!confirm('Mark every lesson in this module as free?')) { return; }
-        router.post(moduleMarkFree.url({ course: courseSlug, module: module.id }), {}, { preserveScroll: true });
+    const allResourcesFree = resources.length > 0 && resources.every((r) => r.is_free);
+
+    function toggleModuleFree() {
+        const free = !allResourcesFree;
+        if (!confirm(free ? 'Mark every lesson in this module as free?' : 'Mark every lesson in this module as paid?')) { return; }
+        router.post(moduleMarkFree.url({ course: courseSlug, module: module.id }), { free }, { preserveScroll: true });
     }
 
     function deleteResource(resourceId: number) {
@@ -1082,8 +1085,8 @@ function ModulePanel({
                             <Button type="button" size="compact" variant="ghost" onClick={() => setEditingModule(false)}>
                                 Cancel
                             </Button>
-                            <Button type="button" size="compact" variant="secondary" onClick={markModuleFree}>
-                                Mark Free
+                            <Button type="button" size="compact" variant="secondary" onClick={toggleModuleFree}>
+                                {allResourcesFree ? 'Mark All Lessons Paid' : 'Mark All Lessons Free'}
                             </Button>
                         </div>
                     </form>

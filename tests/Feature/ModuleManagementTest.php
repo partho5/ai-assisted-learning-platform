@@ -119,6 +119,24 @@ class ModuleManagementTest extends TestCase
         }
     }
 
+    public function test_mentor_can_mark_all_lessons_in_module_paid(): void
+    {
+        $mentor = User::factory()->mentor()->create();
+        $course = Course::factory()->for($mentor, 'mentor')->create();
+        $module = Module::factory()->for($course)->create();
+        $resources = Resource::factory()->for($module)->count(3)->create(['is_free' => true]);
+
+        $this->actingAs($mentor)
+            ->post(route('modules.mark-free', ['course' => $course->slug, 'module' => $module->id]), [
+                'free' => false,
+            ])
+            ->assertRedirect();
+
+        foreach ($resources as $resource) {
+            $this->assertDatabaseHas('resources', ['id' => $resource->id, 'is_free' => false]);
+        }
+    }
+
     public function test_mentor_cannot_mark_free_on_another_mentors_module(): void
     {
         $mentor = User::factory()->mentor()->create();

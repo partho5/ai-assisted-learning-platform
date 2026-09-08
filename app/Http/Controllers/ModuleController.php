@@ -69,14 +69,19 @@ class ModuleController extends Controller
         return back()->with('success', 'Module deleted.');
     }
 
-    public function markFree(Course $course, Module $module): RedirectResponse
+    public function markFree(Request $request, Course $course, Module $module): RedirectResponse
     {
         $this->authorizeOwner($course);
         abort_unless($module->course_id === $course->id, 404);
 
-        $module->resources()->update(['is_free' => true]);
+        $data = $request->validate([
+            'free' => ['sometimes', 'boolean'],
+        ]);
+        $free = $data['free'] ?? true;
 
-        return back()->with('success', 'All lessons in this module are now free.');
+        $module->resources()->update(['is_free' => $free]);
+
+        return back()->with('success', $free ? 'All lessons in this module are now free.' : 'All lessons in this module are now paid.');
     }
 
     private function authorizeOwner(Course $course): void
