@@ -104,10 +104,10 @@ function FullTextConverter() {
                     </span>
                 </button>
 
-                <div className="overflow-hidden rounded-xl border-2 border-black bg-muted/40 shadow-sm">
+                <div className="overflow-hidden rounded-xl border border-border bg-muted/40 shadow-sm">
                     <label
                         htmlFor="bold-output"
-                        className="block border-b-2 border-black bg-muted/60 px-4 py-2 text-sm font-medium"
+                        className="block border-b border-border bg-muted/60 px-4 py-2 text-sm font-medium"
                     >
                         Bold Text
                     </label>
@@ -199,7 +199,7 @@ function MixedStyleEditor() {
                 </p>
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-border bg-background shadow-sm focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/40">
+            <div className="overflow-hidden rounded-xl border-2 border-black bg-background shadow-sm focus-within:ring-2 focus-within:ring-ring/40">
                 <div
                     className="flex flex-wrap items-center gap-2 border-b border-border bg-muted/40 px-3 py-2"
                     role="toolbar"
@@ -247,7 +247,7 @@ function MixedStyleEditor() {
                     }}
                     onSelect={syncSelection}
                     onBlur={syncSelection}
-                    placeholder="I am a AI Expert, build RAG applications like chatbot"
+                    placeholder="Type or paste your text here, then select a word or phrase to style it…"
                     className="block w-full resize-y bg-transparent px-4 py-3 text-base leading-relaxed text-foreground outline-none placeholder:text-muted-foreground"
                 />
             </div>
