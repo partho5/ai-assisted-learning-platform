@@ -54,6 +54,7 @@ use App\Http\Controllers\TestAttemptController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\TestQuestionController;
 use App\Http\Controllers\TestQuestionOptionController;
+use App\Http\Controllers\ToolController;
 use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -79,6 +80,26 @@ foreach (['courses', 'resources', 'forum', 'portfolio-builder', 'about-us', 'con
         ->defaults('destination', '/'.config('app.locale').'/'.$publicPath)
         ->defaults('status', 301);
 }
+
+// Tools are English-only. Bare /tools paths redirect to /en (not the default
+// locale), and /bn/tools never matches the locale constraint below.
+Route::get('tools', '\Illuminate\Routing\RedirectController')
+    ->defaults('destination', '/en/tools')
+    ->defaults('status', 301);
+Route::get('tools/{slug}', '\Illuminate\Routing\RedirectController')
+    ->defaults('destination', '/en/tools/{slug}')
+    ->defaults('status', 301)
+    ->where('slug', '[a-z0-9-]+');
+
+Route::prefix('{locale}')
+    ->where(['locale' => 'en'])
+    ->middleware('setlocale')
+    ->group(function () {
+        Route::get('tools', [ToolController::class, 'index'])->name('tools.index');
+        Route::get('tools/{slug}', [ToolController::class, 'show'])
+            ->where('slug', '[a-z0-9-]+')
+            ->name('tools.show');
+    });
 
 // All content routes live under /{locale}/ for SEO (BN/EN URL routing)
 
