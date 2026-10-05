@@ -51,7 +51,7 @@ const PLATFORMS = [
 ];
 
 const textareaClass =
-    'w-full rounded-xl border border-border bg-background px-4 py-3 text-base leading-relaxed text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40';
+    'w-full rounded-xl border-2 border-black bg-background px-4 py-3 text-base leading-relaxed text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/40';
 
 function FullTextConverter() {
     const [input, setInput] = useState('');
@@ -104,10 +104,10 @@ function FullTextConverter() {
                     </span>
                 </button>
 
-                <div className="overflow-hidden rounded-xl border border-border bg-muted/40 shadow-sm">
+                <div className="overflow-hidden rounded-xl border-2 border-black bg-muted/40 shadow-sm">
                     <label
                         htmlFor="bold-output"
-                        className="block border-b border-border bg-muted/60 px-4 py-2 text-sm font-medium"
+                        className="block border-b-2 border-black bg-muted/60 px-4 py-2 text-sm font-medium"
                     >
                         Bold Text
                     </label>
