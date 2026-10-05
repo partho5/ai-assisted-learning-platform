@@ -1,13 +1,13 @@
 import { usePage } from '@inertiajs/react';
+import { platform } from '@/actions/App/Http/Controllers/AiChatController';
 import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import PushPermissionPrompt from '@/components/push-permission-prompt';
-import { platform } from '@/actions/App/Http/Controllers/AiChatController';
-import { index as chatHistory } from '@/routes/chat/history';
 import { useOneSignal } from '@/hooks/use-one-signal';
+import { index as chatHistory } from '@/routes/chat/history';
 import type { AppLayoutProps } from '@/types';
 
 export default function AppSidebarLayout({

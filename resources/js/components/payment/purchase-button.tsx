@@ -1,5 +1,5 @@
-import { useState } from 'react';
 import { router } from '@inertiajs/react';
+import { useState } from 'react';
 import { CheckoutModal } from '@/components/payment/checkout-modal';
 import { Button } from '@/components/ui/button';
 import type { Course } from '@/types';

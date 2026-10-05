@@ -1,12 +1,12 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { Lock } from 'lucide-react';
 import { useState } from 'react';
 import {
     edit as notesEdit,
     update as notesUpdate,
 } from '@/actions/App/Http/Controllers/PersonalNotesController';
-import { Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import RichTextEditor from '@/components/rich-text-editor';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 

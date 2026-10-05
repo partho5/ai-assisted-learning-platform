@@ -4,13 +4,13 @@ import {
     destroy as articleDestroy,
     index as articleIndex,
 } from '@/actions/App/Http/Controllers/ArticleController';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import MentorCard from '@/components/mentor-card';
 import RichHtml from '@/components/rich-html';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/public-layout';
-import type { Article } from '@/types';
 import { inLanguage, ogLocale } from '@/lib/locale';
+import type { Article } from '@/types';
 
 interface SchemaTypes {
     howTo: boolean;

@@ -1,10 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { BookOpen, CheckCircle, Clock, CreditCard } from 'lucide-react';
 import { platform } from '@/actions/App/Http/Controllers/AiChatController';
-import { index as chatHistory } from '@/routes/chat/history';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
+import { index as chatHistory } from '@/routes/chat/history';
 import type { BreadcrumbItem } from '@/types';
 
 interface EnrolledCourse {

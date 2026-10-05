@@ -1,11 +1,11 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { update as articleUpdate, preview as articlePreview } from '@/actions/App/Http/Controllers/ArticleController';
+import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
+import RichTextEditor from '@/components/rich-text-editor';
+import TagSuggestions from '@/components/tag-suggestions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
-import TagSuggestions from '@/components/tag-suggestions';
-import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
 import type { Article, Category, ContentLanguage } from '@/types';
 

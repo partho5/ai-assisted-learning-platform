@@ -1,5 +1,3 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
 import {
     DndContext,
     PointerSensor,
@@ -14,6 +12,17 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Braces, Download, GripVertical } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import {
+    store as couponStore,
+    destroy as couponDestroy,
+} from '@/actions/App/Http/Controllers/CouponCodeController';
+import {
+    store as authorStore,
+    destroy as authorDestroy,
+} from '@/actions/App/Http/Controllers/CourseAuthorController';
 import {
     approve as courseApprove,
     destroy as courseDestroy,
@@ -23,14 +32,7 @@ import {
     submitForReview as courseSubmitForReview,
     update as courseUpdate,
 } from '@/actions/App/Http/Controllers/CourseController';
-import {
-    store as couponStore,
-    destroy as couponDestroy,
-} from '@/actions/App/Http/Controllers/CouponCodeController';
-import {
-    store as authorStore,
-    destroy as authorDestroy,
-} from '@/actions/App/Http/Controllers/CourseAuthorController';
+import { store as courseImportStore } from '@/actions/App/Http/Controllers/CourseImportController';
 import {
     destroy as moduleDestroy,
     markFree as moduleMarkFree,
@@ -44,15 +46,13 @@ import {
     store as resourceStore,
     update as resourceUpdate,
 } from '@/actions/App/Http/Controllers/ResourceController';
-import { store as courseImportStore } from '@/actions/App/Http/Controllers/CourseImportController';
 import { edit as testEdit } from '@/actions/App/Http/Controllers/TestController';
-import { Braces, Download, GripVertical } from 'lucide-react';
+import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
+import RichTextEditor from '@/components/rich-text-editor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
-import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
 import type { BillingType, BreadcrumbItem, Category, Course, CourseDifficulty, CourseMentorWithRole, CouponCode, CourseModule, CourseResource, ResourceType, SelectOption } from '@/types';
 

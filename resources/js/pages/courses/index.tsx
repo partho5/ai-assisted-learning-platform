@@ -1,15 +1,15 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { platform } from '@/actions/App/Http/Controllers/AiChatController';
-import { index as chatHistory } from '@/routes/chat/history';
-import CourseCard from '@/components/course-card';
+import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
+import CourseCard from '@/components/course-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PublicLayout from '@/layouts/public-layout';
-import type { Category, Course, Paginated, SelectOption } from '@/types';
 import { inLanguage, ogLocale } from '@/lib/locale';
+import { index as chatHistory } from '@/routes/chat/history';
+import type { Category, Course, Paginated, SelectOption } from '@/types';
 
 interface Filters {
     category?: string;

@@ -1,4 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import {
     create as articleCreate,
     edit as articleEdit,
@@ -10,11 +11,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import PublicLayout from '@/layouts/public-layout';
 import AppLayout from '@/layouts/app-layout';
-import type { Article, ArticleCategory, Paginated } from '@/types';
-import { useState } from 'react';
+import PublicLayout from '@/layouts/public-layout';
 import { inLanguage } from '@/lib/locale';
+import type { Article, ArticleCategory, Paginated } from '@/types';
 
 interface PublicProps {
     articles: Paginated<Article>;

@@ -1,7 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Award, BookOpen, CheckCircle2, ExternalLink } from 'lucide-react';
-import { show as portfolioShow } from '@/actions/App/Http/Controllers/PublicProfileController';
 import { toggleShowcase } from '@/actions/App/Http/Controllers/PortfolioController';
+import { show as portfolioShow } from '@/actions/App/Http/Controllers/PublicProfileController';
 import CourseCard from '@/components/course-card';
 import MentorCard from '@/components/mentor-card';
 import { Badge } from '@/components/ui/badge';

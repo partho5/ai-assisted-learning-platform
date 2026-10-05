@@ -1,19 +1,19 @@
-import { useCallback, useRef, useState } from 'react';
-import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import { Underline } from '@tiptap/extension-underline';
-import { TextStyle, Color, FontSize } from '@tiptap/extension-text-style';
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
 import { Highlight } from '@tiptap/extension-highlight';
-import { Link } from '@tiptap/extension-link';
 import { Image } from '@tiptap/extension-image';
+import { Link } from '@tiptap/extension-link';
 import { Table } from '@tiptap/extension-table';
-import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TextStyle, Color, FontSize } from '@tiptap/extension-text-style';
+import { Underline } from '@tiptap/extension-underline';
+import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react';
+import { useCallback, useRef, useState } from 'react';
+import StarterKit from '@tiptap/starter-kit';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { Callout } from '@/extensions/callout-extension';
 import { SectionBlock as SectionBlockExt } from '@/extensions/section-block-extension';
 import { Youtube, extractYoutubeId } from '@/extensions/youtube-extension';
-import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';
 
 const lowlight = createLowlight(common);

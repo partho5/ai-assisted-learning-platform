@@ -3,11 +3,11 @@ import {
     index as coursesIndex,
     store as courseStore,
 } from '@/actions/App/Http/Controllers/CourseController';
+import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
+import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import CloudinaryImageUpload from '@/components/cloudinary-image-upload';
-import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
 import type { BillingType, BreadcrumbItem, Category, SelectOption } from '@/types';
 

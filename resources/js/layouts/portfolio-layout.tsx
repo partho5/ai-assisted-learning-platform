@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { Mail, Menu, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface Category {

@@ -13,7 +13,7 @@ Index page: `/en/tools`. Public, no login. English only (`/bn/tools*` → 404).
 | 2 | Frontend foundation: Unicode engine, tools layout, shared pieces | `[x]` |
 | 3 | Tool page: bold-text-generator-editor (both modes) | `[x]` |
 | 4 | Tools index page (card view) + footer link | `[x]` |
-| 5 | Sitemap + backend tests + final checks | `[ ]` |
+| 5 | Sitemap + backend tests + final checks | `[x]` |
 
 Status values: `[ ]` not started · `[~]` in progress · `[x]` done.
 
@@ -119,13 +119,13 @@ Status: `[x]`
 
 ## Part 5 — Sitemap + tests + final checks
 
-Status: `[ ]`
+Status: `[x]`
 
-- [ ] `SitemapController`: new `toolUrls($baseUrl)` — `en` only, `/en/tools` plus one URL per registry tool; priorities ~0.6 hub / 0.7 tool, `monthly`. Merge in `index()`.
-- [ ] `php artisan make:test --phpunit ToolsTest` — cases: guest gets 200 on `/en/tools` and `/en/tools/bold-text-generator-editor` (Inertia component + meta asserted); `/en/tools/unknown` → 404; `/bn/tools` and `/bn/tools/bold-text-generator-editor` → 404; `/tools` and `/tools/bold-text-generator-editor` → 301 to `/en/…`; sitemap contains the `/en/tools…` URLs and no `/bn/tools…`; registry `find()` returns null for unknown slug.
-- [ ] Run only `php artisan test --compact tests/Feature/ToolsTest.php` plus `tests/Feature/ContentLanguageSitemapTest.php` (existing sitemap test, regression check).
-- [ ] `vendor/bin/pint --dirty --format agent`, `npm run lint` / `npx tsc --noEmit` if configured.
-- [ ] Ask the user whether to run the full suite.
+- [x] `SitemapController`: new `toolUrls($baseUrl)` — `en` only, `/en/tools` plus one URL per registry tool; priorities ~0.6 hub / 0.7 tool, `monthly`. Merge in `index()`.
+- [x] `php artisan make:test --phpunit ToolsTest` — cases: guest gets 200 on `/en/tools` and `/en/tools/bold-text-generator-editor` (Inertia component + meta asserted); `/en/tools/unknown` → 404; `/bn/tools` and `/bn/tools/bold-text-generator-editor` → 404; `/tools` and `/tools/bold-text-generator-editor` → 301 to `/en/…`; sitemap contains the `/en/tools…` URLs and no `/bn/tools…`; registry `find()` returns null for unknown slug.
+- [x] Run only `php artisan test --compact tests/Feature/ToolsTest.php` plus `tests/Feature/ContentLanguageSitemapTest.php` (existing sitemap test, regression check).
+- [x] `vendor/bin/pint --dirty --format agent`, `npm run lint` / `npx tsc --noEmit` if configured.
+- [x] Ask the user whether to run the full suite.
 - [ ] Update `__dev-progress.md` with a one-line Tools entry (only if the user wants it).
 
 ---

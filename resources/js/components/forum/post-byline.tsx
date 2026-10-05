@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
-import { timeAgo } from '@/lib/time';
 import { Badge } from '@/components/ui/badge';
+import { timeAgo } from '@/lib/time';
 import type { ForumAuthor } from '@/types';
 
 const REPUTATION_COLORS: Record<string, string> = {

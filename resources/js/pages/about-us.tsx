@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
+import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/public-layout';
-import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { aboutCopy, type AboutBenefit } from '@/lib/about-copy';
 import { BRAND_EXPANSION, BRAND_FULL, BRAND_NAME } from '@/lib/brand';
 

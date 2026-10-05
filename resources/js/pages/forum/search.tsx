@@ -1,10 +1,10 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
-import { Search } from 'lucide-react';
+import ThreadCard from '@/components/forum/thread-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import ThreadCard from '@/components/forum/thread-card';
 import AppLayout from '@/layouts/app-layout';
 import PublicLayout from '@/layouts/public-layout';
 import type { ForumCategory, ForumThread, Paginated, User } from '@/types';

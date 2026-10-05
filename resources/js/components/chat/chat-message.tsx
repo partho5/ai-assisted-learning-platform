@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
 import type { ChatMessage as ChatMessageType } from '@/hooks/use-chat';
+import { cn } from '@/lib/utils';
 
 interface Props {
     message: ChatMessageType;

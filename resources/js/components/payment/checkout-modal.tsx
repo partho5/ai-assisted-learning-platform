@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import {
     PayPalScriptProvider,
     PayPalButtons,
     usePayPalScriptReducer,
 } from '@paypal/react-paypal-js';
+import { useEffect, useRef, useState } from 'react';
 import {
     validateCoupon,
     createOrder,
@@ -12,10 +12,10 @@ import {
     createSubscription,
     activateSubscription,
 } from '@/actions/App/Http/Controllers/PaymentController';
-import { trackPurchase } from '@/lib/analytics';
-import { getReferral, clearReferral } from '@/lib/referral';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { trackPurchase } from '@/lib/analytics';
+import { getReferral, clearReferral } from '@/lib/referral';
 import type { Course } from '@/types';
 
 

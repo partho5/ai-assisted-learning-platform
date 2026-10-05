@@ -1,6 +1,7 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

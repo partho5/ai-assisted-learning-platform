@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronUp, Menu, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { CookieBanner } from '@/components/cookie-banner';
-import { FloatingChatButton } from '@/components/chat/floating-chat-button';
+import { useEffect, useState } from 'react';
 import { platform } from '@/actions/App/Http/Controllers/AiChatController';
-import { index as chatHistory } from '@/routes/chat/history';
+import { index as articlesIndex } from '@/actions/App/Http/Controllers/ArticleController';
 import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
-import { index as articlesIndex } from '@/actions/App/Http/Controllers/ArticleController';
 import { index as portfolioLanding } from '@/actions/App/Http/Controllers/PortfolioLandingController';
-import { login, register } from '@/routes';
+import { FloatingChatButton } from '@/components/chat/floating-chat-button';
+import { CookieBanner } from '@/components/cookie-banner';
+import { Button } from '@/components/ui/button';
 import { BRAND_EXPANSION, BRAND_NAME } from '@/lib/brand';
+import { login, register } from '@/routes';
+import { index as chatHistory } from '@/routes/chat/history';
 
 interface NavLinkProps {
     href: string;

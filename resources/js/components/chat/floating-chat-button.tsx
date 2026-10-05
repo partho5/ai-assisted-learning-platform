@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
 import { ChatPanel } from '@/components/chat/chat-panel';
 import type { ChatContext } from '@/hooks/use-chat';
+import { cn } from '@/lib/utils';
 
 // ─── Inline keyframes ───────────────────────────────────────────────────────
 // Rotating border: a conic-gradient span spins inside an overflow-hidden wrapper.

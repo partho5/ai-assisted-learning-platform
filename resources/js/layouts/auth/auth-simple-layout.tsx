@@ -1,9 +1,9 @@
 import { Link, usePage } from '@inertiajs/react';
 import { BadgeCheck, BookOpen, GraduationCap } from 'lucide-react';
 import AppLogoIcon from '@/components/app-logo-icon';
+import { BRAND_NAME } from '@/lib/brand';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
-import { BRAND_NAME } from '@/lib/brand';
 
 const features = [
     {

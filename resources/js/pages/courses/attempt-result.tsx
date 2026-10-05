@@ -1,14 +1,14 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { usePoll } from '@inertiajs/react';
 import { Loader2, Sparkles, Star } from 'lucide-react';
-import { toggleShowcase } from '@/actions/App/Http/Controllers/PortfolioController';
 import { platform } from '@/actions/App/Http/Controllers/AiChatController';
-import { index as chatHistory } from '@/routes/chat/history';
+import { toggleShowcase } from '@/actions/App/Http/Controllers/PortfolioController';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 import AppLayout from '@/layouts/app-layout';
+import { index as chatHistory } from '@/routes/chat/history';
 import type { BreadcrumbItem, TestAttempt, TestQuestion, TestAttemptAnswer } from '@/types';
 
 interface Props {

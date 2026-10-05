@@ -1,7 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { resource as resourceChatAction } from '@/actions/App/Http/Controllers/AiChatController';
-import { index as chatHistory } from '@/routes/chat/history';
 import { complete as markComplete } from '@/actions/App/Http/Controllers/ResourceCompletionController';
 import {
     store as startAttempt,
@@ -18,6 +17,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import AppLayout from '@/layouts/app-layout';
 import PublicLayout from '@/layouts/public-layout';
 import { trackTestSubmit, trackResourceComplete } from '@/lib/analytics';
+import { inLanguage, ogLocale } from '@/lib/locale';
+import { courseId, isoDuration } from '@/lib/schema';
+import { index as chatHistory } from '@/routes/chat/history';
 import type {
     BreadcrumbItem,
     Enrollment,
@@ -26,8 +28,6 @@ import type {
     TestQuestion,
 } from '@/types';
 import type { ResourceType } from '@/types/course';
-import { inLanguage, ogLocale } from '@/lib/locale';
-import { courseId, isoDuration } from '@/lib/schema';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

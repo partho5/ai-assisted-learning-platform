@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
 import { usePage } from '@inertiajs/react';
-import { cn } from '@/lib/utils';
-import { useChat, type ChatContext } from '@/hooks/use-chat';
+import { useEffect, useRef, useState } from 'react';
 import { ChatMessage } from '@/components/chat/chat-message';
 import { ChatSuggestions } from '@/components/chat/chat-suggestions';
+import { useChat, type ChatContext } from '@/hooks/use-chat';
+import { cn } from '@/lib/utils';
 
 interface Props {
     context: ChatContext;

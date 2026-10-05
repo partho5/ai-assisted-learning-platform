@@ -1,10 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { create as createThread } from '@/actions/App/Http/Controllers/Forum/ForumThreadController';
 import { MessageSquare, CheckCircle, Clock } from 'lucide-react';
-import { timeAgo } from '@/lib/time';
+import { create as createThread } from '@/actions/App/Http/Controllers/Forum/ForumThreadController';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import PublicLayout from '@/layouts/public-layout';
+import { timeAgo } from '@/lib/time';
 import type { ForumCategory, User } from '@/types';
 
 interface Props {

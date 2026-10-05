@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { show as showChatSession } from '@/actions/App/Http/Controllers/Admin/ChatSessionController';
 import { BookOpen, BookText, Users, UserPlus, MessageSquare, MessagesSquare } from 'lucide-react';
+import { show as showChatSession } from '@/actions/App/Http/Controllers/Admin/ChatSessionController';
 import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';

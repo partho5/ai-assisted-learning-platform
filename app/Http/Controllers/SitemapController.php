@@ -9,6 +9,7 @@ use App\Models\ForumThread;
 use App\Models\Portfolio;
 use App\Models\Resource;
 use App\Models\User;
+use App\Services\Tools\ToolRegistry;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 
@@ -49,6 +50,7 @@ class SitemapController extends Controller
             ...$this->articleUrls($baseUrl),
             ...$this->forumUrls($baseUrl),
             ...$this->profileUrls($baseUrl),
+            ...$this->toolUrls($baseUrl),
         ];
 
         $xml = view('sitemap', compact('urls'))->render();
@@ -259,6 +261,35 @@ class SitemapController extends Controller
                     'priority' => '0.6',
                 ];
             }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Tools are English-only, so they are emitted under /en regardless of the
+     * application's primary locale.
+     *
+     * @return array<int, array<string, string>>
+     */
+    private function toolUrls(string $baseUrl): array
+    {
+        $lastmod = '2026-03-01T00:00:00+00:00';
+
+        $urls = [[
+            'loc' => "{$baseUrl}/en/tools",
+            'lastmod' => $lastmod,
+            'changefreq' => 'monthly',
+            'priority' => '0.6',
+        ]];
+
+        foreach (app(ToolRegistry::class)->all() as $tool) {
+            $urls[] = [
+                'loc' => "{$baseUrl}/en/tools/{$tool->slug()}",
+                'lastmod' => $lastmod,
+                'changefreq' => 'monthly',
+                'priority' => '0.7',
+            ];
         }
 
         return $urls;

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Cookie } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
 const STORAGE_KEY = 'cookie_consent';

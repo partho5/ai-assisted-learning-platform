@@ -1,8 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Copy, Handshake } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { store as partnerStore } from '@/actions/App/Http/Controllers/PartnerController';
 import { show as courseShow } from '@/actions/App/Http/Controllers/CourseController';
+import { store as partnerStore } from '@/actions/App/Http/Controllers/PartnerController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';

@@ -1,23 +1,23 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
+import { course as courseChatAction } from '@/actions/App/Http/Controllers/AiChatController';
 import { store as enrollStore } from '@/actions/App/Http/Controllers/EnrollmentController';
 import { show as learnShow } from '@/actions/App/Http/Controllers/LearnController';
-import { course as courseChatAction } from '@/actions/App/Http/Controllers/AiChatController';
-import { index as chatHistory } from '@/routes/chat/history';
 import { track as referralTrack } from '@/actions/App/Http/Controllers/PartnerReferralController';
 import { FloatingChatButton } from '@/components/chat/floating-chat-button';
+import MentorCard from '@/components/mentor-card';
 import { PurchaseButton } from '@/components/payment/purchase-button';
+import RichHtml from '@/components/rich-html';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import MentorCard from '@/components/mentor-card';
-import RichHtml from '@/components/rich-html';
 import PublicLayout from '@/layouts/public-layout';
 import { trackCourseView, trackEnroll } from '@/lib/analytics';
-import { captureReferral } from '@/lib/referral';
-import type { Course, Enrollment } from '@/types';
 import { ogLocale } from '@/lib/locale';
+import { captureReferral } from '@/lib/referral';
 import { courseSchema } from '@/lib/schema';
+import { index as chatHistory } from '@/routes/chat/history';
+import type { Course, Enrollment } from '@/types';
 
 interface Props {
     course: Course;

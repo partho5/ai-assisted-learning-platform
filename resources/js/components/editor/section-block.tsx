@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import type { NodeViewProps } from '@tiptap/react';
+import { useState, useEffect } from 'react';
 
 const VARIANTS = {
     'hero-dark': {

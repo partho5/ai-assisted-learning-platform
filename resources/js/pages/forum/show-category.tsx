@@ -1,8 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { create as createThread } from '@/actions/App/Http/Controllers/Forum/ForumThreadController';
 import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
-import { Button } from '@/components/ui/button';
+import { create as createThread } from '@/actions/App/Http/Controllers/Forum/ForumThreadController';
 import ThreadCard from '@/components/forum/thread-card';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import PublicLayout from '@/layouts/public-layout';
 import type { ForumCategory, ForumThread, Paginated, User } from '@/types';

@@ -1,8 +1,8 @@
 import { Link, usePage } from '@inertiajs/react';
 import { BarChart3, FolderOpen, Grid3X3, LayoutDashboard, Mail, Settings } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
 import { cn } from '@/lib/utils';
+import type { BreadcrumbItem } from '@/types';
 
 interface Props {
     children: React.ReactNode;

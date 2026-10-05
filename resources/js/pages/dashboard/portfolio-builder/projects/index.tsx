@@ -1,6 +1,3 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { Edit2, FolderOpen, GripVertical, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import {
     DndContext,
     PointerSensor,
@@ -15,6 +12,9 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Head, Link, router } from '@inertiajs/react';
+import { Edit2, FolderOpen, GripVertical, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

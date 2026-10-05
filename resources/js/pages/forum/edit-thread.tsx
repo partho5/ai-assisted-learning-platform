@@ -1,11 +1,11 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { update as updateThread } from '@/actions/App/Http/Controllers/Forum/ForumThreadController';
 import { index as forumIndex } from '@/actions/App/Http/Controllers/Forum/ForumController';
+import { update as updateThread } from '@/actions/App/Http/Controllers/Forum/ForumThreadController';
+import RichTextEditor from '@/components/rich-text-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
 import type { ForumCategory, ForumThread } from '@/types';
 

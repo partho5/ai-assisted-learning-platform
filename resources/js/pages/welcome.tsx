@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowRight, BookOpen, CheckCircle, ChevronRight, RefreshCw, Sparkles, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useRef, useState } from 'react';
+import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
 import { RotatingText } from '@/components/rotating-text';
+import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/public-layout';
 import { trackLandingCta } from '@/lib/analytics';
-import { index as coursesIndex } from '@/actions/App/Http/Controllers/CourseController';
-import { register } from '@/routes';
-import { inLanguage, ogLocale } from '@/lib/locale';
-import { landingCopy } from '@/lib/landing-copy';
-import { courseSchema } from '@/lib/schema';
 import { BRAND_EXPANSION, BRAND_FULL, BRAND_NAME } from '@/lib/brand';
+import { landingCopy } from '@/lib/landing-copy';
+import { inLanguage, ogLocale } from '@/lib/locale';
+import { courseSchema } from '@/lib/schema';
+import { register } from '@/routes';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

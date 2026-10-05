@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
 import { Edit2, FolderOpen, Trash2 } from 'lucide-react';
+import type { FormEvent} from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
