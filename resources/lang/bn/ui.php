@@ -47,6 +47,7 @@ return [
             'forum' => 'ফোরাম',
             'resources' => 'রিসোর্স',
             'portfolio_builder' => 'পোর্টফোলিও বিল্ডার',
+            'tools' => 'ফ্রি টুলস',
             'contact' => 'যোগাযোগ',
             'refund_policy' => 'রিফান্ড পলিসি',
             'privacy_policy' => 'প্রাইভেসি পলিসি',

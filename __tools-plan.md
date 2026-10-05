@@ -12,7 +12,7 @@ Index page: `/en/tools`. Public, no login. English only (`/bn/tools*` → 404).
 | 1 | Backend: contract, registry, manager, controller, routes, redirect | `[x]` |
 | 2 | Frontend foundation: Unicode engine, tools layout, shared pieces | `[x]` |
 | 3 | Tool page: bold-text-generator-editor (both modes) | `[x]` |
-| 4 | Tools index page (card view) + footer link | `[ ]` |
+| 4 | Tools index page (card view) + footer link | `[x]` |
 | 5 | Sitemap + backend tests + final checks | `[ ]` |
 
 Status values: `[ ]` not started · `[~]` in progress · `[x]` done.
@@ -110,12 +110,12 @@ Done when: user can type "I am a AI Expert, build RAG applications like chatbot"
 
 ## Part 4 — Tools index page + footer link
 
-Status: `[ ]`
+Status: `[x]`
 
-- [ ] `resources/js/pages/tools/index.tsx` using `tools-layout`: heading + card grid (reuse `components/ui/card.tsx`), one card for the bold tool, each card links to `/en/tools/{slug}` (via Wayfinder `show` action). Data comes from the controller's registry list (hardcoded in PHP, not DB). `<Head>` meta.
-- [ ] `public-layout.tsx` footer: add a Tools `<li>` in the Platform column, href `/en/tools`.
-- [ ] Add `footer.tools` to `resources/lang/en/ui.php` and `resources/lang/bn/ui.php` (check how `ui.public` is shared to the front end and the TS type for it, if any).
-- [ ] Verify no other existing page changed behaviour.
+- [x] `resources/js/pages/tools/index.tsx` using `tools-layout`: heading + card grid (reuse `components/ui/card.tsx`), one card for the bold tool, each card links to `/en/tools/{slug}` (via Wayfinder `show` action). Data comes from the controller's registry list (hardcoded in PHP, not DB). `<Head>` meta.
+- [x] `public-layout.tsx` footer: add a Tools `<li>` in the Platform column, href `/en/tools`.
+- [x] Add `footer.tools` to `resources/lang/en/ui.php` and `resources/lang/bn/ui.php` (check how `ui.public` is shared to the front end and the TS type for it, if any).
+- [x] Verify no other existing page changed behaviour.
 
 ## Part 5 — Sitemap + tests + final checks
 

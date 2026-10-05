@@ -58,6 +58,7 @@ export type UiTranslations = {
             forum: string;
             resources: string;
             portfolio_builder: string;
+            tools: string;
             contact: string;
             refund_policy: string;
             privacy_policy: string;

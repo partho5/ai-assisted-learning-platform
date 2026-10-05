@@ -47,6 +47,7 @@ return [
             'forum' => 'Forum',
             'resources' => 'Resources',
             'portfolio_builder' => 'Portfolio Builder',
+            'tools' => 'Free Tools',
             'contact' => 'Contact Us',
             'refund_policy' => 'Refund Policy',
             'privacy_policy' => 'Privacy Policy',

@@ -208,6 +208,7 @@ export default function PublicLayout({
                                     <li><Link href={articlesIndex.url(l)} className="text-sm text-muted-foreground hover:text-primary">{t.footer.resources}</Link></li>
                                     <li><Link href={`/${l}/about-us`} className="text-sm text-muted-foreground hover:text-primary">{t.nav.about}</Link></li>
                                     <li><Link href={portfolioLanding.url({ locale: l })} className="text-sm text-muted-foreground hover:text-primary">{t.footer.portfolio_builder}</Link></li>
+                                    <li><Link href="/en/tools" className="text-sm text-muted-foreground hover:text-primary">{t.footer.tools}</Link></li>
                                 </ul>
                             </div>
 
