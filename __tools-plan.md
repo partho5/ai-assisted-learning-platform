@@ -10,7 +10,7 @@ Index page: `/en/tools`. Public, no login. English only (`/bn/tools*` → 404).
 | Part | Scope | Status |
 |------|-------|--------|
 | 1 | Backend: contract, registry, manager, controller, routes, redirect | `[x]` |
-| 2 | Frontend foundation: Unicode engine, tools layout, shared pieces | `[ ]` |
+| 2 | Frontend foundation: Unicode engine, tools layout, shared pieces | `[x]` |
 | 3 | Tool page: bold-text-generator-editor (both modes) | `[ ]` |
 | 4 | Tools index page (card view) + footer link | `[ ]` |
 | 5 | Sitemap + backend tests + final checks | `[ ]` |
@@ -84,14 +84,14 @@ Done when: `php artisan route:list --path=tools` shows the routes; manual curl o
 
 ## Part 2 — Frontend foundation
 
-Status: `[ ]`
+Status: `[x]`
 
-- [ ] Activate skills: `inertia-react-development`, `tailwindcss-development`.
-- [ ] `resources/js/lib/unicode-text.ts` — pure functions, no React:
+- [x] Activate skills: `inertia-react-development`, `tailwindcss-development`.
+- [x] `resources/js/lib/unicode-text.ts` — pure functions, no React:
   - style map `{ bold: {...bases}, italic: {...bases} }`
   - `toStyle(text, style)`, `normalize(text)` (any styled char → ASCII), `applyToSelection(value, start, end, style)` → `{ value, selectionStart, selectionEnd }` (code-point safe, boundary guard, normalise-then-apply).
-- [ ] `resources/js/layouts/tools-layout.tsx` — sticky top bar: `/logo.png` + `BRAND_NAME` (from `@/lib/brand`) linking to `/${locale}/`; centered content container; dark-mode aware (reuse tokens used by public-layout); no footer, no nav links. Check `resources/js/layouts/*` for how layouts are applied to pages (`Page.layout` vs wrapper) and match.
-- [ ] Reusable `CopyButton` in `resources/js/components/tools/` — `navigator.clipboard.writeText` with textarea fallback, checkmark state for ~2s. No toast library exists in the project, so use inline state, not a new dependency.
+- [x] `resources/js/layouts/tools-layout.tsx` — sticky top bar: `/logo.png` + `BRAND_NAME` (from `@/lib/brand`) linking to `/${locale}/`; centered content container; dark-mode aware (reuse tokens used by public-layout); no footer, no nav links. Check `resources/js/layouts/*` for how layouts are applied to pages (`Page.layout` vs wrapper) and match.
+- [x] Reusable `CopyButton` in `resources/js/components/tools/` — `navigator.clipboard.writeText` with textarea fallback, checkmark state for ~2s. No toast library exists in the project, so use inline state, not a new dependency.
 
 Done when: `npm run build` (or `npx tsc --noEmit`) passes. No visible page yet.
 
