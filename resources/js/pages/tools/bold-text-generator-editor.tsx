@@ -64,7 +64,8 @@ function FullTextConverter() {
                     id="converter-heading"
                     className="text-xl font-semibold tracking-tight"
                 >
-                    Convert text to bold
+                    Convert <span className="text-red-500">full text</span> to
+                    bold
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                     Type or paste below, then press Convert to bold.
@@ -190,7 +191,8 @@ function MixedStyleEditor() {
                     id="editor-heading"
                     className="text-xl font-semibold tracking-tight"
                 >
-                    Style only part of your text
+                    Style only{' '}
+                    <span className="text-red-500">part of your text</span>
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                     Write your passage, highlight a word or phrase, then choose
