@@ -358,18 +358,13 @@ export default function BoldTextGeneratorEditor({ meta }: { meta: Meta }) {
             </Head>
 
             <div className="space-y-12">
-                <header className="space-y-3">
+                <div className="space-y-6">
                     <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
                         Bold Text Generator &amp; Editor
                     </h1>
-                    <p className="max-w-2xl text-lg text-muted-foreground">
-                        Make text 𝗯𝗼𝗹𝗱 or 𝙞𝙩𝙖𝙡𝙞𝙘 for LinkedIn, X, Instagram and
-                        WhatsApp. Style the whole text, or just the words you
-                        pick.
-                    </p>
-                </header>
+                    <MixedStyleEditor />
+                </div>
 
-                <MixedStyleEditor />
                 <FullTextConverter />
                 <SeoContent />
             </div>
