@@ -11,7 +11,7 @@ Index page: `/en/tools`. Public, no login. English only (`/bn/tools*` → 404).
 |------|-------|--------|
 | 1 | Backend: contract, registry, manager, controller, routes, redirect | `[x]` |
 | 2 | Frontend foundation: Unicode engine, tools layout, shared pieces | `[x]` |
-| 3 | Tool page: bold-text-generator-editor (both modes) | `[ ]` |
+| 3 | Tool page: bold-text-generator-editor (both modes) | `[x]` |
 | 4 | Tools index page (card view) + footer link | `[ ]` |
 | 5 | Sitemap + backend tests + final checks | `[ ]` |
 
@@ -97,14 +97,14 @@ Done when: `npm run build` (or `npx tsc --noEmit`) passes. No visible page yet.
 
 ## Part 3 — Tool page: bold-text-generator-editor
 
-Status: `[ ]`
+Status: `[x]`
 
-- [ ] `resources/js/pages/tools/bold-text-generator-editor.tsx` using `tools-layout`; `<Head>` title/description from `meta` (pattern: `about-us.tsx`), canonical link.
-- [ ] **Section 1 — Full-text converter:** input textarea, live Sans-Bold output box, Copy button, Convert behaviour = live preview (button optional/cosmetic; keep it per spec).
-- [ ] **Section 2 — Mixed-style editor (the main goal):** one textarea; toolbar with **Bold (𝗕)** and **Italic (𝘐)**; click converts only the highlighted range in place, keeps the converted range selected, restores focus; buttons disabled when selection is empty; `onMouseDown` preventDefault on toolbar buttons so selection is not lost. Prefer `document.execCommand('insertText')` / `setRangeText` so native undo still works. **Copy Passage** button copies the whole textarea value.
-- [ ] Toolbar is driven by the style list in `unicode-text.ts` so future styles (monospace, cursive…) are a one-line addition.
-- [ ] SEO body text below the tool: How it works, Where to use (LinkedIn, X, Instagram, WhatsApp, Discord, bios), FAQ (include note: works for Latin letters and digits only; some platforms/screen readers read these characters poorly). Real semantic headings.
-- [ ] Mobile-friendly layout; check light and dark.
+- [x] `resources/js/pages/tools/bold-text-generator-editor.tsx` using `tools-layout`; `<Head>` title/description from `meta` (pattern: `about-us.tsx`), canonical link.
+- [x] **Section 1 — Full-text converter:** input textarea, live Sans-Bold output box, Copy button, Convert behaviour = live preview (button optional/cosmetic; keep it per spec).
+- [x] **Section 2 — Mixed-style editor (the main goal):** one textarea; toolbar with **Bold (𝗕)** and **Italic (𝘐)**; click converts only the highlighted range in place, keeps the converted range selected, restores focus; buttons disabled when selection is empty; `onMouseDown` preventDefault on toolbar buttons so selection is not lost. Prefer `document.execCommand('insertText')` / `setRangeText` so native undo still works. **Copy Passage** button copies the whole textarea value.
+- [x] Toolbar is driven by the style list in `unicode-text.ts` so future styles (monospace, cursive…) are a one-line addition.
+- [x] SEO body text below the tool: How it works, Where to use (LinkedIn, X, Instagram, WhatsApp, Discord, bios), FAQ (include note: works for Latin letters and digits only; some platforms/screen readers read these characters poorly). Real semantic headings.
+- [x] Mobile-friendly layout; check light and dark.
 
 Done when: user can type "I am a AI Expert, build RAG applications like chatbot", select "AI Expert" → Bold, select "chatbot" → Italic, and Copy yields `I am a 𝗔𝗜 𝗘𝘅𝗽𝗲𝗿𝘁, … like 𝙘𝙝𝙖𝙩𝙗𝙤𝙩`. Verify in the browser.
 
