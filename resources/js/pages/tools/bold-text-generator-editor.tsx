@@ -1,10 +1,11 @@
 import { Head } from '@inertiajs/react';
-import { useRef, useState } from 'react';
+import { useState, useRef } from 'react';
 import { CopyButton } from '@/components/tools/copy-button';
 import { Button } from '@/components/ui/button';
 import ToolsLayout from '@/layouts/tools-layout';
 import {
     applyToSelection,
+    isFullyStyled,
     TEXT_STYLE_LIST,
     toStyle,
     type TextStyleId,
@@ -54,8 +55,7 @@ const textareaClass =
 
 function FullTextConverter() {
     const [input, setInput] = useState('');
-    const outputRef = useRef<HTMLTextAreaElement>(null);
-    const output = toStyle(input, 'bold');
+    const [output, setOutput] = useState('');
 
     return (
         <section aria-labelledby="converter-heading" className="space-y-4">
@@ -67,49 +67,62 @@ function FullTextConverter() {
                     Convert text to bold
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    Type or paste below. The bold version appears instantly.
+                    Type or paste below, then press Convert to bold.
                 </p>
             </div>
 
-            <div className="space-y-2">
-                <label htmlFor="bold-input" className="text-sm font-medium">
-                    Your text
-                </label>
-                <textarea
-                    id="bold-input"
-                    rows={4}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type your text here…"
-                    className={textareaClass}
-                />
-            </div>
+            <div>
+                <div className="space-y-2">
+                    <label htmlFor="bold-input" className="text-sm font-medium">
+                        Your text
+                    </label>
+                    <textarea
+                        id="bold-input"
+                        rows={4}
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Type your text here…"
+                        className={textareaClass}
+                    />
+                </div>
 
-            <div className="space-y-2">
-                <label htmlFor="bold-output" className="text-sm font-medium">
-                    Bold result
-                </label>
-                <textarea
-                    id="bold-output"
-                    ref={outputRef}
-                    rows={4}
-                    readOnly
-                    value={output}
-                    placeholder="𝗬𝗼𝘂𝗿 𝗯𝗼𝗹𝗱 𝘁𝗲𝘅𝘁 𝘄𝗶𝗹𝗹 𝗮𝗽𝗽𝗲𝗮𝗿 𝗵𝗲𝗿𝗲…"
-                    className={`${textareaClass} bg-muted/40`}
-                />
+                <button
+                    type="button"
+                    disabled={input === ''}
+                    onClick={() => setOutput(toStyle(input, 'bold'))}
+                    className="group relative mx-auto flex h-28 w-48 items-center justify-center rounded-md text-red-500 outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    <svg
+                        aria-hidden="true"
+                        viewBox="0 0 40 112"
+                        className="h-full w-10 fill-current"
+                    >
+                        <path d="M16 0h8v82h12L20 112 4 82h12z" />
+                    </svg>
+                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black px-4 py-2 text-sm font-semibold whitespace-nowrap text-white shadow-md ring-1 ring-white/20 transition-transform group-enabled:group-hover:scale-105">
+                        Convert to bold
+                    </span>
+                </button>
+
+                <div className="overflow-hidden rounded-xl border border-border bg-muted/40 shadow-sm">
+                    <label
+                        htmlFor="bold-output"
+                        className="block border-b border-border bg-muted/60 px-4 py-2 text-sm font-medium"
+                    >
+                        Bold Text
+                    </label>
+                    <textarea
+                        id="bold-output"
+                        rows={4}
+                        readOnly
+                        value={output}
+                        placeholder="𝗬𝗼𝘂𝗿 𝗯𝗼𝗹𝗱 𝘁𝗲𝘅𝘁 𝘄𝗶𝗹𝗹 𝗮𝗽𝗽𝗲𝗮𝗿 𝗵𝗲𝗿𝗲…"
+                        className="block w-full resize-none bg-transparent px-4 py-3 text-base leading-relaxed text-foreground outline-none placeholder:text-muted-foreground"
+                    />
+                </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
-                <Button
-                    type="button"
-                    variant="enroll"
-                    size="compact"
-                    disabled={output === ''}
-                    onClick={() => outputRef.current?.select()}
-                >
-                    Convert
-                </Button>
                 <CopyButton text={output} disabled={output === ''} />
             </div>
         </section>
@@ -129,6 +142,10 @@ function MixedStyleEditor() {
             setSelection({ start: el.selectionStart, end: el.selectionEnd });
         }
     };
+
+    const isStyleActive = (style: TextStyleId): boolean =>
+        hasSelection &&
+        isFullyStyled(value.slice(selection.start, selection.end), style);
 
     const applyStyle = (style: TextStyleId) => {
         const el = textareaRef.current;
@@ -177,7 +194,8 @@ function MixedStyleEditor() {
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                     Write your passage, highlight a word or phrase, then choose
-                    a style. Only the highlighted part changes.
+                    a style. Only the highlighted part changes. Click the same
+                    style again to remove it.
                 </p>
             </div>
 
@@ -194,8 +212,14 @@ function MixedStyleEditor() {
                             variant="utility"
                             size="compact"
                             disabled={!hasSelection}
+                            aria-pressed={isStyleActive(style.id)}
                             aria-label={`${style.label} selected text`}
                             title={`${style.label} selected text`}
+                            className={
+                                isStyleActive(style.id)
+                                    ? 'ring-2 ring-ring'
+                                    : undefined
+                            }
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => applyStyle(style.id)}
                         >
@@ -231,7 +255,7 @@ function MixedStyleEditor() {
             <div className="flex flex-wrap gap-3">
                 <CopyButton
                     text={value}
-                    label="Copy Passage"
+                    label="Copy Text"
                     copiedLabel="Copied"
                     disabled={value === ''}
                 />
@@ -262,7 +286,8 @@ function SeoContent() {
                     <li>Type or paste your text.</li>
                     <li>
                         Use the converter for the whole text, or highlight part
-                        of it in the editor and click Bold or Italic.
+                        of it in the editor and click Bold or Italic (click
+                        again to undo).
                     </li>
                     <li>Copy the result and paste it where you need it.</li>
                 </ol>

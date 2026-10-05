@@ -77,6 +77,23 @@ function toAsciiCodePoint(cp: number): number {
     return cp;
 }
 
+function toAsciiCodePointForStyle(cp: number, style: TextStyle): number {
+    if (cp >= style.upperBase && cp < style.upperBase + 26) {
+        return CODE_A + (cp - style.upperBase);
+    }
+    if (cp >= style.lowerBase && cp < style.lowerBase + 26) {
+        return CODE_a + (cp - style.lowerBase);
+    }
+    if (
+        style.digitBase !== undefined &&
+        cp >= style.digitBase &&
+        cp < style.digitBase + 10
+    ) {
+        return CODE_0 + (cp - style.digitBase);
+    }
+    return cp;
+}
+
 function mapCodePoints(text: string, map: (cp: number) => number): string {
     return Array.from(text, (char) =>
         String.fromCodePoint(map(char.codePointAt(0) as number)),
@@ -92,6 +109,34 @@ export function normalize(text: string): string {
 export function toStyle(text: string, style: TextStyleId): string {
     const target = TEXT_STYLES[style];
     return mapCodePoints(normalize(text), (cp) => toStyleCodePoint(cp, target));
+}
+
+/** Remove one style only, leaving other styled characters (e.g. italic inside bold) intact. */
+export function removeStyle(text: string, style: TextStyleId): string {
+    const target = TEXT_STYLES[style];
+    return mapCodePoints(text, (cp) => toAsciiCodePointForStyle(cp, target));
+}
+
+/**
+ * True when `text` contains at least one character in `style` and nothing the
+ * style could still convert (e.g. plain letters). Characters the style cannot
+ * represent, such as spaces, punctuation or italic digits, are ignored.
+ */
+export function isFullyStyled(text: string, style: TextStyleId): boolean {
+    const target = TEXT_STYLES[style];
+    let hasStyled = false;
+
+    for (const char of text) {
+        const cp = char.codePointAt(0) as number;
+
+        if (toAsciiCodePointForStyle(cp, target) !== cp) {
+            hasStyled = true;
+        } else if (toStyleCodePoint(cp, target) !== cp) {
+            return false;
+        }
+    }
+
+    return hasStyled;
 }
 
 export interface SelectionResult {
@@ -115,9 +160,10 @@ function isHighSurrogate(code: number): boolean {
 }
 
 /**
- * Style only the `[start, end)` range of `value`. Offsets are UTF-16 indices
- * (as in `selectionStart`/`selectionEnd`); a boundary that would split a
- * surrogate pair is nudged outward so no character is cut in half.
+ * Style only the `[start, end)` range of `value`, or remove the style when the
+ * range is already fully in it (toggle, like a word processor). Offsets are
+ * UTF-16 indices (as in `selectionStart`/`selectionEnd`); a boundary that would
+ * split a surrogate pair is nudged outward so no character is cut in half.
  */
 export function applyToSelection(
     value: string,
@@ -143,7 +189,10 @@ export function applyToSelection(
         to += 1;
     }
 
-    const replacement = toStyle(value.slice(from, to), style);
+    const selected = value.slice(from, to);
+    const replacement = isFullyStyled(selected, style)
+        ? removeStyle(selected, style)
+        : toStyle(selected, style);
 
     return {
         value: value.slice(0, from) + replacement + value.slice(to),
