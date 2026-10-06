@@ -5,12 +5,13 @@
  * the `text/html` clipboard flavour (Word, Google Docs, web pages, AI chat UIs
  * all copy bold/italic/lists as HTML even when the visible text has no markers)
  * and markdown in `text/plain`. Bold + italic collapses to italic, headings
- * become bold, bullets become arrows and numbered top-level items keep their
+ * become bold, top-level bullets use • (nested items use →) and numbered top-level items keep their
  * numbers.
  */
 
 import { toStyle } from '@/lib/unicode-text';
 
+const BULLET = '•';
 const ARROW = '→';
 const INDENT = '   ';
 
@@ -137,7 +138,7 @@ export function convertMarkdown(text: string): string {
             const bullet = BULLET_LINE.exec(line);
             if (bullet) {
                 const level = levelFor(indentWidth(bullet[1]));
-                return `${indentFor(level)}${ARROW} ${renderInlineMarkdown(bullet[2], plain)}`;
+                return `${indentFor(level)}${level === 0 ? BULLET : ARROW} ${renderInlineMarkdown(bullet[2], plain)}`;
             }
 
             const numbered = NUMBERED_LINE.exec(line);
@@ -374,7 +375,8 @@ function walk(node: Node, state: WalkState, out: HtmlLineBuilder): void {
         const level = Number.isNaN(ariaLevel)
             ? Math.max(0, state.lists.length - 1)
             : ariaLevel - 1;
-        const marker = list.ordered && level === 0 ? `${list.count}.` : ARROW;
+        const marker =
+            level > 0 ? ARROW : list.ordered ? `${list.count}.` : BULLET;
         out.startItem(`${indentFor(level)}${marker} `);
         walkChildren({ ...next, insideListItem: true });
         out.flush();
@@ -388,7 +390,7 @@ function walk(node: Node, state: WalkState, out: HtmlLineBuilder): void {
             .replace(/[\s\u00a0]+/g, ' ')
             .trim();
         const ordered = ORDERED_MARKER.test(markerText);
-        const marker = ordered && msoLevel === 0 ? markerText : ARROW;
+        const marker = msoLevel > 0 ? ARROW : ordered ? markerText : BULLET;
         out.startItem(`${indentFor(msoLevel)}${marker} `);
         walkChildren({ ...next, insideListItem: true });
         out.flush();
