@@ -5,7 +5,7 @@
  * the `text/html` clipboard flavour (Word, Google Docs, web pages, AI chat UIs
  * all copy bold/italic/lists as HTML even when the visible text has no markers)
  * and markdown in `text/plain`. Bold + italic collapses to italic, headings
- * become bold, top-level bullets use • (nested items use →) and numbered top-level items keep their
+ * become bold, top-level bullets use • (nested items use →) and numbered items keep their
  * numbers.
  */
 
@@ -144,7 +144,7 @@ export function convertMarkdown(text: string): string {
             const numbered = NUMBERED_LINE.exec(line);
             if (numbered) {
                 const level = levelFor(indentWidth(numbered[1]));
-                const marker = level === 0 ? numbered[2] : ARROW;
+                const marker = numbered[2];
                 return `${indentFor(level)}${marker} ${renderInlineMarkdown(numbered[3], plain)}`;
             }
 
@@ -375,8 +375,11 @@ function walk(node: Node, state: WalkState, out: HtmlLineBuilder): void {
         const level = Number.isNaN(ariaLevel)
             ? Math.max(0, state.lists.length - 1)
             : ariaLevel - 1;
-        const marker =
-            level > 0 ? ARROW : list.ordered ? `${list.count}.` : BULLET;
+        const marker = list.ordered
+            ? `${list.count}.`
+            : level > 0
+              ? ARROW
+              : BULLET;
         out.startItem(`${indentFor(level)}${marker} `);
         walkChildren({ ...next, insideListItem: true });
         out.flush();
@@ -390,7 +393,7 @@ function walk(node: Node, state: WalkState, out: HtmlLineBuilder): void {
             .replace(/[\s\u00a0]+/g, ' ')
             .trim();
         const ordered = ORDERED_MARKER.test(markerText);
-        const marker = msoLevel > 0 ? ARROW : ordered ? markerText : BULLET;
+        const marker = ordered ? markerText : msoLevel > 0 ? ARROW : BULLET;
         out.startItem(`${indentFor(msoLevel)}${marker} `);
         walkChildren({ ...next, insideListItem: true });
         out.flush();
