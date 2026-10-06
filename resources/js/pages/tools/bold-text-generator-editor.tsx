@@ -1,8 +1,9 @@
 import { Head } from '@inertiajs/react';
-import { useState, useRef } from 'react';
+import { useState, useRef, type ClipboardEvent } from 'react';
 import { CopyButton } from '@/components/tools/copy-button';
 import { Button } from '@/components/ui/button';
 import ToolsLayout from '@/layouts/tools-layout';
+import { convertPastedContent } from '@/lib/paste-to-unicode';
 import {
     applyToSelection,
     isFullyStyled,
@@ -184,6 +185,33 @@ function MixedStyleEditor() {
         });
     };
 
+    const handlePaste = (e: ClipboardEvent<HTMLTextAreaElement>) => {
+        const converted = convertPastedContent(
+            e.clipboardData.getData('text/html'),
+            e.clipboardData.getData('text/plain'),
+        );
+
+        if (converted === null) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const el = e.currentTarget;
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+
+        if (!document.execCommand('insertText', false, converted)) {
+            setValue(
+                el.value.slice(0, start) + converted + el.value.slice(end),
+            );
+            requestAnimationFrame(() => {
+                const caret = start + converted.length;
+                el.setSelectionRange(caret, caret);
+            });
+        }
+    };
+
     return (
         <section aria-labelledby="editor-heading" className="space-y-4">
             <div>
@@ -249,6 +277,7 @@ function MixedStyleEditor() {
                     }}
                     onSelect={syncSelection}
                     onBlur={syncSelection}
+                    onPaste={handlePaste}
                     placeholder="Type or paste your text here, then select a word or phrase to style it…"
                     className="block w-full resize-y bg-transparent px-4 py-3 text-base leading-relaxed text-foreground outline-none placeholder:text-muted-foreground"
                 />
