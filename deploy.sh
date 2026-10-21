@@ -1,58 +1,58 @@
 #!/bin/bash
-set -e
-APP=/var/www/jovoc.com
-PIDFILE=$APP/storage/queue-worker.pid
+# Deploy the latest jovoc branch to production. Run it directly from the repo:
+#   sudo /var/www/jovoc.com/deploy.sh
+set -euo pipefail
 
-echo "==> Pulling latest code..."
-cd $APP
-git pull origin jovoc
+SITE=jovoc
+ROOT=/var/www/jovoc.com
+BRANCH=jovoc
 
-echo "==> Installing PHP dependencies..."
-composer install --no-dev --optimize-autoloader --no-interaction
+[ "$(id -u)" -eq 0 ] || { echo "run with sudo"; exit 1; }
+cd "$ROOT"
 
-echo "==> Clearing stale caches..."
-php artisan optimize:clear --no-interaction
+echo "==> maintenance mode on"
+sudo -u $SITE php artisan down --render="errors::503" || true
+# Always leave maintenance mode, even if a step below fails.
+trap 'cd "$ROOT" && sudo -u '"$SITE"' php artisan up || true' EXIT
 
-echo "==> Running migrations..."
-php artisan migrate --force --no-interaction
+echo "==> pulling $BRANCH"
+sudo -u $SITE git pull --ff-only origin "$BRANCH"
 
-echo "==> Generating Wayfinder actions..."
-php artisan wayfinder:generate --no-interaction
+echo "==> composer"
+sudo -u $SITE composer install --no-dev --optimize-autoloader --no-interaction
 
-echo "==> Installing JS dependencies & building assets..."
-npm ci
-npm run build
+echo "==> clearing stale caches"
+sudo -u $SITE php artisan optimize:clear --no-interaction
 
-echo "==> Recaching..."
-php artisan config:cache --no-interaction
-php artisan route:cache --no-interaction
-php artisan view:cache --no-interaction
+echo "==> migrations"
+sudo -u $SITE php artisan migrate --force --no-interaction
 
-echo "==> Fixing permissions..."
-chown -R jovoc:jovoc $APP
-chmod -R 775 $APP/storage $APP/bootstrap/cache
+echo "==> npm build"
+sudo -u $SITE php artisan wayfinder:generate --no-interaction
+sudo -u $SITE npm ci --no-audit --no-fund
+sudo -u $SITE npm run build
 
-echo "==> Restarting PHP-FPM (a reload does not clear OPcache; only a full restart does)..."
+echo "==> rebuilding caches"
+sudo -u $SITE php artisan config:cache
+sudo -u $SITE php artisan route:cache
+sudo -u $SITE php artisan view:cache
+sudo -u $SITE php artisan event:cache
+
+echo "==> permissions"
+chown -R $SITE:$SITE "$ROOT"
+chmod -R 775 "$ROOT/storage" "$ROOT/bootstrap/cache"
+chmod 600 "$ROOT/.env"
+
+# OPcache runs with validate_timestamps=0: PHP-FPM must be restarted to see new code.
+echo "==> restarting php-fpm (clears OPcache)"
 systemctl restart php8.4-fpm
 
-echo "==> Ensuring Laravel scheduler cron is installed for jovoc..."
-(crontab -u jovoc -l 2>/dev/null | grep -qF 'schedule:run') || \
-  { crontab -u jovoc -l 2>/dev/null; echo "* * * * * cd $APP && php artisan schedule:run >> /dev/null 2>&1"; } | crontab -u jovoc -
+echo "==> ensuring Laravel scheduler cron is installed for $SITE"
+(crontab -u $SITE -l 2>/dev/null | grep -qF 'schedule:run') || \
+  { crontab -u $SITE -l 2>/dev/null; echo "* * * * * cd $ROOT && php artisan schedule:run >> /dev/null 2>&1"; } | crontab -u $SITE -
 
-echo "==> Restarting queue worker..."
-# Signal any running workers to stop after their current job
-php artisan queue:restart 2>/dev/null || true
-# Kill previous worker started by this script
-if [ -f "$PIDFILE" ]; then
-  OLD_PID=$(cat "$PIDFILE")
-  kill "$OLD_PID" 2>/dev/null || true
-  rm -f "$PIDFILE"
-fi
-# Start a fresh persistent worker as the jovoc user (matches the PHP-FPM pool
-# owner) so files it writes don't end up root-owned and unwritable by PHP-FPM
-sudo -u jovoc nohup php artisan queue:work --tries=3 --backoff=30 --timeout=120 \
-  >> $APP/storage/logs/queue-worker.log 2>&1 &
-echo $! > "$PIDFILE"
-echo "    Queue worker started (PID: $!)"
+# Workers hold the old code in memory until restarted.
+echo "==> restarting queue worker"
+systemctl restart ${SITE}-queue
 
-echo "==> Done. Site is live."
+echo "==> done"
